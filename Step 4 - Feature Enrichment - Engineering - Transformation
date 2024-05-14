@@ -1,0 +1,1912 @@
+Final Project - Feature Engineering  Enrichment  Transformations
+1. Import Packages
+#pip install factor_analyzer
+import pandas as pd
+import numpy as np
+
+import scipy.stats as ss
+import researchpy as rp
+import scipy.stats as stats
+import csv
+import pandas as pd
+import numpy as np
+
+from scipy import stats
+from scipy.stats import chisquare
+from scipy.stats import chi2_contingency
+from scipy.stats import f_oneway
+from scipy.stats import kstest
+from scipy.stats import ks_2samp
+from scipy.stats import norm
+from scipy.stats import iqr
+
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
+from sklearn.preprocessing import LabelEncoder
+from sklearn.datasets import load_boston
+from sklearn import linear_model
+
+import matplotlib.pyplot as plt
+plt.style.use('classic')
+import seaborn as sns
+plt.style.use('seaborn')
+get_ipython().run_line_magic('matplotlib', 'inline')
+
+from ydata_profiling import ProfileReport
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+
+import chart_studio
+import re
+import cv2
+
+import missingno as msno
+import warnings
+warnings.filterwarnings("ignore")
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from statsmodels.tools.tools import add_constant
+
+#port csv
+#mport pyodbc
+#.read_sql_query
+
+import researchpy as rp
+import scipy.stats as stats
+
+import pandas as pd
+import numpy as np
+import scipy.stats as ss
+from math import log
+#pd.set_option('display.max_rows', None, 'display.max_columns', None)
+2. Import Data
+###Making list of missing value types
+df = pd.read_csv("C:/Users/Knowl/Desktop/Project/project_data_after_EDA/EDA_Final_data.csv")
+df.head()
+   Unnamed: 0      id Population_Type_Dico Assessment_Center_Grade  \
+0           0   540.0                  0.0                     low   
+1           1  1128.0              missing                     low   
+2           2   604.0                  0.0                     low   
+3           3   605.0                  0.0                     low   
+4           4   536.0                  0.0                     low   
+
+   Cognitive_Ability_Test  Morals_and_Values_Test  Job_Interview_Grade  \
+0                     7.0                     4.0                  4.0   
+1                     6.0                     1.0                  4.0   
+2                     9.0                     1.0                  5.0   
+3                     6.0                     2.0                  5.0   
+4                     7.0                     5.0                  5.0   
+
+  Heberew_Test_Grade Filling_Instruction_Test Emotional_Inteligence_Test  ...  \
+0            missing                      low                   very low  ...   
+1           very low                  missing                       high  ...   
+2            missing                 very low                        low  ...   
+3            missing                   medium                        low  ...   
+4            missing                   medium                   very low  ...   
+
+  RT_dico  TRIN_dico VRIN_dico  CR_dico RS_dico  \
+0     0.0        0.0       0.0      0.0     0.0   
+1     0.0        0.0       0.0      0.0     0.0   
+2     0.0        0.0       0.0      0.0     0.0   
+3     0.0        1.0       0.0      0.0     0.0   
+4     0.0        0.0       0.0      0.0     0.0   
+
+   Personality_Disqualification_Dico         Designated_Role  Education_Level  \
+0                                0.0              prosecutor          missing   
+1                                0.0     operational officer          missing   
+2                                0.0  administrative officer          missing   
+3                                0.0  administrative officer          missing   
+4                                0.0              prosecutor          missing   
+
+   Educational_Institution  Rovaee_Training_Type  
+0                  missing               missing  
+1                  missing               missing  
+2                  missing               missing  
+3                  missing               missing  
+4                  missing              rovaee 3  
+
+[5 rows x 113 columns]
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 2300 entries, 0 to 2299
+Columns: 113 entries, Unnamed: 0 to Rovaee_Training_Type
+dtypes: float64(99), int64(2), object(12)
+memory usage: 2.0+ MB
+3. Variables Measures Scales
+###checking datatype before conversions
+#df.dtypes
+Coding variables type as category
+df = df.astype({"Designated_Role":'category', "Education_Level":'category', "Educational_Institution":'category', "Rovaee_Training_Type":'category',"Assessment_Center_Grade":'category', "Filling_Instruction_Test":'category', "Emotional_Inteligence_Test":'category', "Age":'category', "Commander_in_Army_Dico":'category', "Honesty_Test":'category', "Population_Type_Dico":'category', "Heberew_Test_Grade":'category'})
+Coding variables type as object
+df=df.astype({"Population_Type_Dico":'object',"Gender_Dico":'object',"Commander_in_Army_Dico":'object', "M2a_dico":'object',"ASP_dico":'object',"R_dico":'object',"CYN_dico":'object',"BIM_dico":'object',"PA_dico":'object',"AAS_dico":'object',"tcent_dico":'object',"OBS_dico":'object',"MDS_dico":'object',"TPA_dico":'object',"BIZ_dico":'object',"ANG_dico":'object',"DEP_dico":'object',"K_dico":'object',"SOD_dico":'object',"D_dico":'object',"D1_dico":'object',"D2_dico":'object',"D3_dico":'object',"D4_dico":'object',"D5_dico":'object',"MF_dico":'object',"DOE_dico":'object',"PT_dico":'object',"ANX_dico":'object',"F_dico":'object',"SC_dico":'object',"HEA_dico":'object',"FP_dico":'object',"HS_dico":'object',"FAM_dico":'object',"PD_dico":'object',"ES_dico":'object',"FCENT_dico":'object',"WRK_dico":'object',"HY_dico":'object',"L_dico":'object',"MA_dico":'object',"SE_dico":'object',"RT_dico":'object',"TRIN_dico":'object',"VRIN_dico":'object',"CR_dico":'object',"RS_dico":'object',"Honesty_Test":'object'})
+4. Re-Coding Variables
+In previous stages of the EDA analysis, it was observed that certain departments encompass a relatively limited number of participants within the categorical variables. Within this phase of the analysis, we will investigate the mean rate of personality rejection across distinct classes of the categorical variables.
+Our aim is to pinpoint departments exhibiting similar average rates of personality rejection. Subsequently, we will categorize these departments into either low and high groups or, as an alternative, into low, medium, and high groups based on the average of the target factor. This approach will serve to mitigate or even substantially alleviate the challenge posed by departments with limited sample sizes.
+Method A - "Get Dummies"
+Converting all dichotomous and categorical variables into dummy variables coded as 0 and 1. Each category of the pertinent variables is presented as an individual separate variable within the data frame, with a code of 1 denoting the specific category and 0 indicating the absence of that category. The initial category of each variable is omitted to mitigate potential issues of multicollinearity within the models.
+df_get_dummies = pd.DataFrame(df, columns=["id","Designated_Role", "Education_Level","Educational_Institution","Rovaee_Training_Type","Assessment_Center_Grade","Heberew_Test_Grade","Filling_Instruction_Test","Emotional_Inteligence_Test","Honesty_Test","Age","Commander_in_Army_Dico"])
+df_get_dummies = pd.get_dummies(df, drop_first= True)
+df_get_dummies[df_get_dummies.columns[1:]].corr(method='spearman')['Personality_Disqualification_Dico'].sort_values(ascending=False)
+Personality_Disqualification_Dico         1.000000
+Assessment_Center_Grade_missing           0.253652
+PT_dico_1.0                               0.193513
+PD_dico_1.0                               0.186076
+FAM                                       0.178317
+                                            ...   
+Years_of_Education                       -0.113056
+ES                                       -0.114200
+Emotional_Inteligence_Test_missing       -0.135029
+Designated_Role_operational core units   -0.139908
+Job_Interview_Grade                      -0.192547
+Name: Personality_Disqualification_Dico, Length: 158, dtype: float64
+df_get_dummies.head()
+   Unnamed: 0      id  Cognitive_Ability_Test  Morals_and_Values_Test  \
+0           0   540.0                     7.0                     4.0   
+1           1  1128.0                     6.0                     1.0   
+2           2   604.0                     9.0                     1.0   
+3           3   605.0                     6.0                     2.0   
+4           4   536.0                     7.0                     5.0   
+
+   Job_Interview_Grade  Years_of_Education   M2a   ASP     R   CYN  ...  \
+0                  4.0                15.0  40.0  42.0  65.0  38.0  ...   
+1                  4.0                12.0  56.0  52.0  62.0  56.0  ...   
+2                  5.0                13.0  37.0  34.0  63.0  35.0  ...   
+3                  5.0                12.0  38.0  45.0  67.0  46.0  ...   
+4                  5.0                17.0  44.0  56.0  49.0  53.0  ...   
+
+   Rovaee_Training_Type_rovaee 12  Rovaee_Training_Type_rovaee 13  \
+0                               0                               0   
+1                               0                               0   
+2                               0                               0   
+3                               0                               0   
+4                               0                               0   
+
+   Rovaee_Training_Type_rovaee 2  Rovaee_Training_Type_rovaee 3  \
+0                              0                              0   
+1                              0                              0   
+2                              0                              0   
+3                              0                              0   
+4                              0                              1   
+
+   Rovaee_Training_Type_rovaee 4  Rovaee_Training_Type_rovaee 5  \
+0                              0                              0   
+1                              0                              0   
+2                              0                              0   
+3                              0                              0   
+4                              0                              0   
+
+   Rovaee_Training_Type_rovaee 6  Rovaee_Training_Type_rovaee 7  \
+0                              0                              0   
+1                              0                              0   
+2                              0                              0   
+3                              0                              0   
+4                              0                              0   
+
+   Rovaee_Training_Type_rovaee 8  Rovaee_Training_Type_rovaee 9  
+0                              0                              0  
+1                              0                              0  
+2                              0                              0  
+3                              0                              0  
+4                              0                              0  
+
+[5 rows x 159 columns]
+Method B - recoding variables categries by outcome variable level
+In this section, we will reassign the departments within the categorical project variables based on the prevalence of personality disorders, which is the focus of the current project. Employing the Demi coding technique, we will categorize the divisions into those with high, medium, and low rates of personality disorders. This approach will apply to variables with both completed and uncompleted missing values. Through this recoding process, using the aforementioned method, we aim to address the issue of small class sizes in the categorical project variables (specifically those categories with a low number of participants or observations).
+Designated_Role recoding
+Designated_Role = df.groupby('Designated_Role').agg({'Personality_Disqualification_Dico':["count", "mean", "sum"]}).sort_values([('Personality_Disqualification_Dico', 'mean')], ascending=False)
+Designated_Role
+                          Personality_Disqualification_Dico                 
+                                                      count      mean    sum
+Designated_Role                                                             
+Border Guard fighters                                   450  0.248889  112.0
+Police dispatchers                                       34  0.088235    3.0
+administrative nagad                                    217  0.078341   17.0
+missing                                                 148  0.074324   11.0
+operational core units                                 1214  0.053542   65.0
+Control center volunteers                                20  0.050000    1.0
+prosecutor                                               78  0.025641    2.0
+Traffic cops                                             17  0.000000    0.0
+administrative officer                                   57  0.000000    0.0
+intelligence                                             17  0.000000    0.0
+operational officer                                       9  0.000000    0.0
+special unit                                             39  0.000000    0.0
+df['Designated_Role_Border_fighters'] = 0
+df.loc[(df['Designated_Role'] == 'Border Guard fighters'), 'Designated_Role_Border_fighters'] = 1   
+Education_Level recoding
+Education_Level = df.groupby('Education_Level').agg({'Personality_Disqualification_Dico':["count", "mean", "sum"]}).sort_values([('Personality_Disqualification_Dico', 'mean')], ascending=False)
+Education_Level
+                   Personality_Disqualification_Dico                 
+                                               count      mean    sum
+Education_Level                                                      
+missing                                          957  0.114943  110.0
+diploma                                          101  0.108911   11.0
+without_bagrot                                   368  0.105978   39.0
+complete_bagrot                                  508  0.070866   36.0
+Academic education                               366  0.040984   15.0
+df['Education_Level_Dico'] = 0
+df.loc[(df['Education_Level'] == 'diploma') | (df['Education_Level'] == 'without_bagrot'), 'Education_Level_Dico'] = 1   
+Educational_Institution recoding
+Educational_Institution = df.groupby('Educational_Institution').agg({'Personality_Disqualification_Dico':["count", "mean", "sum"]}).sort_values([('Personality_Disqualification_Dico', 'mean')], ascending=False)
+Educational_Institution
+                        Personality_Disqualification_Dico                 
+                                                    count      mean    sum
+Educational_Institution                                                   
+missing                                               964  0.116183  112.0
+other                                                 999  0.081081   81.0
+college                                               298  0.060403   18.0
+university                                             39  0.000000    0.0
+df['Educational_Institution_Missing'] = 0
+df.loc[(df['Educational_Institution'] == 'missing'), 'Educational_Institution_Missing'] = 1   
+df['Educational_Institution_college_other'] = 0
+df.loc[(df['Educational_Institution'] == 'college') | (df['Educational_Institution'] == 'other'), 'Educational_Institution_college_other'] = 1   
+Rovaee_Training_Type recoding
+Rovaee_Training_Type = df.groupby('Rovaee_Training_Type').agg({'Personality_Disqualification_Dico':["count", "mean", "sum"]}).sort_values([('Personality_Disqualification_Dico', 'mean')], ascending=False)
+Rovaee_Training_Type
+                     Personality_Disqualification_Dico                
+                                                 count      mean   sum
+Rovaee_Training_Type                                                  
+rovaee 5                                           172  0.168605  29.0
+rovaee 4                                            13  0.153846   2.0
+rovaee 6                                            41  0.146341   6.0
+missing                                            876  0.113014  99.0
+rovaee 7                                           199  0.110553  22.0
+rovaee 8                                            93  0.096774   9.0
+rovaee 0                                           318  0.056604  18.0
+rovaee 12                                           18  0.055556   1.0
+rovaee 2                                           420  0.052381  22.0
+rovaee 3                                           128  0.023438   3.0
+rovaee 1                                            11  0.000000   0.0
+rovaee 10                                            9  0.000000   0.0
+rovaee 13                                            1  0.000000   0.0
+rovaee 9                                             1  0.000000   0.0
+df['Rovaee_Training_high'] = 0
+df.loc[(df['Rovaee_Training_Type'] == 'rovaee 5') | (df['Rovaee_Training_Type'] == 'rovaee 6') | (df['Rovaee_Training_Type'] == 'missing'), 'Rovaee_Training_high'] = 1   
+df['Rovaee_Training_Medium'] = 0
+df.loc[(df['Rovaee_Training_Type'] == 'rovaee 7') | (df['Rovaee_Training_Type'] == 'rovaee 8') | (df['Rovaee_Training_Type'] == 'rovaee 4') | (df['Rovaee_Training_Type'] == 'rovaee 12'), 'Rovaee_Training_Medium'] = 1   
+Assessment_Center_Grade recoding
+Assessment_Center_Grade = df.groupby('Assessment_Center_Grade').agg({'Personality_Disqualification_Dico':["count", "mean", "sum"]}).sort_values([('Personality_Disqualification_Dico', 'mean')], ascending=False)
+Assessment_Center_Grade
+                        Personality_Disqualification_Dico                 
+                                                    count      mean    sum
+Assessment_Center_Grade                                                   
+missing                                               988  0.176113  174.0
+low                                                   368  0.048913   18.0
+very low                                               82  0.036585    3.0
+medium                                                405  0.029630   12.0
+very high                                             150  0.013333    2.0
+high                                                  307  0.006515    2.0
+df['Assessment_Center_Grade_missing'] = 0
+df.loc[(df['Assessment_Center_Grade'] == 'missing'), 'Assessment_Center_Grade_missing'] = 1   
+df['Assessment_Center_Grade_medium'] = 0
+df.loc[(df['Assessment_Center_Grade'] == 'low') | (df['Assessment_Center_Grade'] == 'medium')| (df['Assessment_Center_Grade'] == 'very low') , 'Assessment_Center_Grade_medium'] = 1   
+Filling_Instruction_Test recoding
+Filling_Instruction_Test = df.groupby('Filling_Instruction_Test').agg({'Personality_Disqualification_Dico':["count", "mean", "sum"]}).sort_values([('Personality_Disqualification_Dico', 'mean')], ascending=False)
+Filling_Instruction_Test
+                         Personality_Disqualification_Dico                
+                                                     count      mean   sum
+Filling_Instruction_Test                                                  
+very high                                               62  0.161290  10.0
+missing                                                704  0.133523  94.0
+high                                                   345  0.092754  32.0
+medium                                                 590  0.074576  44.0
+low                                                    478  0.056485  27.0
+very low                                               121  0.033058   4.0
+df['Filling_Instruction_Test_high'] = 0
+df.loc[(df['Filling_Instruction_Test'] == 'very high'), 'Filling_Instruction_Test_high'] = 1   
+df['Filling_Instruction_Test_medium'] = 0
+df.loc[(df['Filling_Instruction_Test'] == 'high')| (df['Filling_Instruction_Test'] == 'low') | (df['Filling_Instruction_Test'] == 'medium'), 'Filling_Instruction_Test_medium'] = 1   
+Emotional_Inteligence_Test recoding
+Emotional_Inteligence_Test = df.groupby('Emotional_Inteligence_Test').agg({'Personality_Disqualification_Dico':["count", "mean", "sum"]}).sort_values([('Personality_Disqualification_Dico', 'mean')], ascending=False)
+Emotional_Inteligence_Test
+                           Personality_Disqualification_Dico                
+                                                       count      mean   sum
+Emotional_Inteligence_Test                                                  
+high                                                     344  0.162791  56.0
+very high                                                124  0.161290  20.0
+medium                                                   488  0.135246  66.0
+low                                                      272  0.069853  19.0
+missing                                                 1031  0.048497  50.0
+very low                                                  41  0.000000   0.0
+df['Emotional_Inteligence_Test_high'] = 0
+df.loc[(df['Emotional_Inteligence_Test'] == 'very high')| (df['Emotional_Inteligence_Test'] == 'high') | (df['Emotional_Inteligence_Test'] == 'medium'), 'Emotional_Inteligence_Test_high'] = 1   
+Age recoding
+Age = df.groupby('Age').agg({'Personality_Disqualification_Dico':["count", "mean", "sum"]}).sort_values([('Personality_Disqualification_Dico', 'mean')], ascending=False)
+Age
+          Personality_Disqualification_Dico                 
+                                      count      mean    sum
+Age                                                         
+very high                               901  0.113208  102.0
+low                                     197  0.086294   17.0
+high                                    398  0.082915   33.0
+medium                                  292  0.082192   24.0
+very low                                203  0.068966   14.0
+missing                                 309  0.067961   21.0
+df['age_very_high'] = 0
+df.loc[(df['Age'] == 'very high'), 'age_very_high'] = 1   
+Honesty_Test recoding
+Honesty_Test = df.groupby('Honesty_Test').agg({'Personality_Disqualification_Dico':["count", "mean", "sum"]}).sort_values([('Personality_Disqualification_Dico', 'mean')], ascending=False)
+Honesty_Test
+             Personality_Disqualification_Dico                 
+                                         count      mean    sum
+Honesty_Test                                                   
+medium                                    1873  0.097170  182.0
+missing                                    427  0.067916   29.0
+df['Honesty_Test_no_missing'] = 0
+df.loc[(df['Honesty_Test'] == 'medium'), 'Honesty_Test_no_missing'] = 1   
+Heberew_Test_Grade recoding
+Heberew_Test_Grade = df.groupby('Heberew_Test_Grade').agg({'Personality_Disqualification_Dico':["count", "mean", "sum"]}).sort_values([('Personality_Disqualification_Dico', 'mean')], ascending=False)
+Heberew_Test_Grade
+                   Personality_Disqualification_Dico                
+                                               count      mean   sum
+Heberew_Test_Grade                                                  
+missing                                          753  0.116866  88.0
+very high                                        907  0.097023  88.0
+very low                                         640  0.054688  35.0
+df['Heberew_Test_Grade_high_or_missing'] = 0
+df.loc[(df['Heberew_Test_Grade'] == 'missing') | (df['Heberew_Test_Grade'] == 'very high'), 'Heberew_Test_Grade_high_or_missing'] = 1   
+Spearman correlation between categorical variables and the target factor (after recoding)
+Categorical_variables_recoded_list = pd.DataFrame(df, columns=['Designated_Role_Border_fighters', 'Education_Level_Dico', 'Educational_Institution_Missing', 'Educational_Institution_college_other', 'Rovaee_Training_high', 'Rovaee_Training_Medium', 'Assessment_Center_Grade_missing', 'Assessment_Center_Grade_medium', 'Filling_Instruction_Test_high', 'Assessment_Center_Grade_medium', 'Emotional_Inteligence_Test_high', 'age_very_high', 'Honesty_Test_no_missing', 'Heberew_Test_Grade_high_or_missing', 'Personality_Disqualification_Dico'])
+for col in Categorical_variables_recoded_list:
+    if col in Categorical_variables_recoded_list.columns:
+        Categorical_variables_recoded_list[col] = Categorical_variables_recoded_list[col].astype(np.float64)
+Categorical_variables_recoded_list[Categorical_variables_recoded_list.columns[1:]].corr(method='spearman')['Personality_Disqualification_Dico'].sort_values(ascending=False)
+Personality_Disqualification_Dico        1.000000
+Assessment_Center_Grade_missing          0.253652
+Emotional_Inteligence_Test_high          0.165946
+Rovaee_Training_high                     0.102857
+Heberew_Test_Grade_high_or_missing       0.079700
+Educational_Institution_Missing          0.071931
+age_very_high                            0.059686
+Filling_Instruction_Test_high            0.040104
+Honesty_Test_no_missing                  0.039406
+Education_Level_Dico                     0.026073
+Rovaee_Training_Medium                   0.018937
+Educational_Institution_college_other   -0.060704
+Assessment_Center_Grade_medium          -0.141615
+Assessment_Center_Grade_medium          -0.141615
+Assessment_Center_Grade_medium          -0.141615
+Assessment_Center_Grade_medium          -0.141615
+Name: Personality_Disqualification_Dico, dtype: float64
+Method C - Impact Coding : Converting a categorical variable to continuous
+In this section, we will transform the categorical variable "Designated_Role" into a continuous variable.
+Initially, we will consolidate small categories within the variable into a singular class. The selection of the consolidated class type will be based on the prevalence of personality disorders across the classes.
+Subsequently, for each department in the "Designated_Role" variable, we will aggregate the percentage of personality disorder occurrences (the variable of interest). This procedure will effectively convert the categorical variable into a numerical one.
+Designated_Role = df.groupby('Designated_Role').agg({'Personality_Disqualification_Dico':["count", "mean", "sum"]}).sort_values([('Personality_Disqualification_Dico', 'mean')], ascending=False)
+Designated_Role
+                          Personality_Disqualification_Dico                 
+                                                      count      mean    sum
+Designated_Role                                                             
+Border Guard fighters                                   450  0.248889  112.0
+Police dispatchers                                       34  0.088235    3.0
+administrative nagad                                    217  0.078341   17.0
+missing                                                 148  0.074324   11.0
+operational core units                                 1214  0.053542   65.0
+Control center volunteers                                20  0.050000    1.0
+prosecutor                                               78  0.025641    2.0
+Traffic cops                                             17  0.000000    0.0
+administrative officer                                   57  0.000000    0.0
+intelligence                                             17  0.000000    0.0
+operational officer                                       9  0.000000    0.0
+special unit                                             39  0.000000    0.0
+df.loc[(df['Designated_Role'] == 'Border Guard fighters'), 'Designated_Role_continuous'] = 0.253  
+df.loc[(df['Designated_Role'] == 'Police dispatchers'), 'Designated_Role_continuous'] = 0.080  
+df.loc[(df['Designated_Role'] == 'administrative nagad'), 'Designated_Role_continuous'] = 0.058   
+df.loc[(df['Designated_Role'] == 'Control center volunteers'), 'Designated_Role_continuous'] = 0.055   
+df.loc[(df['Designated_Role'] == 'missing'), 'Designated_Role_continuous'] = 0.053   
+df.loc[(df['Designated_Role'] == 'operational core units'), 'Designated_Role_continuous'] = 0.048   
+df.loc[(df['Designated_Role'] == 'prosecutor'), 'Designated_Role_continuous'] = 0.030   
+df.loc[(df['Designated_Role'] == 'Traffic cops') | (df['Designated_Role'] == 'administrative officer') | (df['Designated_Role'] == 'intelligence') | (df['Designated_Role'] == 'operational officer') | (df['Designated_Role'] == 'special unit'), 'Designated_Role_continuous'] = 0   
+df['Designated_Role_continuous']. corr(df['Personality_Disqualification_Dico']).round(2)
+0.27
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+5. Weighting Solutions for MMPI-2 Numeric Scales
+The dataset encompasses approximately 100 personality scales from the MMPI-2 test. Half of these personality scales are quantified on a continuous scale (ranging from 1 to 120), while the other half are dichotomous (coded as 0 or 1). The dichotomous scales signify abnormal scores or elevations in the continuous personality scales, specifically a score of 65 or higher on the respective variable scale, which corresponds to 1.5 standard deviations above the norm score on that scale.
+As anticipated, the outcomes of the exploratory data analysis (EDA) have unveiled the presence of multicollinear relationships among numerous personality scales. These findings have been corroborated by the examination of Spearman's correlation matrix among the research variables, as well as by the Variance Inflation Factor (VIF) index computed in multivariate regression analyses.
+Naturally, for various compelling reasons, it is not recommended to incorporate such an extensive array of personality scales into prediction models. This is primarily due to the fact that a considerable portion of these personality scales share similar content, exhibit multicollinear relationships, and contribute to noise and overloading. These factors can result in challenges such as multidimensionality, overfitting, and detriment to the predictive models' generalizability.
+Given the rationale provided above, the forthcoming sections will present a diverse range of solutions for handling the weighting between continuous and dichotomous personality scales. These solutions encompass: (1) Simple Mean approach; (2) PCA (Principal Component Analysis) approach; (3) Stepwise Regression approach; (4) Composite Measure approach; (5) Index approach.
+It is imperative to acknowledge that some of the analyses to be presented below (pertaining to the selection of a suitable weighting solution for the personality scales) are conventionally carried out during the feature selection phase in machine learning projects. We have employed these relevant analyses to guide the selection of an appropriate weighting solution for the personality scales. The outcomes of these analyses will significantly enhance the refinement, accuracy, and effectiveness of the data engineering process.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Weighing solutions - numerical personal scales
+Spearman correlation between the continuous personality scales and personality disqualification :
+MMPI_numeric_scales_Corr = pd.DataFrame(df, columns=["M2a" ,"ASP" ,"R" ,"CYN" ,"BIM" ,"PA" ,"M2APS" ,"AAS" ,"tcent" ,"OBS" ,"MDS" ,"TPA" ,"BIZ" ,"ANG" ,"WSD" ,"DEP" ,"DIS" ,"K" ,"SOD" ,"D" ,"D1" ,"D2" ,"D3" ,"D4" ,"D5" ,"MF" ,"DOE" ,"PT" ,"ANX" ,"F" ,"SC" ,"HEA" ,"FP" ,"HS" ,"FAM" ,"PD" ,"ES" ,"FCENT" ,"WRK" ,"HY" ,"L" ,"MA" ,"SE" ,"RT" ,"TRIN" ,"VRIN" ,"CR" ,"RS","Personality_Disqualification_Dico"])
+MMPI_numeric_scales_Corr[MMPI_numeric_scales_Corr.columns[1:]].corr(method='spearman')['Personality_Disqualification_Dico'].sort_values(ascending=False)
+Personality_Disqualification_Dico    1.000000
+FAM                                  0.178317
+BIM                                  0.173689
+WSD                                  0.171107
+DEP                                  0.169507
+MDS                                  0.167799
+SC                                   0.165180
+F                                    0.160735
+DIS                                  0.158312
+RT                                   0.153151
+PD                                   0.152188
+HEA                                  0.150574
+ANX                                  0.142042
+WRK                                  0.140609
+D5                                   0.125987
+VRIN                                 0.123545
+ASP                                  0.121013
+SE                                   0.117935
+OBS                                  0.114624
+BIZ                                  0.114196
+CYN                                  0.110643
+D4                                   0.106704
+D1                                   0.104793
+tcent                                0.095134
+AAS                                  0.094432
+ANG                                  0.093937
+PT                                   0.092970
+FP                                   0.087728
+TPA                                  0.087320
+HS                                   0.086495
+RS                                   0.084638
+D                                    0.084552
+PA                                   0.078044
+D3                                   0.069609
+MA                                   0.067436
+CR                                   0.061189
+SOD                                  0.057043
+HY                                   0.008699
+TRIN                                 0.003062
+M2APS                                0.001668
+D2                                  -0.007654
+L                                   -0.055955
+DOE                                 -0.060176
+MF                                  -0.068613
+R                                   -0.072221
+FCENT                               -0.093652
+K                                   -0.103551
+ES                                  -0.114200
+Name: Personality_Disqualification_Dico, dtype: float64
+Solution 1 - Simple mean
+Simple mean between 0.1 and above sperman corr personality scales :
+df['MMPI_Numeric_mean__Above_0_1_corr'] = df[["FAM" ,"BIM" ,"WSD" ,"DEP" ,"SC" ,"PD" ,"MDS" ,"F" ,"DIS" ,"RT" ,"WRK" ,"HEA" ,"VRIN" ,"BIZ" ,"ANX" ,"SE" ,"D4" ,"FP" ,"ASP" ,"OBS" ,"D1" ,"HS" ,"D5" ,"ANG" ,"PT" ,"MF" ,"DOE" ,"PT"]].mean(axis=1)
+df['MMPI_Numeric_mean__Above_0_1_corr']. corr(df['Personality_Disqualification_Dico']).round(2)
+0.26
+Simple mean between 0.15 and above sperman corr personality scales :
+df['MMPI_Numeric_mean__Above_0_15_corr'] = df[["FAM" ,"BIM" ,"WSD" ,"DEP" ,"SC" ,"PD" ,"MDS" ,"F" ,"DIS" ,"RT"]].mean(axis=1)
+df['MMPI_Numeric_mean__Above_0_15_corr']. corr(df['Personality_Disqualification_Dico']).round(2)
+0.27
+---Solution 1 Summary---
+•	The weighted "superfactor" generated from the combination of personality scales exhibits a notably stronger correlation with the target factor in comparison to the correlations observed with individual personality scales.
+•	No substantial divergence was observed in the strength of the association between the weighted factor and personality disqualification when considering scales with a correlation of 0.15 or higher, as opposed to 0.1 and above.
+•	One notable advantage of adopting the weighted factor solution (simple average of continuous personality scales) lies in elimination of issues linked to multicollinearity among personality scales. This approach also addresses biases stemming from extreme values and alleviates challenges associated with subclassification (inherent to dichotomous personality scales).
+Solution 2 - PCA (Principal Components Analysis)
+•	Within the framework of the MMPI-2 test, the personality scales represent conceptual constructs referred to as latent variables. These latent variables, often termed hidden factors, are not directly measurable or observable. Instead, their measurement involves using indirect indicators, known as observed variables, which operationalize their underlying definitions. These observed variables are designed to capture the essence of the hidden variables they represent. To unearth these latent variables from the intricate web of relevant components within the aforementioned factor structures, an exploratory factor analysis (EFA) was employed. Specifically, the method of principal component analysis (PCA) was harnessed in this process.
+•	The primary objective of the PCA solution is to delve into the feasibility of assigning weights to the 50 numeric personality scales. These weights are determined based on distinct groups of latent factors that emerge from the results of the factor analysis. This approach seeks to investigate the potential of differentiating and attributing significance to the observed personality scales by associating them with distinct latent factor categories, as unearthed through the insights of the factor analysis outcomes.
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_diabetes
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, FactorAnalysis
+from factor_analyzer import FactorAnalyzer
+import matplotlib.pyplot as plt
+import numpy as np
+
+from sklearn.datasets import load_iris
+from sklearn.decomposition import PCA, FactorAnalysis
+from sklearn.preprocessing import StandardScaler
+
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA, FactorAnalysis
+from matplotlib import pyplot as plt
+Grouped_MMPI_numeric_scales_pd = pd.DataFrame(df, columns=["M2a" ,"ASP" ,"R" ,"CYN" ,"BIM" ,"PA" ,"M2APS" ,"AAS" ,"tcent" ,"OBS" ,"MDS" ,"TPA" ,"BIZ" ,"ANG" ,"WSD" ,"DEP" ,"DIS" ,"K" ,"SOD" ,"D" ,"D1" ,"D2" ,"D3" ,"D4" ,"D5" ,"MF" ,"DOE" ,"PT" ,"ANX" ,"F" ,"SC" ,"HEA" ,"FP" ,"HS" ,"FAM" ,"PD" ,"ES" ,"FCENT" ,"WRK" ,"HY" ,"L" ,"MA" ,"SE" ,"RT" ,"TRIN" ,"VRIN" ,"CR" ,"RS"])
+scaler = StandardScaler()
+ 
+scaler.fit(Grouped_MMPI_numeric_scales_pd)
+ 
+MMPI_numeric_scaled = scaler.transform(Grouped_MMPI_numeric_scales_pd)
+pca = PCA(n_components=10)
+ 
+rounded_components = pca.fit_transform(MMPI_numeric_scaled)
+rounded_components
+array([[-0.53249825, -0.97705472,  2.9645497 , ..., -0.45488473,
+         1.31828728,  1.3797418 ],
+       [ 5.63411245, -1.80049975,  0.19199965, ...,  0.97356722,
+        -0.58914276,  0.7915635 ],
+       [-4.67537038,  0.24538474,  0.01142648, ..., -0.83963606,
+        -0.09277984, -0.23746865],
+       ...,
+       [-2.19927884,  0.05099806, -0.22539436, ...,  0.16524405,
+         1.39763534, -0.44565471],
+       [-4.45280824, -0.21480119,  1.23104255, ...,  0.50937593,
+        -0.69127597,  0.50137426],
+       [-0.33680305, -2.44139471, -1.66588227, ..., -1.3110747 ,
+         0.20942313,  0.36962015]])
+prop_var = pca.explained_variance_ratio_
+eigenvalues = pca.explained_variance_
+prop_var
+array([0.36106881, 0.13841001, 0.05121386, 0.04660237, 0.0330048 ,
+       0.02641485, 0.02455121, 0.020163  , 0.01856416, 0.01803734])
+eigenvalues
+array([17.33884127,  6.64657008,  2.45933462,  2.23788662,  1.58491934,
+        1.26846447,  1.17897081,  0.96824474,  0.89146725,  0.86616901])
+The results of the analysis show that the personality scales in the MMPI-2 test are divided into seven hidden factors (according eigenvalues>1).
+Scree Plot - Visual Assessment
+The Scree Plot is a graphical technique employed to determine the optimal number of latent factors. In essence, this method involves identifying a distinct "breakpoint" characterized by a sharp change in the slope of the depicted line (indicating a notable reduction in Eigenvalue values). This breakpoint serves as a key indicator for determining the appropriate number of latent factors in the analysis.
+PC_numbers = np.arange(pca.n_components_) + 1
+ 
+plt.plot(PC_numbers, 
+         prop_var, 
+         'ro-')
+plt.title('Figure 1: Scree Plot', fontsize=8)
+plt.ylabel('Proportion of Variance', fontsize=8)
+plt.show()
+ 
+•	While the eigenvalue index indicates the presence of 7 latent factors, a visual assessment using the 'eye test' on the provided scree plot chart suggests that the last substantial breakpoint occurs after the 5th latent factor. Beyond this point, no significant breakpoints are observed.
+•	In addition to the scree plot analysis, an examination of the variance explained by the latent factors reveals that the first five factors account for approximately 55% of the total variance. The contribution of the fourth to seventh factors to the explained variance is moderate, resulting in a slight increase from 55% to 67%. Although this increase in explained variance is noteworthy, subsequent tests revealed that partitioning the variables into 4 to 7 hidden factors leads to a notable number of cases with shared loading of items (numerous personality scales with a loading of 0.45 or higher across several hidden factors). Moreover, this division results in notably strong correlations between the hidden factors.
+•	Guided by the above analysis, a decision was made to adopt a partitioning solution involving 3 latent factors.
+Loading Levels of Personality Scales in the Five Hidden Factors (After Rotation) :
+data = pd.DataFrame(df, columns=["M2a" ,"ASP" ,"R" ,"CYN" ,"BIM" ,"PA" ,"M2APS" ,"AAS" ,"tcent" ,"OBS" ,"MDS" ,"TPA" ,"BIZ" ,"ANG" ,"WSD" ,"DEP" ,"DIS" ,"K" ,"SOD" ,"D" ,"D1" ,"D2" ,"D3" ,"D4" ,"D5" ,"MF" ,"DOE" ,"PT" ,"ANX" ,"F" ,"SC" ,"HEA" ,"FP" ,"HS" ,"FAM" ,"PD" ,"ES" ,"FCENT" ,"WRK" ,"HY" ,"L" ,"MA" ,"SE" ,"RT" ,"TRIN" ,"VRIN" ,"CR" ,"RS"]);
+feature_names = ["M2a" ,"ASP" ,"R" ,"CYN" ,"BIM" ,"PA" ,"M2APS" ,"AAS" ,"tcent" ,"OBS" ,"MDS" ,"TPA" ,"BIZ" ,"ANG" ,"WSD" ,"DEP" ,"DIS" ,"K" ,"SOD" ,"D" ,"D1" ,"D2" ,"D3" ,"D4" ,"D5" ,"MF" ,"DOE" ,"PT" ,"ANX" ,"F" ,"SC" ,"HEA" ,"FP" ,"HS" ,"FAM" ,"PD" ,"ES" ,"FCENT" ,"WRK" ,"HY" ,"L" ,"MA" ,"SE" ,"RT" ,"TRIN" ,"VRIN" ,"CR" ,"RS"];
+X = StandardScaler().fit_transform(data)
+n_comps = 3
+
+methods = [
+    ("PCA", PCA()),
+    ("Unrotated FA", FactorAnalysis()),
+    ("Varimax FA", FactorAnalysis(rotation="varimax")),
+]
+fig, axes = plt.subplots(ncols=len(methods), figsize=(10, 8), sharey=True)
+
+dfs = []  # List to store dataframes
+
+for ax, (method, fa) in zip(axes, methods):
+    fa.set_params(n_components=n_comps)
+    fa.fit(X)
+
+    components = fa.components_.T
+    print("\n\n %s :\n" % method)
+    rounded_components = np.round(components, 3)
+    print(rounded_components)  # Print rounded components
+
+    vmax = np.abs(components).max()
+    ax.imshow(components, cmap="RdBu_r", vmax=vmax, vmin=-vmax)
+    ax.set_yticks(np.arange(len(feature_names)))
+    ax.set_yticklabels(feature_names)
+    ax.set_title(str(method))
+    ax.set_xticks([5, 5])
+    ax.set_xticklabels(["Comp. 1", "Comp. 2"])
+fig.suptitle("Factors")
+plt.tight_layout()
+plt.show()
+
+
+ PCA :
+
+[[ 0.22  -0.011 -0.02 ]
+ [ 0.175 -0.096 -0.095]
+ [-0.127  0.2    0.02 ]
+ [ 0.177 -0.094 -0.26 ]
+ [ 0.19   0.017 -0.071]
+ [ 0.049  0.11   0.266]
+ [ 0.084 -0.099  0.37 ]
+ [ 0.105  0.013  0.25 ]
+ [ 0.2   -0.183 -0.022]
+ [ 0.199 -0.051  0.007]
+ [ 0.171  0.029  0.11 ]
+ [ 0.173 -0.119 -0.052]
+ [ 0.18  -0.001 -0.102]
+ [ 0.179 -0.103  0.084]
+ [ 0.172  0.192  0.084]
+ [ 0.185  0.104 -0.059]
+ [ 0.179  0.067  0.171]
+ [-0.2    0.131  0.122]
+ [ 0.076  0.115 -0.049]
+ [ 0.03   0.316 -0.072]
+ [ 0.124  0.252  0.041]
+ [-0.066  0.224 -0.043]
+ [ 0.056  0.18  -0.097]
+ [ 0.131  0.166  0.148]
+ [ 0.173  0.077  0.068]
+ [-0.009 -0.035  0.198]
+ [-0.153  0.149 -0.15 ]
+ [ 0.068  0.206  0.238]
+ [ 0.187  0.073 -0.012]
+ [ 0.154  0.127 -0.069]
+ [ 0.166  0.085 -0.059]
+ [ 0.116  0.189 -0.07 ]
+ [ 0.055  0.143 -0.296]
+ [-0.019  0.295 -0.012]
+ [ 0.187  0.035 -0.029]
+ [ 0.053  0.18   0.288]
+ [-0.152 -0.13   0.207]
+ [-0.2    0.182  0.025]
+ [ 0.194  0.01   0.001]
+ [-0.071  0.264  0.179]
+ [-0.121  0.161 -0.291]
+ [ 0.096 -0.111  0.068]
+ [ 0.159  0.007  0.065]
+ [ 0.176  0.041 -0.126]
+ [-0.019  0.151  0.051]
+ [ 0.138  0.094 -0.086]
+ [ 0.108 -0.17   0.105]
+ [ 0.125  0.062 -0.062]]
+
+
+ Unrotated FA :
+
+[[ 0.822  0.413 -0.013]
+ [ 0.712  0.158  0.074]
+ [-0.726  0.191 -0.057]
+ [ 0.734  0.156  0.132]
+ [ 0.645  0.424  0.449]
+ [ 0.05   0.307  0.165]
+ [ 0.369  0.    -0.131]
+ [ 0.309  0.243  0.07 ]
+ [ 0.998 -0.03  -0.006]
+ [ 0.773  0.292  0.015]
+ [ 0.517  0.422  0.091]
+ [ 0.766  0.084  0.011]
+ [ 0.651  0.341  0.346]
+ [ 0.715  0.169  0.047]
+ [ 0.39   0.812 -0.264]
+ [ 0.545  0.6   -0.035]
+ [ 0.545  0.519 -0.159]
+ [-0.837 -0.155 -0.081]
+ [ 0.128  0.398 -0.147]
+ [-0.222  0.737 -0.254]
+ [ 0.147  0.842 -0.287]
+ [-0.411  0.311 -0.311]
+ [ 0.005  0.484  0.017]
+ [ 0.272  0.649 -0.249]
+ [ 0.545  0.554 -0.233]
+ [-0.014 -0.088 -0.012]
+ [-0.643 -0.045 -0.107]
+ [ 0.06   0.53  -0.167]
+ [ 0.589  0.529  0.01 ]
+ [ 0.38   0.566  0.225]
+ [ 0.455  0.531  0.54 ]
+ [ 0.144  0.649  0.39 ]
+ [ 0.029  0.371  0.303]
+ [-0.419  0.566  0.288]
+ [ 0.605  0.441  0.165]
+ [-0.066  0.482  0.075]
+ [-0.393 -0.575 -0.248]
+ [-0.998  0.027  0.004]
+ [ 0.695  0.406 -0.08 ]
+ [-0.566  0.411  0.088]
+ [-0.593  0.065  0.143]
+ [ 0.474 -0.067  0.238]
+ [ 0.579  0.323 -0.121]
+ [ 0.575  0.425  0.085]
+ [-0.256  0.262  0.056]
+ [ 0.36   0.465  0.12 ]
+ [ 0.589 -0.16   0.119]
+ [ 0.37   0.369  0.059]]
+
+
+ Varimax FA :
+
+[[ 0.776  0.428  0.244]
+ [ 0.692  0.157  0.186]
+ [-0.741  0.135  0.002]
+ [ 0.713  0.127  0.237]
+ [ 0.594  0.192  0.639]
+ [ 0.017  0.186  0.299]
+ [ 0.369  0.096 -0.09 ]
+ [ 0.282  0.199  0.2  ]
+ [ 0.996  0.058  0.04 ]
+ [ 0.74   0.306  0.206]
+ [ 0.471  0.36   0.321]
+ [ 0.754  0.129  0.098]
+ [ 0.609  0.173  0.509]
+ [ 0.694  0.18   0.168]
+ [ 0.309  0.863  0.2  ]
+ [ 0.482  0.578  0.302]
+ [ 0.492  0.571  0.154]
+ [-0.816 -0.161 -0.198]
+ [ 0.089  0.427  0.079]
+ [-0.292  0.744  0.134]
+ [ 0.065  0.881  0.181]
+ [-0.436  0.39  -0.139]
+ [-0.044  0.408  0.256]
+ [ 0.208  0.706  0.124]
+ [ 0.489  0.638  0.108]
+ [-0.005 -0.071 -0.055]
+ [-0.634 -0.037 -0.154]
+ [ 0.008  0.545  0.124]
+ [ 0.532  0.498  0.309]
+ [ 0.319  0.405  0.5  ]
+ [ 0.393  0.223  0.759]
+ [ 0.073  0.375  0.67 ]
+ [-0.012  0.17   0.449]
+ [-0.477  0.309  0.505]
+ [ 0.556  0.346  0.4  ]
+ [-0.115  0.372  0.301]
+ [-0.33  -0.403 -0.525]
+ [-0.996 -0.059 -0.044]
+ [ 0.651  0.446  0.176]
+ [-0.605  0.264  0.247]
+ [-0.598 -0.064  0.12 ]
+ [ 0.476 -0.139  0.202]
+ [ 0.545  0.386  0.092]
+ [ 0.528  0.37   0.321]
+ [-0.281  0.177  0.163]
+ [ 0.31   0.37   0.357]
+ [ 0.601 -0.15   0.059]
+ [ 0.331  0.318  0.257]]
+ 
+###save rotated loadongs print as datafrme 
+columns = ["factor_1", "factor_2", "factor_3"]
+df_rounded_components = pd.DataFrame(rounded_components, columns=columns);
+
+###Displaying values with a loading level of > 0.45 or < 0.45 :
+df_rounded_components = df_rounded_components.applymap(lambda x: '' if not (x >= 0.45 or x <= -0.45) else x);
+
+### bring personality scales names
+df_rounded_components['personality_scales'] = feature_names
+last_column = df_rounded_components.pop(df_rounded_components.columns[-1])
+df_rounded_components.insert(0, last_column.name, last_column);
+
+### sort loading values
+df_rounded_components = df_rounded_components.sort_values(by=['factor_3', 'factor_2', 'factor_1'], ascending=[False, False, False]);
+
+df_rounded_components
+   personality_scales factor_1 factor_2 factor_3
+5                  PA                           
+6               M2APS                           
+7                 AAS                           
+18                SOD                           
+21                 D2                           
+22                 D3                           
+25                 MF                           
+32                 FP                           
+35                 PD                           
+44               TRIN                           
+45               VRIN                           
+47                 RS                           
+8               tcent    0.996                  
+0                 M2a    0.776                  
+11                TPA    0.754                  
+9                 OBS     0.74                  
+3                 CYN    0.713                  
+13                ANG    0.694                  
+1                 ASP    0.692                  
+38                WRK    0.651                  
+46                 CR    0.601                  
+34                FAM    0.556                  
+42                 SE    0.545                  
+43                 RT    0.528                  
+41                 MA    0.476                  
+10                MDS    0.471                  
+40                  L   -0.598                  
+39                 HY   -0.605                  
+26                DOE   -0.634                  
+2                   R   -0.741                  
+17                  K   -0.816                  
+37              FCENT   -0.996                  
+20                 D1             0.881         
+14                WSD             0.863         
+19                  D             0.744         
+23                 D4             0.706         
+24                 D5    0.489    0.638         
+15                DEP    0.482    0.578         
+16                DIS    0.492    0.571         
+27                 PT             0.545         
+28                ANX    0.532    0.498         
+30                 SC                      0.759
+31                HEA                       0.67
+4                 BIM    0.594             0.639
+12                BIZ    0.609             0.509
+33                 HS   -0.477             0.505
+29                  F                        0.5
+36                 ES                     -0.525
+The outcomes presented above provide a comprehensive portrayal of how the personality scales are distributed across the three latent factors, alongside the corresponding loading levels assigned to each personality scale. Notably, in the process of categorizing the personality scales into three latent factors, no instances of shared loading were identified. Concurrently, it was observed that a single personality scale (M2APS) exhibited no co-loading with any of the three latent factors. Consequently, this particular personality scale will not be considered when allocating weights to the personality scales within the three groups of MMPI-2 scales, based on the outcomes of the factor analysis.
+The tabulated presentation above elucidates the division of the 50 personality scales among the latent factors. Furthermore, it demonstrates the loading levels of variables within each latent factor (highlighting loading levels of 0.4 and above).
+As previously mentioned, the 'eye test' visually indicates that the last significant change occurs after the presence of five latent factors. Given that the contribution of the sixth and seventh latent factors makes a negligible impact on the percentage of explained variance, the project's scope will encompass the initial five hidden factors. It's important to note that hidden factors 6 and 7 encompass only four personality scales and will therefore not be considered.
+Weighting of the numerical personality scales according to the five groups of hidden factors:
+df['MMPI_factor_group_A'] = df[['tcent','M2a', 'TPA', 'OBS', 'CYN','ANG','ASP','WRK','CR','FAM', 'SE', 'RT', 'MA', 'MDS']].mean(axis=1);
+df['MMPI_factor_group_B'] = df[['WSD', 'D1', 'D4', 'D']].mean(axis=1);
+df['MMPI_factor_group_C'] = df[['HEA', 'SC', 'F', 'FP', 'ES']].mean(axis=1); 
+Relationship between the weighted personality scales groups wuth the target factor
+df['MMPI_factor_group_A']. corr(df['Personality_Disqualification_Dico']).round(2)
+0.2
+df['MMPI_factor_group_B']. corr(df['Personality_Disqualification_Dico']).round(2)
+0.17
+df['MMPI_factor_group_C']. corr(df['Personality_Disqualification_Dico']).round(2)
+0.21
+Multiple Logistic Regression
+Below, a logistic regression analysis will be presented to investigate the correlation between the three factors derived from the weighted personality scales (as indicated by the results of the factor analysis) and personality disqualification.
+from numpy.linalg import inv, det
+MMPI_numeric_scales_pd = pd.DataFrame(df, columns=['MMPI_factor_group_A', 'MMPI_factor_group_B', 'MMPI_factor_group_C', 'MMPI_Numeric_mean__Above_0_15_corr', "Personality_Disqualification_Dico"])
+x = MMPI_numeric_scales_pd[MMPI_numeric_scales_pd.columns[~MMPI_numeric_scales_pd.columns.isin(['Personality_Disqualification_Dico', 'MMPI_Numeric_mean__Above_0_15_corr'])]]
+y = MMPI_numeric_scales_pd['Personality_Disqualification_Dico']
+x = sm.add_constant(x);
+model = sm.Logit(y, x)
+result = model.fit(method='newton', C=1.0, class_weight=None, dual=False, fit_intercept=True, intercept_scaling=1, l1_ratio=None, max_iter=100, multi_class='warn', n_jobs=None, penalty='l2', random_state=0, solver='liblinear', tol=0.0001, verbose=0, warm_start=False);
+Optimization terminated successfully.
+         Current function value: 0.283006
+         Iterations 6
+result.summary()
+<class 'statsmodels.iolib.summary.Summary'>
+"""
+                                   Logit Regression Results                                  
+=============================================================================================
+Dep. Variable:     Personality_Disqualification_Dico   No. Observations:                 2300
+Model:                                         Logit   Df Residuals:                     2296
+Method:                                          MLE   Df Model:                            3
+Date:                               Wed, 30 Aug 2023   Pseudo R-squ.:                 0.07678
+Time:                                       01:11:24   Log-Likelihood:                -650.91
+converged:                                      True   LL-Null:                       -705.05
+Covariance Type:                           nonrobust   LLR p-value:                 2.584e-23
+=======================================================================================
+                          coef    std err          z      P>|z|      [0.025      0.975]
+---------------------------------------------------------------------------------------
+const                  -9.6986      0.755    -12.840      0.000     -11.179      -8.218
+MMPI_factor_group_A     0.0547      0.013      4.251      0.000       0.029       0.080
+MMPI_factor_group_B     0.0387      0.014      2.824      0.005       0.012       0.066
+MMPI_factor_group_C     0.0603      0.015      3.992      0.000       0.031       0.090
+=======================================================================================
+"""
+The logistic regression analysis reveals a statistically significant relationship (p < 0.001 - 0.01) between the three weighted personality factors and personality disqualification.
+The model's ability to predict personality disqualification is characterized by an explained variance percentage of 7.7%. The multiple correlation of the model in forecasting personality disqualification stands at 0.28. In a broader context, it was observed that the Spearman correlations among the three weighted personality factors range from 0.17 to 0.21. Consequently, the collective predictive impact of the three weighted factors, as manifested within the logistic regression model, elevates the predictive capacity of the targeted factor to 0.28 — a moderately substantial enhancement.
+Hierarchical Logistic Regression
+Utilizing logistic regression allows us to investigate whether the three weighted personality factors make a significant and distinct contribution in predicting personality disqualification, surpassing the predictive power of a simple average of the continuous personality scales (solution 1).
+import statsmodels.api as sm
+from scipy.stats import chi2
+# Separate features (x) and target (y)
+x = MMPI_numeric_scales_pd[MMPI_numeric_scales_pd.columns[MMPI_numeric_scales_pd.columns.isin(['MMPI_Numeric_mean__Above_0_15_corr'])]]
+y = MMPI_numeric_scales_pd['Personality_Disqualification_Dico']
+
+# Add constant term to the features
+x = sm.add_constant(x)
+
+# Fit the initial logistic regression model
+model = sm.Logit(y, x)
+result = model.fit(method='newton', max_iter=100)
+
+# Calculate the initial percentage of variance explained
+initial_var_explained = 1 - (result.llf / result.llnull)
+
+# Calculate the initial likelihood ratio test statistic (Chisq)
+initial_lrtest_stat = result.llr
+
+# Add three new predictors to the model
+new_predictors = ['MMPI_factor_group_A', 'MMPI_factor_group_B', 'MMPI_factor_group_C']
+new_x = x.copy()  # Make a copy of the original feature matrix
+new_x[new_predictors] = MMPI_numeric_scales_pd[new_predictors]  # Replace 'new_predictors' with your actual new predictors
+
+# Fit the new logistic regression model with additional predictors
+new_model = sm.Logit(y, new_x)
+new_result = new_model.fit(method='newton', max_iter=100)
+
+# Calculate the new percentage of variance explained
+new_var_explained = 1 - (new_result.llf / new_result.llnull)
+
+# Calculate the likelihood ratio test statistic (Chisq) for the new model
+new_lrtest_stat = new_result.llr
+
+# Calculate the difference in the percentage of variance explained
+variance_explained_diff = new_var_explained - initial_var_explained
+
+# Perform the likelihood ratio test to calculate the Chisq difference
+chisq_diff = new_lrtest_stat - initial_lrtest_stat
+
+# Calculate the p-value from the likelihood ratio test
+p_value = 1 - chi2.cdf(chisq_diff, df=3)  # 3 is the degrees of freedom for the difference
+
+print("Initial Variance Explained:", initial_var_explained)
+print("New Variance Explained:", new_var_explained)
+print("Initial Likelihood Ratio Test Statistic:", initial_lrtest_stat)
+print("New Likelihood Ratio Test Statistic:", new_lrtest_stat)
+print("Chisq Difference:", chisq_diff)
+print("Difference in Variance Explained:", variance_explained_diff)
+print("P-value for Difference:", p_value)
+Optimization terminated successfully.
+         Current function value: 0.279146
+         Iterations 7
+Optimization terminated successfully.
+         Current function value: 0.278609
+         Iterations 7
+Initial Variance Explained: 0.08937428481417786
+New Variance Explained: 0.0911249984396294
+Initial Likelihood Ratio Test Statistic: 126.02655521402585
+New Likelihood Ratio Test Statistic: 128.49523407216338
+Chisq Difference: 2.4686788581375367
+Difference in Variance Explained: 0.0017507136254515387
+P-value for Difference: 0.4809781171764159
+Hierarchical logistic regression outcomes indicate that upon the inclusion of the weighted personality factors, the explained variance percentage in predicting personality disqualification marginally increased from 8.9% to 9.1%. Analyzing the disparities between the explained variance percentages before and after the integration of the three weighted personality factors indicates that these differences lack statistical significance (p > 0.05). As a result, it can be deduced that solution 2, which is founded on PCA, does not yield a substantial contribution beyond the insights derived from solution 1, which relies on a straightforward average of the continuous personality scales.
+Multiple Linear Reggression
+Below, a multiple linear regression analysis will be presented to explore the correlation between the three weighted personality factors and personality disqualification. The primary emphasis of this analysis will be directed towards evaluating the Variance Inflation Factor (VIF) index.
+MMPI_numeric_scales_pd = pd.DataFrame(df, columns=['MMPI_factor_group_A', 'MMPI_factor_group_B', 'MMPI_factor_group_C',"Personality_Disqualification_Dico"])
+x = MMPI_numeric_scales_pd[MMPI_numeric_scales_pd.columns[~MMPI_numeric_scales_pd.columns.isin(['Personality_Disqualification_Dico'])]]
+y = MMPI_numeric_scales_pd['Personality_Disqualification_Dico']
+x = sm.add_constant(x);
+
+regr = linear_model.LinearRegression()
+regr.fit(x, y);
+model = sm.OLS(y, x).fit();
+
+predictions = model.predict(x);
+### See quality measurs of the model
+
+print_model = model.summary().tables[0]
+print(print_model)
+                                    OLS Regression Results                                   
+=============================================================================================
+Dep. Variable:     Personality_Disqualification_Dico   R-squared:                       0.061
+Model:                                           OLS   Adj. R-squared:                  0.060
+Method:                                Least Squares   F-statistic:                     50.07
+Date:                               Wed, 30 Aug 2023   Prob (F-statistic):           2.43e-31
+Time:                                       01:11:24   Log-Likelihood:                -332.90
+No. Observations:                               2300   AIC:                             673.8
+Df Residuals:                                   2296   BIC:                             696.8
+Df Model:                                          3                                         
+Covariance Type:                           nonrobust                                         
+=============================================================================================
+### See quality measurs of the model
+
+print_model = model.summary().tables[1]
+print(print_model)
+=======================================================================================
+                          coef    std err          t      P>|t|      [0.025      0.975]
+---------------------------------------------------------------------------------------
+const                  -0.7435      0.070    -10.662      0.000      -0.880      -0.607
+MMPI_factor_group_A     0.0059      0.001      4.984      0.000       0.004       0.008
+MMPI_factor_group_B     0.0042      0.001      3.315      0.001       0.002       0.007
+MMPI_factor_group_C     0.0076      0.001      5.333      0.000       0.005       0.010
+=======================================================================================
+x = sm.add_constant(x)
+
+vif = pd.DataFrame()
+vif["VIF Factor"] = [variance_inflation_factor(x.values, i) for i in range(x.values.shape[1])]
+vif["features"] = x.columns
+print(vif.round(1))
+   VIF Factor             features
+0       142.8                const
+1         1.3  MMPI_factor_group_A
+2         1.3  MMPI_factor_group_B
+3         1.4  MMPI_factor_group_C
+Upon evaluation, it was determined that the VIF index for the three weighted personality scales is less than 0.5. Consequently, there exists no concern regarding multicollinearity issues among these weighted factors.
+---Solution 2 Summary---
+•	Conducting an analysis employing PCA on the MMPI-2 test's personality scales unveiled the presence of three underlying factors.
+•	Drawing from the outcomes of the factor analysis, all 48 numeric personality scales was effectively clustered into three distinct weighted personality factors.
+•	The Spearman correlations among these three weighted personality factors exhibited a range spanning from 0.17 to 0.21.
+•	Results stemming from multiple logistic regression underscored a consequential and statistically significant linkage between the three weighted personality factors and personality disqualification. Notably, these factors uniquely contribute to the predictive capacity of the project's outcome variable.
+•	In the context of investigating multicollinearity, a thorough assessment was performed through multiple linear regression, with specific emphasis on the Variance Inflation Factor (VIF) index. This comprehensive evaluation substantiated the absence of multicollinearity concerns across the spectrum of the three weighted personality factors.
+•	Similar to the solution reliant on averaging personality scales, the PCA-based approach effectively mitigates the challenge of multicollinearity among these scales.
+•	However, it's worth acknowledging a limitation inherent to the PCA-based approach. Specifically, this methodology falls short in accommodating numerous personality scales that either lack association with the three latent factors or share connections with multiple underlying factors.
+•	Furthermore, subsequent analyses, particularly multiple logistic regression, unveiled that the multiple correlation coefficient linked to the three weighted personality factors in predicting personality disqualification (0.28) marginally surpasses the potency of the relationship observed between the average of personality scales (exhibiting a correlation of 0.15 or higher) and personality disqualification (Spearman correlation = 0.27).
+•	Moreover, outcomes from hierarchical logistic regression demonstrated that the integration of the three weighted personality factors yielded no significant enhancement in the percentage of explained variance, in comparison to the solution rooted in the uncomplicated averaging of continuous personality scales.
+solution 3 - Stepwise Logistic Reggression - numeric scales
+Stepwise regression is an iterative technique employed to assess the statistical significance of individual independent variables within a linear regression model. This method facilitates the identification of predictors that distinctly and uniquely contribute to the predictive capabilities of the model. In essence, when applying stepwise regression, the model condenses its focus onto personality scales with a discernible and notable impact on predicting personality disqualification. Concurrently, personality scales that lack a substantial and distinctive influence on predicting the foundational factor will be omitted from the model's consideration.
+Out of the pool of 48 personality scales featured in the MMPI-2 test, this approach results in the presentation of a streamlined collection of personality scales that wield a noteworthy, singular influence on predicting personality disqualification. Meanwhile, personality scales that fail to wield such a distinctive impact are intentionally excluded from the model.
+import statsmodels.api as sm
+Stepwise_MMPI_numeric_scales = pd.DataFrame(df, columns=["M2a" ,"ASP" ,"R" ,"CYN" ,"BIM" ,"PA" ,"M2APS" ,"AAS" ,"tcent" ,"OBS" ,"MDS" ,"TPA" ,"BIZ" ,"ANG" ,"WSD" ,"DEP" ,"DIS" ,"K" ,"SOD" ,"D" ,"D1" ,"D2" ,"D3" ,"D4" ,"D5" ,"MF" ,"DOE" ,"PT" ,"ANX" ,"F" ,"SC" ,"HEA" ,"FP" ,"HS" ,"FAM" ,"PD" ,"ES" ,"FCENT" ,"WRK" ,"HY" ,"L" ,"MA" ,"SE" ,"RT" ,"TRIN" ,"VRIN" ,"CR" ,"RS", "Personality_Disqualification_Dico"])
+# Define your features (X) and target variable (y)
+X = Stepwise_MMPI_numeric_scales.drop(columns=['Personality_Disqualification_Dico'])
+y = Stepwise_MMPI_numeric_scales['Personality_Disqualification_Dico']
+
+# Add a constant term to the features matrix
+X = sm.add_constant(X)
+
+# Perform logistic regression using stepwise method
+def stepwise_selection(X, y,
+                       initial_list=[],
+                       threshold_in=0.01,
+                       threshold_out=0.05,
+                       verbose=True):
+    included = list(initial_list)
+    while True:
+        changed = False
+        excluded = list(set(X.columns) - set(included))
+        new_pval = pd.Series(index=excluded)
+        for new_column in excluded:
+            model = sm.Logit(y, X[included + [new_column]]).fit(disp=False)
+            new_pval[new_column] = model.pvalues[new_column]
+        best_pval = new_pval.min()
+        if best_pval < threshold_in:
+            best_feature = new_pval.idxmin()
+            included.append(best_feature)
+            changed = True
+            if verbose:
+                print(f'Add {best_feature} with p-value {best_pval:.6f}')
+        model = sm.Logit(y, X[included]).fit(disp=False)
+        pvalues = model.pvalues.iloc[1:]
+        worst_pval = pvalues.max()
+        if worst_pval > threshold_out:
+            changed = True
+            worst_feature = pvalues.idxmax()
+            included.remove(worst_feature)
+            if verbose:
+                print(f'Drop {worst_feature} with p-value {worst_pval:.6f}')
+        if not changed:
+            break
+    return included
+
+selected_features = stepwise_selection(X, y)
+print("Selected features:", selected_features)
+
+# Fit the logistic regression model using the selected features
+final_model = sm.Logit(y, X[selected_features]).fit()
+
+# Print summary of the final model
+print(final_model.summary())
+
+# Make predictions on the same dataset
+y_pred = final_model.predict(X[selected_features])
+
+# Evaluate the model (e.g., calculate accuracy, ROC curve, etc.)
+Add const with p-value 0.000000
+Add FAM with p-value 0.000000
+Add PD with p-value 0.000001
+Add DEP with p-value 0.000763
+Add MF with p-value 0.005237
+Selected features: ['const', 'FAM', 'PD', 'DEP', 'MF']
+Optimization terminated successfully.
+         Current function value: 0.276778
+         Iterations 7
+                                   Logit Regression Results                                  
+=============================================================================================
+Dep. Variable:     Personality_Disqualification_Dico   No. Observations:                 2300
+Model:                                         Logit   Df Residuals:                     2295
+Method:                                          MLE   Df Model:                            4
+Date:                               Wed, 30 Aug 2023   Pseudo R-squ.:                 0.09710
+Time:                                       01:11:25   Log-Likelihood:                -636.59
+converged:                                      True   LL-Null:                       -705.05
+Covariance Type:                           nonrobust   LLR p-value:                 1.287e-28
+==============================================================================
+                 coef    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+const         -7.3200      0.751     -9.743      0.000      -8.792      -5.848
+FAM            0.0366      0.011      3.251      0.001       0.015       0.059
+PD             0.0497      0.010      5.040      0.000       0.030       0.069
+DEP            0.0452      0.015      3.078      0.002       0.016       0.074
+MF            -0.0241      0.009     -2.792      0.005      -0.041      -0.007
+==============================================================================
+The analysis outcomes reveal that the model development process concluded after the seventh iteration. During this specific iteration, merely four personality scales (FAM; PD; DEP; MF) were incorporated into the model, collectively elucidating 9.7% of the variance associated with personality rejection (indicated by a multiple correlation of 0.31). This signifies that, out of the entire collection encompassing 48 continuous personality scales, the application of multiple logistic regression employing the Stepwise method demonstrates that only four personality scales make a clear and distinct unique contribution to forecasting personality disqualification.
+---Solution 3 Summary---
+•	Utilizing the stepwise method, a multiple logistic regression analysis unveiled that among the 48 personality scales examined, only four demonstrated a noteworthy and distinctive impact when predicting personality disqualification.
+•	Employing a hierarchical regression analysis, it was determined that the stepwise multiple logistic regression solution (referred to as solution 2) significantly enhances the proportion of explained variance regarding the target factor in contrast to the approach grounded in a basic average calculation across the continuous personality scales (referred to as solution 1).
+solution 4 - Numeric Composite Measure
+Weighted indexes serve as a valuable tool for amalgamating multidimensional factors, finding their frequent application in the realm of statistical literature. Recognized methods for assigning weights to factors to construct integrative indices encompass equal weights, principal component analysis, Pearson weights, and regression weights.
+In the forthcoming analysis, we will compute an integrative index leveraging logistic regression weights obtained through the stepwise methodology. Within this approach, logistic regression outcomes are harnessed to ascertain the relative weight of each personality scale in the model. This representation reflects their individual contributions toward predicting the dependent factor. Factors with more substantial predictive influence on the target factor receive heightened relative weights, mirroring the coefficients established for each personality scale in the model.
+To circumvent potential biases arising from variations in measurement units across different variables, it is customary to normalize or standardize the predictors before multiplication by their respective relative weights. However, it's pertinent to note that the weighted personality scales within the index uniformly span a measurement scale of 1 to 120. This inherent uniformity obviates the necessity for variable standardization during the computation of the integrative index.
+df['num_composite_measure'] = df.FAM * 0.0366 + df.PD * 00.0497 + df.DEP * 0.0452 + df.MF * -0.0241
+df['num_composite_measure']. corr(df['Personality_Disqualification_Dico']).round(2)
+0.27
+---Solution 4 Summary---
+•	The Spearman correlation between the integrative index derived from the continuous personality scales and personality disqualification was identified to be 0.27.
+•	Notably, the magnitude of the relationship observed between the integrative index and personality disqualification (0.27) closely aligns with the strength of the relationship stemming from a straightforward averaging of the personality scales (exhibiting a correlation of 0.15 or higher) in relation to the target factor.
+solution 5 - Personality elevations index (dichotomous personality scales)
+The methodology employed for weightning the personality scales relies on a straightforward summation process (+) encompassing all 48 dichotomous personality scales. Due to the semi-coded nature of these dichotomous scales, the resultant range for the personality index factor extends from a minimum of 0 to a maximum of 48.
+df_MMPI_dico = pd.DataFrame(df, columns=["M2a_dico" ,"ASP_dico" ,"R_dico" ,"CYN_dico" ,"BIM_dico" ,"PA_dico" "AAS_dico" ,"tcent_dico" ,"OBS_dico" ,"MDS_dico" ,"TPA_dico" ,"BIZ_dico" ,"ANG_dico" ,"DEP_dico" , "K_dico" ,"SOD_dico" ,"D_dico" ,"D1_dico" ,"D2_dico" ,"D3_dico" ,"D4_dico" ,"D5_dico" ,"MF_dico" ,"DOE_dico" ,"PT_dico" ,"ANX_dico" ,"F_dico" ,"SC_dico" ,"HEA_dico" ,"FP_dico" ,"HS_dico" ,"FAM_dico" ,"PD_dico" ,"ES_dico" ,"FCENT_dico" ,"WRK_dico" ,"HY_dico" ,"L_dico" ,"MA_dico" ,"SE_dico" ,"RT_dico" ,"TRIN_dico" ,"VRIN_dico" ,"CR_dico" ,"RS","Personality_Disqualification_Dico"])
+#for x in df_MMPI_dico.columns:
+#    if isinstance(MMPI_dico_scales_Corr[x].iat[0],object):
+#        MMPI_dico_scales_Corr[x]=MMPI_dico_scales_Corr[x].astype(float)
+df=df.astype({"M2a_dico":'float',"ASP_dico":'float',"R_dico":'float',"CYN_dico":'float',"BIM_dico":'float',"PA_dico":'float',"AAS_dico":'float',"tcent_dico":'float',"OBS_dico":'float',"MDS_dico":'float',"TPA_dico":'float',"BIZ_dico":'float',"ANG_dico":'float',"DEP_dico":'float',"K_dico":'float',"SOD_dico":'float',"D_dico":'float',"D1_dico":'float',"D2_dico":'float',"D3_dico":'float',"D4_dico":'float',"D5_dico":'float',"MF_dico":'float',"DOE_dico":'float',"PT_dico":'float',"ANX_dico":'float',"F_dico":'float',"SC_dico":'float',"HEA_dico":'float',"FP_dico":'float',"HS_dico":'float',"FAM_dico":'float',"PD_dico":'float',"ES_dico":'float',"FCENT_dico":'float',"WRK_dico":'float',"HY_dico":'float',"L_dico":'float',"MA_dico":'float',"SE_dico":'float',"RT_dico":'float',"TRIN_dico":'float',"VRIN_dico":'float',"CR_dico":'float',"RS_dico":'float'})
+df['Personal_elevations_index'] = df.HEA_dico + df.PD_dico  + df.PT_dico  + df.ANG_dico  + df.HS_dico  + df.FAM_dico  + df.MDS_dico  + df.D4_dico  + df.DEP_dico  + df.D1_dico  + df.WRK_dico  + df.HY_dico  + df.SC_dico  + df.VRIN_dico  + df.OBS_dico
+df['Personal_elevations_index']. corr(df['Personality_Disqualification_Dico']).round(2)
+0.28
+---Solution 5 Summary---
+•	The Spearman correlation between the Personality elevations index of the dummies personality variables and personality disqualification was found to be 0.28.
+•	It is evident that the strength of the relationship between the Personality elevations index and personality disqualification (0.28) only negligibly high compare the strength of the relationship between a simple averaging of the personality scales (with a correlation of 0.15 or higher) and the target factor (0.27).
+solution 6 - Stepwise Logistic Reggression - Dummy Variables
+Stepwise regression is an iterative technique that evaluates the statistical significance of individual independent variables within a linear regression model. By employing this approach, the model is designed to consider only those predictors that make a distinct and exclusive contribution to the prediction.
+In accordance with this principle, among the 48 personality dummy variables within the MMPI-2 test, the model will streamline the presentation of personality dummy variables that possess a noteworthy and exclusive impact when forecasting personality disqualification. Simultaneously, any personality scales lacking a significant and unique role in predicting the foundational factor will be excluded from the model.
+Stepwise_MMPI_dico_scales = pd.DataFrame(df, columns=["M2a_dico","ASP_dico","R_dico","CYN_dico","BIM_dico","PA_dico","AAS_dico","tcent_dico","OBS_dico","MDS_dico","TPA_dico","BIZ_dico","ANG_dico","DEP_dico","K_dico","SOD_dico","D_dico","D1_dico","D2_dico","D3_dico","D4_dico","D5_dico","MF_dico","DOE_dico","PT_dico","ANX_dico","F_dico","SC_dico","HEA_dico","FP_dico","HS_dico","FAM_dico","PD_dico","ES_dico","FCENT_dico","WRK_dico","HY_dico","L_dico","MA_dico","SE_dico","RT_dico","TRIN_dico","VRIN_dico","CR_dico","RS_dico", "Personality_Disqualification_Dico"])
+# Define your features (X) and target variable (y)
+X = Stepwise_MMPI_dico_scales.drop(columns=['Personality_Disqualification_Dico'])
+y = Stepwise_MMPI_dico_scales['Personality_Disqualification_Dico']
+
+# Add a constant term to the features matrix
+X = sm.add_constant(X)
+
+# Perform logistic regression using stepwise method
+def stepwise_selection(X, y,
+                       initial_list=[],
+                       threshold_in=0.01,
+                       threshold_out=0.05,
+                       verbose=True):
+    included = list(initial_list)
+    while True:
+        changed = False
+        excluded = list(set(X.columns) - set(included))
+        new_pval = pd.Series(index=excluded)
+        for new_column in excluded:
+            model = sm.Logit(y, X[included + [new_column]]).fit(disp=False)
+            new_pval[new_column] = model.pvalues[new_column]
+        best_pval = new_pval.min()
+        if best_pval < threshold_in:
+            best_feature = new_pval.idxmin()
+            included.append(best_feature)
+            changed = True
+            if verbose:
+                print(f'Add {best_feature} with p-value {best_pval:.6f}')
+        model = sm.Logit(y, X[included]).fit(disp=False)
+        pvalues = model.pvalues.iloc[1:]
+        worst_pval = pvalues.max()
+        if worst_pval > threshold_out:
+            changed = True
+            worst_feature = pvalues.idxmax()
+            included.remove(worst_feature)
+            if verbose:
+                print(f'Drop {worst_feature} with p-value {worst_pval:.6f}')
+        if not changed:
+            break
+    return included
+
+selected_features = stepwise_selection(X, y)
+print("Selected features:", selected_features)
+
+# Fit the logistic regression model using the selected features
+final_model = sm.Logit(y, X[selected_features]).fit()
+
+# Print summary of the final model
+print(final_model.summary())
+
+# Make predictions on the same dataset
+y_pred = final_model.predict(X[selected_features])
+
+# Evaluate the model (e.g., calculate accuracy, ROC curve, etc.)
+Add const with p-value 0.000000
+Add PD_dico with p-value 0.000000
+Add PT_dico with p-value 0.000000
+Add ASP_dico with p-value 0.000003
+Add HS_dico with p-value 0.000019
+Add VRIN_dico with p-value 0.001444
+Add K_dico with p-value 0.006809
+Selected features: ['const', 'PD_dico', 'PT_dico', 'ASP_dico', 'HS_dico', 'VRIN_dico', 'K_dico']
+Optimization terminated successfully.
+         Current function value: 0.277387
+         Iterations 7
+                                   Logit Regression Results                                  
+=============================================================================================
+Dep. Variable:     Personality_Disqualification_Dico   No. Observations:                 2300
+Model:                                         Logit   Df Residuals:                     2293
+Method:                                          MLE   Df Model:                            6
+Date:                               Wed, 30 Aug 2023   Pseudo R-squ.:                 0.09511
+Time:                                       01:11:28   Log-Likelihood:                -637.99
+converged:                                      True   LL-Null:                       -705.05
+Covariance Type:                           nonrobust   LLR p-value:                 1.745e-26
+==============================================================================
+                 coef    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+const         -2.5983      0.111    -23.514      0.000      -2.815      -2.382
+PD_dico        1.1543      0.250      4.617      0.000       0.664       1.644
+PT_dico        1.2741      0.292      4.371      0.000       0.703       1.845
+ASP_dico       1.2026      0.314      3.829      0.000       0.587       1.818
+HS_dico        0.7589      0.173      4.385      0.000       0.420       1.098
+VRIN_dico      0.6199      0.239      2.590      0.010       0.151       1.089
+K_dico        -0.4634      0.171     -2.706      0.007      -0.799      -0.128
+==============================================================================
+---Solution 6 Summary---
+•	The analysis outcomes indicate that the model development concluded following the seventh iteration. Within this specific iteration, only six personality scales were incorporated, collectively accounting for 9.5% of the variance associated with personality rejection (with a multiple correlation of 0.31).
+•	In essence, among the complete set of 48 dummy personality variables, the outcomes of the multiple logistic regression utilizing the Stepwise approach highlight that solely six personality scales yield a distinctive and individualized influence when projecting personality disqualification. In detail, the results of the stepwise logistic regression employing the same method reveal six dummy personality variables that deliver a noteworthy and unique impact when predicting the target factor: PD_dico, PT_dico, ASP_dico, HS_dico, VRIN_dico, K_dico
+solution 7 - Dummy Composite Measure
+df['dummy_composite_measure'] = df.PD_dico * 1.1543 + df.PT_dico * 1.2741 + df.ASP_dico * 1.2741 + df.HS_dico * 0.7589 + df.VRIN_dico * 0.6199 + df.K_dico * -0.4634
+df['dummy_composite_measure']. corr(df['Personality_Disqualification_Dico']).round(2)
+0.29
+---Solution 7 Summary---
+•	The Spearman correlation between the composite index of the dummy personality scales and personality disqualification was determined to be 0.29.
+•	It is apparent that the magnitude of the association between the composite dummy index and personality disqualification (0.29) is only marginally higher compared to the relationship observed between a basic average of the personality scales (with a correlation of 0.15 or greater) and the target factor.
+6. Identifing the best solution
+Initially, our focus will be on determining which of the solutions offers an exclusive predictive contribution to personality disqualification, surpassing the impact of solution 1. The foundation for this comparison lies in solution 1, which relies on a straightforward averaging approach across all continuous personality factors. Solution 1 was selected as the baseline against which the distinct influences of different weighting strategies are evaluated, given that averaging represents the fundamental and simplest method for assigning weights to the personality scales.
+Additional contribution of solution 2 - PCA-based weighting
+solutions_contribution = pd.DataFrame(df, columns=['dummy_composite_measure', 'PD_dico', 'PT_dico', 'ASP_dico', 'HS_dico', 'VRIN_dico', 'K_dico', 'Personal_elevations_index','num_composite_measure', 'FAM', 'PD', 'DEP', 'MF', 'MMPI_factor_group_C', 'MMPI_factor_group_B', 'MMPI_factor_group_A', 'MMPI_Numeric_mean__Above_0_15_corr', 'Personality_Disqualification_Dico'])
+# Separate features (x) and target (y)
+x = df[solutions_contribution.columns[solutions_contribution.columns.isin(['MMPI_Numeric_mean__Above_0_15_corr'])]]
+y = df['Personality_Disqualification_Dico']
+
+# Add constant term to the features
+x = sm.add_constant(x)
+
+# Fit the initial logistic regression model
+model = sm.Logit(y, x)
+result = model.fit(method='newton', max_iter=100)
+
+# Calculate the initial percentage of variance explained
+initial_var_explained = 1 - (result.llf / result.llnull)
+
+# Calculate the initial likelihood ratio test statistic (Chisq)
+initial_lrtest_stat = result.llr
+
+# Add new predictors to the model
+new_predictors = ['MMPI_factor_group_A', 'MMPI_factor_group_B', 'MMPI_factor_group_C']
+new_x = x.copy()  # Make a copy of the original feature matrix
+new_x[new_predictors] = solutions_contribution[new_predictors]  # Replace 'new_predictors' with your actual new predictors
+
+# Fit the new logistic regression model with additional predictors
+new_model = sm.Logit(y, new_x)
+new_result = new_model.fit(method='newton', max_iter=100)
+
+# Calculate the new percentage of variance explained
+new_var_explained = 1 - (new_result.llf / new_result.llnull)
+
+# Calculate the likelihood ratio test statistic (Chisq) for the new model
+new_lrtest_stat = new_result.llr
+
+# Calculate the difference in the percentage of variance explained
+variance_explained_diff = new_var_explained - initial_var_explained
+
+# Perform the likelihood ratio test to calculate the Chisq difference
+chisq_diff = new_lrtest_stat - initial_lrtest_stat
+
+# Calculate the p-value from the likelihood ratio test
+p_value = 1 - chi2.cdf(chisq_diff, df=3)  # 3 is the degrees of freedom for the difference
+
+print("Initial Variance Explained:", initial_var_explained)
+print("New Variance Explained:", new_var_explained)
+print("Initial Likelihood Ratio Test Statistic:", initial_lrtest_stat)
+print("New Likelihood Ratio Test Statistic:", new_lrtest_stat)
+print("Chisq Difference:", chisq_diff)
+print("Difference in Variance Explained:", variance_explained_diff)
+print("P-value for Difference:", p_value)
+Optimization terminated successfully.
+         Current function value: 0.279146
+         Iterations 7
+Optimization terminated successfully.
+         Current function value: 0.278609
+         Iterations 7
+Initial Variance Explained: 0.08937428481417786
+New Variance Explained: 0.0911249984396294
+Initial Likelihood Ratio Test Statistic: 126.02655521402585
+New Likelihood Ratio Test Statistic: 128.49523407216338
+Chisq Difference: 2.4686788581375367
+Difference in Variance Explained: 0.0017507136254515387
+P-value for Difference: 0.4809781171764159
+The above analysis shows that solution 2 based on PCA results does not have a significant contribution to the percentage of variance explained by personality disqualification, beyond the solution based on a simple averaging between the continuous personality scales.
+Additional contribution of solution 3 - Stepwise logistic regression numerics
+# Add new predictors to the model
+new_predictors = ['FAM', 'PD', 'DEP', 'MF']
+new_x = x.copy()  # Make a copy of the original feature matrix
+new_x[new_predictors] = solutions_contribution[new_predictors]  # Replace 'new_predictors' with your actual new predictors
+
+# Fit the new logistic regression model with additional predictors
+new_model = sm.Logit(y, new_x)
+new_result = new_model.fit(method='newton', max_iter=100)
+
+# Calculate the new percentage of variance explained
+new_var_explained = 1 - (new_result.llf / new_result.llnull)
+
+# Calculate the likelihood ratio test statistic (Chisq) for the new model
+new_lrtest_stat = new_result.llr
+
+# Calculate the difference in the percentage of variance explained
+variance_explained_diff = new_var_explained - initial_var_explained
+
+# Perform the likelihood ratio test to calculate the Chisq difference
+chisq_diff = new_lrtest_stat - initial_lrtest_stat
+
+# Calculate the p-value from the likelihood ratio test
+p_value = 1 - chi2.cdf(chisq_diff, df=3)  # 3 is the degrees of freedom for the difference
+
+print("Initial Variance Explained:", initial_var_explained)
+print("New Variance Explained:", new_var_explained)
+print("Initial Likelihood Ratio Test Statistic:", initial_lrtest_stat)
+print("New Likelihood Ratio Test Statistic:", new_lrtest_stat)
+print("Chisq Difference:", chisq_diff)
+print("Difference in Variance Explained:", variance_explained_diff)
+print("P-value for Difference:", p_value)
+Optimization terminated successfully.
+         Current function value: 0.274832
+         Iterations 7
+Initial Variance Explained: 0.08937428481417786
+New Variance Explained: 0.10344677190995966
+Initial Likelihood Ratio Test Statistic: 126.02655521402585
+New Likelihood Ratio Test Statistic: 145.87014977439185
+Chisq Difference: 19.843594560366
+Difference in Variance Explained: 0.014072487095781794
+P-value for Difference: 0.0001828935372508722
+The above analysis shows that solution 3 based on stepwise logistic regression has a significant contribution to the percentage of variance explained by personality rejection, beyond the solution based on simple averaging between the continuous personality scales (in particular, an increase from 8.9% to 10.3% in the explained variance of the target factor).
+Additional contribution of solution 4 - Numeric composite measure
+# Add new predictors to the model
+new_predictors = ['num_composite_measure']
+new_x = x.copy()  # Make a copy of the original feature matrix
+new_x[new_predictors] = solutions_contribution[new_predictors]  # Replace 'new_predictors' with your actual new predictors
+
+# Fit the new logistic regression model with additional predictors
+new_model = sm.Logit(y, new_x)
+new_result = new_model.fit(method='newton', max_iter=100)
+
+# Calculate the new percentage of variance explained
+new_var_explained = 1 - (new_result.llf / new_result.llnull)
+
+# Calculate the likelihood ratio test statistic (Chisq) for the new model
+new_lrtest_stat = new_result.llr
+
+# Calculate the difference in the percentage of variance explained
+variance_explained_diff = new_var_explained - initial_var_explained
+
+# Perform the likelihood ratio test to calculate the Chisq difference
+chisq_diff = new_lrtest_stat - initial_lrtest_stat
+
+# Calculate the p-value from the likelihood ratio test
+p_value = 1 - chi2.cdf(chisq_diff, df=3)  # 3 is the degrees of freedom for the difference
+
+print("Initial Variance Explained:", initial_var_explained)
+print("New Variance Explained:", new_var_explained)
+print("Initial Likelihood Ratio Test Statistic:", initial_lrtest_stat)
+print("New Likelihood Ratio Test Statistic:", new_lrtest_stat)
+print("Chisq Difference:", chisq_diff)
+print("Difference in Variance Explained:", variance_explained_diff)
+print("P-value for Difference:", p_value)
+Optimization terminated successfully.
+         Current function value: 0.275737
+         Iterations 7
+Initial Variance Explained: 0.08937428481417786
+New Variance Explained: 0.10049429486784156
+Initial Likelihood Ratio Test Statistic: 126.02655521402585
+New Likelihood Ratio Test Statistic: 141.70686598711154
+Chisq Difference: 15.680310773085694
+Difference in Variance Explained: 0.011120010053663698
+P-value for Difference: 0.001318602185475637
+The above analysis shows that solution 4 based on the Numeric composite measure has a significant contribution to the percentage of variance explained by personality rejection, beyond the solution based on a simple averaging between the continuous personality scales (in particular, an increase from 8.9% to 10% in the explained variance of the target factor). That is, the change in the percentage of variance explained is indeed high, but relatively small in size.
+Additional contribution of solution 5 - Personal elevations index
+# Add new predictors to the model
+new_predictors = ['Personal_elevations_index']
+new_x = x.copy()  # Make a copy of the original feature matrix
+new_x[new_predictors] = solutions_contribution[new_predictors]  # Replace 'new_predictors' with your actual new predictors
+
+# Fit the new logistic regression model with additional predictors
+new_model = sm.Logit(y, new_x)
+new_result = new_model.fit(method='newton', max_iter=100)
+
+# Calculate the new percentage of variance explained
+new_var_explained = 1 - (new_result.llf / new_result.llnull)
+
+# Calculate the likelihood ratio test statistic (Chisq) for the new model
+new_lrtest_stat = new_result.llr
+
+# Calculate the difference in the percentage of variance explained
+variance_explained_diff = new_var_explained - initial_var_explained
+
+# Perform the likelihood ratio test to calculate the Chisq difference
+chisq_diff = new_lrtest_stat - initial_lrtest_stat
+
+# Calculate the p-value from the likelihood ratio test
+p_value = 1 - chi2.cdf(chisq_diff, df=3)  # 3 is the degrees of freedom for the difference
+
+print("Initial Variance Explained:", initial_var_explained)
+print("New Variance Explained:", new_var_explained)
+print("Initial Likelihood Ratio Test Statistic:", initial_lrtest_stat)
+print("New Likelihood Ratio Test Statistic:", new_lrtest_stat)
+print("Chisq Difference:", chisq_diff)
+print("Difference in Variance Explained:", variance_explained_diff)
+print("P-value for Difference:", p_value)
+Optimization terminated successfully.
+         Current function value: 0.277363
+         Iterations 7
+Initial Variance Explained: 0.08937428481417786
+New Variance Explained: 0.09519143846500477
+Initial Likelihood Ratio Test Statistic: 126.02655521402585
+New Likelihood Ratio Test Statistic: 134.22931551905845
+Chisq Difference: 8.202760305032598
+Difference in Variance Explained: 0.005817153650826912
+P-value for Difference: 0.0420019548742222
+The above analysis shows that solution 5 based on the Personal elevations index has a significant contribution to the percentage of variance explained by personality rejection, beyond the solution based on a simple averaging between the continuous personality scales (in particular, an increase from 8.9% to 9.5% in the explained variance of the target factor). That is, the change in the percentage of variance explained is indeed high, but of negligible size.
+Additional contribution of solution 6 - Stepwise logistic regression dummies
+# Add new predictors to the model
+new_predictors = ['PD_dico', 'PT_dico', 'ASP_dico', 'HS_dico', 'VRIN_dico', 'K_dico']
+new_x = x.copy()  # Make a copy of the original feature matrix
+new_x[new_predictors] = solutions_contribution[new_predictors]  # Replace 'new_predictors' with your actual new predictors
+
+# Fit the new logistic regression model with additional predictors
+new_model = sm.Logit(y, new_x)
+new_result = new_model.fit(method='newton', max_iter=100)
+
+# Calculate the new percentage of variance explained
+new_var_explained = 1 - (new_result.llf / new_result.llnull)
+
+# Calculate the likelihood ratio test statistic (Chisq) for the new model
+new_lrtest_stat = new_result.llr
+
+# Calculate the difference in the percentage of variance explained
+variance_explained_diff = new_var_explained - initial_var_explained
+
+# Perform the likelihood ratio test to calculate the Chisq difference
+chisq_diff = new_lrtest_stat - initial_lrtest_stat
+
+# Calculate the p-value from the likelihood ratio test
+p_value = 1 - chi2.cdf(chisq_diff, df=3)  # 3 is the degrees of freedom for the difference
+
+print("Initial Variance Explained:", initial_var_explained)
+print("New Variance Explained:", new_var_explained)
+print("Initial Likelihood Ratio Test Statistic:", initial_lrtest_stat)
+print("New Likelihood Ratio Test Statistic:", new_lrtest_stat)
+print("Chisq Difference:", chisq_diff)
+print("Difference in Variance Explained:", variance_explained_diff)
+print("P-value for Difference:", p_value)
+Optimization terminated successfully.
+         Current function value: 0.273423
+         Iterations 7
+Initial Variance Explained: 0.08937428481417786
+New Variance Explained: 0.10804565487916151
+Initial Likelihood Ratio Test Statistic: 126.02655521402585
+New Likelihood Ratio Test Statistic: 152.35502827882965
+Chisq Difference: 26.328473064803802
+Difference in Variance Explained: 0.01867137006498365
+P-value for Difference: 8.14032437934653e-06
+The above analysis shows that solution 6 based on stepwise logistic regression dummies has a significant contribution to the percentage of variance explained by personality rejection, beyond the solution based on simple averaging between the continuous personality scales (in particular, an increase from 8.9% to 10.8% in the explained variance of the target factor).
+Additional contribution of solution 7 - Dummy composite measure
+# Add new predictors to the model
+new_predictors = ['dummy_composite_measure']
+new_x = x.copy()  # Make a copy of the original feature matrix
+new_x[new_predictors] = solutions_contribution[new_predictors]  # Replace 'new_predictors' with your actual new predictors
+
+# Fit the new logistic regression model with additional predictors
+new_model = sm.Logit(y, new_x)
+new_result = new_model.fit(method='newton', max_iter=100)
+
+# Calculate the new percentage of variance explained
+new_var_explained = 1 - (new_result.llf / new_result.llnull)
+
+# Calculate the likelihood ratio test statistic (Chisq) for the new model
+new_lrtest_stat = new_result.llr
+
+# Calculate the difference in the percentage of variance explained
+variance_explained_diff = new_var_explained - initial_var_explained
+
+# Perform the likelihood ratio test to calculate the Chisq difference
+chisq_diff = new_lrtest_stat - initial_lrtest_stat
+
+# Calculate the p-value from the likelihood ratio test
+p_value = 1 - chi2.cdf(chisq_diff, df=3)  # 3 is the degrees of freedom for the difference
+
+print("Initial Variance Explained:", initial_var_explained)
+print("New Variance Explained:", new_var_explained)
+print("Initial Likelihood Ratio Test Statistic:", initial_lrtest_stat)
+print("New Likelihood Ratio Test Statistic:", new_lrtest_stat)
+print("Chisq Difference:", chisq_diff)
+print("Difference in Variance Explained:", variance_explained_diff)
+print("P-value for Difference:", p_value)
+Optimization terminated successfully.
+         Current function value: 0.273832
+         Iterations 7
+Initial Variance Explained: 0.08937428481417786
+New Variance Explained: 0.10670862739206144
+Initial Likelihood Ratio Test Statistic: 126.02655521402585
+New Likelihood Ratio Test Statistic: 150.46968767133808
+Chisq Difference: 24.44313245731223
+Difference in Variance Explained: 0.017334342577883577
+P-value for Difference: 2.0185827660501587e-05
+The above analysis shows that solution 7 based on the Dummy composite measure has a significant contribution to the percentage of variance explained by personality rejection, beyond the solution based on simple averaging between the continuous personality scales (in particular, an increase from 8.9% to 10.6% in the explained variance of the target factor).
+Multiple logistic regression using the stepwise method
+Unlike the previous analyses, in the analysis below we will examine the relative unique contribution of all the solutions in predicting personality disqualification, while neutralizing the common contribution between them. The stepwise method will make it possible to identify the weighting solutions that have a significant unique contribution in predicting personality disqualification, and at the same time, solutions whose contribution to the model is not significant will remain outside the model.
+x = solutions_contribution[solutions_contribution.columns[~solutions_contribution.columns.isin(['Personality_Disqualification_Dico', 'MMPI_Numeric_mean__Above_0_15_corr'])]]
+y = solutions_contribution['Personality_Disqualification_Dico']
+x = sm.add_constant(x);
+model = sm.Logit(y, x)
+result = model.fit();
+Warning: Maximum number of iterations has been exceeded.
+         Current function value: 0.270097
+         Iterations: 35
+result.summary()
+<class 'statsmodels.iolib.summary.Summary'>
+"""
+                                   Logit Regression Results                                  
+=============================================================================================
+Dep. Variable:     Personality_Disqualification_Dico   No. Observations:                 2300
+Model:                                         Logit   Df Residuals:                     2284
+Method:                                          MLE   Df Model:                           15
+Date:                               Wed, 30 Aug 2023   Pseudo R-squ.:                  0.1189
+Time:                                       01:11:28   Log-Likelihood:                -621.22
+converged:                                     False   LL-Null:                       -705.05
+Covariance Type:                           nonrobust   LLR p-value:                 7.224e-28
+=============================================================================================
+                                coef    std err          z      P>|z|      [0.025      0.975]
+---------------------------------------------------------------------------------------------
+const                        -5.2850      1.565     -3.377      0.001      -8.352      -2.218
+dummy_composite_measure       0.4706   9.77e+06   4.82e-08      1.000   -1.92e+07    1.92e+07
+PD_dico                      -0.1403   1.13e+07  -1.24e-08      1.000   -2.21e+07    2.21e+07
+PT_dico                       0.3012   1.24e+07   2.42e-08      1.000   -2.44e+07    2.44e+07
+ASP_dico                      0.1053   1.24e+07   8.47e-09      1.000   -2.44e+07    2.44e+07
+HS_dico                       0.1770   7.44e+06   2.38e-08      1.000   -1.46e+07    1.46e+07
+VRIN_dico                    -0.0023   6.07e+06  -3.85e-10      1.000   -1.19e+07    1.19e+07
+K_dico                        0.0394   4.52e+06   8.72e-09      1.000   -8.86e+06    8.86e+06
+Personal_elevations_index     0.0284      0.095      0.299      0.765      -0.158       0.215
+num_composite_measure         0.0035        nan        nan        nan         nan         nan
+FAM                           0.0101        nan        nan        nan         nan         nan
+PD                            0.0357        nan        nan        nan         nan         nan
+DEP                           0.0168        nan        nan        nan         nan         nan
+MF                           -0.0268        nan        nan        nan         nan         nan
+MMPI_factor_group_C           0.0197      0.019      1.060      0.289      -0.017       0.056
+MMPI_factor_group_B          -0.0241      0.019     -1.260      0.208      -0.062       0.013
+MMPI_factor_group_A           0.0240      0.027      0.896      0.370      -0.028       0.076
+=============================================================================================
+"""
+# Define your features (X) and target variable (y)
+X = solutions_contribution.drop(columns=['Personality_Disqualification_Dico'])
+y = solutions_contribution['Personality_Disqualification_Dico']
+
+# Add a constant term to the features matrix
+X = sm.add_constant(X)
+
+# Perform logistic regression using stepwise method
+def stepwise_selection(X, y,
+                       initial_list=[],
+                       threshold_in=0.01,
+                       threshold_out=0.05,
+                       verbose=True):
+    included = list(initial_list)
+    while True:
+        changed = False
+        excluded = list(set(X.columns) - set(included))
+        new_pval = pd.Series(index=excluded)
+        for new_column in excluded:
+            model = sm.Logit(y, X[included + [new_column]]).fit(disp=False)
+            new_pval[new_column] = model.pvalues[new_column]
+        best_pval = new_pval.min()
+        if best_pval < threshold_in:
+            best_feature = new_pval.idxmin()
+            included.append(best_feature)
+            changed = True
+            if verbose:
+                print(f'Add {best_feature} with p-value {best_pval:.6f}')
+        model = sm.Logit(y, X[included]).fit(disp=False)
+        pvalues = model.pvalues.iloc[1:]
+        worst_pval = pvalues.max()
+        if worst_pval > threshold_out:
+            changed = True
+            worst_feature = pvalues.idxmax()
+            included.remove(worst_feature)
+            if verbose:
+                print(f'Drop {worst_feature} with p-value {worst_pval:.6f}')
+        if not changed:
+            break
+    return included
+
+selected_features = stepwise_selection(X, y)
+print("Selected features:", selected_features)
+
+# Fit the logistic regression model using the selected features
+final_model = sm.Logit(y, X[selected_features]).fit()
+
+# Print summary of the final model
+print(final_model.summary())
+
+# Make predictions on the same dataset
+y_pred = final_model.predict(X[selected_features])
+
+# Evaluate the model (e.g., calculate accuracy, ROC curve, etc.)
+Add const with p-value 0.000000
+Add dummy_composite_measure with p-value 0.000000
+Add num_composite_measure with p-value 0.000000
+Selected features: ['const', 'dummy_composite_measure', 'num_composite_measure']
+Optimization terminated successfully.
+         Current function value: 0.271769
+         Iterations 7
+                                   Logit Regression Results                                  
+=============================================================================================
+Dep. Variable:     Personality_Disqualification_Dico   No. Observations:                 2300
+Model:                                         Logit   Df Residuals:                     2297
+Method:                                          MLE   Df Model:                            2
+Date:                               Wed, 30 Aug 2023   Pseudo R-squ.:                  0.1134
+Time:                                       01:11:28   Log-Likelihood:                -625.07
+converged:                                      True   LL-Null:                       -705.05
+Covariance Type:                           nonrobust   LLR p-value:                 1.839e-35
+===========================================================================================
+                              coef    std err          z      P>|z|      [0.025      0.975]
+-------------------------------------------------------------------------------------------
+const                      -5.5067      0.590     -9.334      0.000      -6.663      -4.350
+dummy_composite_measure     0.5668      0.118      4.792      0.000       0.335       0.799
+num_composite_measure       0.6065      0.120      5.075      0.000       0.372       0.841
+===========================================================================================
+The results of a logistic regression test using the stepwise method show two solutions that have a distinct and unique contribution in predicting personality disqualification - dummy_composite_measure and num_composite_measure. These two factors together explain 11.3% of the variance explained in personality rejection (multiple correlation - 0.34).
+In accordance with the findings of the aforementioned analysis, the rest of the solutions do not have a significant contribution to increasing the explained variance of the target factor. At the same time, it is important to take into account that this is an analysis based on logistic regression findings. It is quite possible that under the use of other models / test methods to examine the unique
+7. Creating Final List
+Final_engi_list = pd.DataFrame(df, columns=['id', 'Assessment_Center_Grade_missing', 'Morals_and_Values_Test','Job_Interview_Grade','Years_of_Education','Gender_Dico','Designated_Role_Border_fighters','Education_Level_Dico','Educational_Institution_Missing','Educational_Institution_college_other','Rovaee_Training_high','Rovaee_Training_Medium','Assessment_Center_Grade_medium','Filling_Instruction_Test_high','Filling_Instruction_Test_medium','Emotional_Inteligence_Test_high','age_very_high','Honesty_Test_no_missing','Heberew_Test_Grade_high_or_missing','Designated_Role_continuous','MMPI_Numeric_mean__Above_0_1_corr','MMPI_Numeric_mean__Above_0_15_corr','MMPI_factor_group_A','MMPI_factor_group_B','MMPI_factor_group_C','num_composite_measure' ,'dummy_composite_measure','Personal_elevations_index', 'FAM', 'PD', 'DEP', 'MF', 'PD_dico', 'PT_dico', 'ASP_dico', 'HS_dico', 'VRIN_dico', 'K_dico', 'Personality_Disqualification_Dico'])
+for col in Final_engi_list:
+    if col in Final_engi_list.columns:
+        Final_engi_list[col] = Final_engi_list[col].astype(np.float64)
+Final_engi_list.head()
+       id  Assessment_Center_Grade_missing  Morals_and_Values_Test  \
+0   540.0                              0.0                     4.0   
+1  1128.0                              0.0                     1.0   
+2   604.0                              0.0                     1.0   
+3   605.0                              0.0                     2.0   
+4   536.0                              0.0                     5.0   
+
+   Job_Interview_Grade  Years_of_Education  Gender_Dico  \
+0                  4.0                15.0          1.0   
+1                  4.0                12.0          0.0   
+2                  5.0                13.0          1.0   
+3                  5.0                12.0          0.0   
+4                  5.0                17.0          0.0   
+
+   Designated_Role_Border_fighters  Education_Level_Dico  \
+0                              0.0                   0.0   
+1                              0.0                   0.0   
+2                              0.0                   0.0   
+3                              0.0                   0.0   
+4                              0.0                   0.0   
+
+   Educational_Institution_Missing  Educational_Institution_college_other  \
+0                              1.0                                    0.0   
+1                              1.0                                    0.0   
+2                              1.0                                    0.0   
+3                              1.0                                    0.0   
+4                              1.0                                    0.0   
+
+   ...    PD   DEP    MF  PD_dico  PT_dico  ASP_dico  HS_dico  VRIN_dico  \
+0  ...  64.0  41.0  44.0      0.0      0.0       0.0      0.0        0.0   
+1  ...  45.0  50.0  47.0      0.0      0.0       0.0      0.0        0.0   
+2  ...  46.0  36.0  48.0      0.0      0.0       0.0      0.0        0.0   
+3  ...  49.0  34.0  57.0      0.0      0.0       0.0      0.0        0.0   
+4  ...  47.0  39.0  67.0      0.0      0.0       0.0      0.0        0.0   
+
+   K_dico  Personality_Disqualification_Dico  
+0     0.0                                0.0  
+1     0.0                                0.0  
+2     1.0                                0.0  
+3     1.0                                0.0  
+4     0.0                                0.0  
+
+[5 rows x 39 columns]
+Final_engi_list[Final_engi_list.columns[1:]].corr(method='spearman')['Personality_Disqualification_Dico'].sort_values(ascending=False)
+Personality_Disqualification_Dico        1.000000
+Designated_Role_Border_fighters          0.268504
+Assessment_Center_Grade_missing          0.253652
+Designated_Role_continuous               0.237875
+num_composite_measure                    0.222035
+MMPI_Numeric_mean__Above_0_15_corr       0.216379
+Personal_elevations_index                0.212724
+dummy_composite_measure                  0.201892
+MMPI_Numeric_mean__Above_0_1_corr        0.199291
+PT_dico                                  0.193513
+PD_dico                                  0.186076
+FAM                                      0.178317
+MMPI_factor_group_C                      0.175364
+DEP                                      0.169507
+Emotional_Inteligence_Test_high          0.165946
+MMPI_factor_group_A                      0.154674
+PD                                       0.152188
+Morals_and_Values_Test                   0.149527
+ASP_dico                                 0.146429
+VRIN_dico                                0.132263
+MMPI_factor_group_B                      0.127595
+Gender_Dico                              0.123984
+HS_dico                                  0.123598
+Rovaee_Training_high                     0.102857
+Heberew_Test_Grade_high_or_missing       0.079700
+Educational_Institution_Missing          0.071931
+age_very_high                            0.059686
+Filling_Instruction_Test_high            0.040104
+Honesty_Test_no_missing                  0.039406
+Education_Level_Dico                     0.026073
+Rovaee_Training_Medium                   0.018937
+Educational_Institution_college_other   -0.060704
+MF                                      -0.068613
+K_dico                                  -0.070554
+Filling_Instruction_Test_medium         -0.082397
+Years_of_Education                      -0.113056
+Assessment_Center_Grade_medium          -0.141615
+Job_Interview_Grade                     -0.192547
+Name: Personality_Disqualification_Dico, dtype: float64
+8.1 Data Standatization
+#for column in Final_engi_list.columns:
+#    Final_engi_list[column] = Final_engi_list[column]  / Final_engi_list[column].abs().max()
+#Final_engi_list[Final_engi_list.columns[1:]].corr()['Personality_Disqualification_Dico'].sort_values(ascending=False)
+8.2 Data to z-scores
+from scipy.stats import zscore
+Final_engi_list = Final_engi_list.apply(zscore)
+Final_engi_list.head
+<bound method NDFrame.head of             id  Assessment_Center_Grade_missing  Morals_and_Values_Test  \
+0    -0.919493                        -0.867784                0.747435   
+1    -0.033888                        -0.867784               -0.668628   
+2    -0.823101                        -0.867784               -0.668628   
+3    -0.821595                        -0.867784               -0.196607   
+4    -0.925518                        -0.867784                1.219457   
+...        ...                              ...                     ...   
+2295 -0.603206                         1.152361               -0.668628   
+2296 -0.219142                         1.152361               -0.196607   
+2297  0.505307                         1.152361               -0.668628   
+2298  0.204081                         1.152361               -0.668628   
+2299  0.380298                         1.152361               -0.196607   
+
+      Job_Interview_Grade  Years_of_Education  Gender_Dico  \
+0               -0.115481            1.156402     0.763500   
+1               -0.115481           -0.542379    -1.309758   
+2                1.587119            0.023881     0.763500   
+3                1.587119           -0.542379    -1.309758   
+4                1.587119            2.288923    -1.309758   
+...                   ...                 ...          ...   
+2295             1.587119           -0.542379     0.763500   
+2296            -0.115481           -0.542379     0.763500   
+2297            -0.115481           -0.542379     0.763500   
+2298             1.587119            0.590142    -1.309758   
+2299            -0.115481           -0.542379     0.763500   
+
+      Designated_Role_Border_fighters  Education_Level_Dico  \
+0                           -0.493197             -0.506107   
+1                           -0.493197             -0.506107   
+2                           -0.493197             -0.506107   
+3                           -0.493197             -0.506107   
+4                           -0.493197             -0.506107   
+...                               ...                   ...   
+2295                        -0.493197             -0.506107   
+2296                        -0.493197             -0.506107   
+2297                        -0.493197             -0.506107   
+2298                        -0.493197             -0.506107   
+2299                        -0.493197             -0.506107   
+
+      Educational_Institution_Missing  Educational_Institution_college_other  \
+0                            1.177239                              -1.137155   
+1                            1.177239                              -1.137155   
+2                            1.177239                              -1.137155   
+3                            1.177239                              -1.137155   
+4                            1.177239                              -1.137155   
+...                               ...                                    ...   
+2295                         1.177239                              -1.137155   
+2296                        -0.849445                               0.879388   
+2297                         1.177239                              -1.137155   
+2298                         1.177239                              -1.137155   
+2299                         1.177239                              -1.137155   
+
+      ...        PD       DEP        MF   PD_dico   PT_dico  ASP_dico  \
+0     ...  1.689679 -0.361015 -0.770431 -0.216523 -0.174545 -0.163663   
+1     ... -0.930025  1.159434 -0.452945 -0.216523 -0.174545 -0.163663   
+2     ... -0.792146 -1.205708 -0.347117 -0.216523 -0.174545 -0.163663   
+3     ... -0.378508 -1.543585  0.605338 -0.216523 -0.174545 -0.163663   
+4     ... -0.654267 -0.698892  1.663622 -0.216523 -0.174545 -0.163663   
+...   ...       ...       ...       ...       ...       ...       ...   
+2295  ...  0.310888 -0.361015 -1.193744 -0.216523 -0.174545 -0.163663   
+2296  ... -0.240629 -0.361015 -1.193744 -0.216523 -0.174545 -0.163663   
+2297  ... -1.067904 -0.361015 -1.193744 -0.216523 -0.174545 -0.163663   
+2298  ...  0.173008 -0.698892  1.451965 -0.216523 -0.174545 -0.163663   
+2299  ... -0.516388  0.314740 -1.828714 -0.216523 -0.174545 -0.163663   
+
+       HS_dico  VRIN_dico    K_dico  Personality_Disqualification_Dico  
+0    -0.488423  -0.255554 -0.838119                          -0.317813  
+1    -0.488423  -0.255554 -0.838119                          -0.317813  
+2    -0.488423  -0.255554  1.193149                          -0.317813  
+3    -0.488423  -0.255554  1.193149                          -0.317813  
+4    -0.488423  -0.255554 -0.838119                          -0.317813  
+...        ...        ...       ...                                ...  
+2295 -0.488423  -0.255554 -0.838119                          -0.317813  
+2296 -0.488423  -0.255554  1.193149                           3.146502  
+2297 -0.488423  -0.255554 -0.838119                           3.146502  
+2298 -0.488423  -0.255554  1.193149                          -0.317813  
+2299 -0.488423  -0.255554 -0.838119                          -0.317813  
+
+[2300 rows x 39 columns]>
+9. Added several potential interactions
+Final_engi_list['INT_No_Asses_Center_Morals_and_Values'] = Final_engi_list.Assessment_Center_Grade_missing * Final_engi_list.Morals_and_Values_Test
+Final_engi_list['INT_No_Asses_Center_Job_Interview_Grade'] = Final_engi_list.Assessment_Center_Grade_missing * Final_engi_list.Job_Interview_Grade
+Final_engi_list['INT_No_Asses_Center_Personal_elevations_index'] = Final_engi_list.Assessment_Center_Grade_missing * Final_engi_list.Personal_elevations_index
+Final_engi_list['INT_No_Asses_Center_composite_measure'] = Final_engi_list.Assessment_Center_Grade_missing * Final_engi_list.dummy_composite_measure
+Final_engi_list['INT_No_Asses_Center_MMPI_Numeric_0_15_above'] = Final_engi_list.Assessment_Center_Grade_missing * Final_engi_list.MMPI_Numeric_mean__Above_0_15_corr
+Final_engi_list['INT_No_Asses_Center_MMPI_Numeric_1_above'] = Final_engi_list.Assessment_Center_Grade_missing * Final_engi_list.MMPI_Numeric_mean__Above_0_1_corr
+Final_engi_list['INT_No_Asses_Center_age_very_high'] = Final_engi_list.Assessment_Center_Grade_missing * Final_engi_list.age_very_high
+Final_engi_list[Final_engi_list.columns[1:]].corr(method='spearman')['Personality_Disqualification_Dico'].sort_values(ascending=False)
+Personality_Disqualification_Dico                1.000000
+Designated_Role_Border_fighters                  0.268504
+Assessment_Center_Grade_missing                  0.253652
+Designated_Role_continuous                       0.237875
+num_composite_measure                            0.222035
+MMPI_Numeric_mean__Above_0_15_corr               0.216379
+Personal_elevations_index                        0.212724
+dummy_composite_measure                          0.201892
+MMPI_Numeric_mean__Above_0_1_corr                0.199291
+PT_dico                                          0.193513
+PD_dico                                          0.186076
+FAM                                              0.178317
+MMPI_factor_group_C                              0.175364
+DEP                                              0.169507
+Emotional_Inteligence_Test_high                  0.165946
+MMPI_factor_group_A                              0.154674
+PD                                               0.152188
+Morals_and_Values_Test                           0.149527
+ASP_dico                                         0.146429
+VRIN_dico                                        0.132263
+INT_No_Asses_Center_MMPI_Numeric_0_15_above      0.129341
+INT_No_Asses_Center_MMPI_Numeric_1_above         0.128760
+MMPI_factor_group_B                              0.127595
+Gender_Dico                                      0.123984
+HS_dico                                          0.123598
+INT_No_Asses_Center_composite_measure            0.110376
+Rovaee_Training_high                             0.102857
+INT_No_Asses_Center_age_very_high                0.102202
+INT_No_Asses_Center_Morals_and_Values            0.101222
+INT_No_Asses_Center_Personal_elevations_index    0.080470
+Heberew_Test_Grade_high_or_missing               0.079700
+Educational_Institution_Missing                  0.071931
+age_very_high                                    0.059686
+Filling_Instruction_Test_high                    0.040104
+Honesty_Test_no_missing                          0.039406
+Education_Level_Dico                             0.026073
+Rovaee_Training_Medium                           0.018937
+Educational_Institution_college_other           -0.060704
+MF                                              -0.068613
+K_dico                                          -0.070554
+Filling_Instruction_Test_medium                 -0.082397
+Years_of_Education                              -0.113056
+Assessment_Center_Grade_medium                  -0.141615
+Job_Interview_Grade                             -0.192547
+INT_No_Asses_Center_Job_Interview_Grade         -0.199445
+Name: Personality_Disqualification_Dico, dtype: float64
+10. Export to CSV
+Final_engi_list.head()
+         id  Assessment_Center_Grade_missing  Morals_and_Values_Test  \
+0 -0.919493                        -0.867784                0.747435   
+1 -0.033888                        -0.867784               -0.668628   
+2 -0.823101                        -0.867784               -0.668628   
+3 -0.821595                        -0.867784               -0.196607   
+4 -0.925518                        -0.867784                1.219457   
+
+   Job_Interview_Grade  Years_of_Education  Gender_Dico  \
+0            -0.115481            1.156402     0.763500   
+1            -0.115481           -0.542379    -1.309758   
+2             1.587119            0.023881     0.763500   
+3             1.587119           -0.542379    -1.309758   
+4             1.587119            2.288923    -1.309758   
+
+   Designated_Role_Border_fighters  Education_Level_Dico  \
+0                        -0.493197             -0.506107   
+1                        -0.493197             -0.506107   
+2                        -0.493197             -0.506107   
+3                        -0.493197             -0.506107   
+4                        -0.493197             -0.506107   
+
+   Educational_Institution_Missing  Educational_Institution_college_other  \
+0                         1.177239                              -1.137155   
+1                         1.177239                              -1.137155   
+2                         1.177239                              -1.137155   
+3                         1.177239                              -1.137155   
+4                         1.177239                              -1.137155   
+
+   ...  VRIN_dico    K_dico  Personality_Disqualification_Dico  \
+0  ...  -0.255554 -0.838119                          -0.317813   
+1  ...  -0.255554 -0.838119                          -0.317813   
+2  ...  -0.255554  1.193149                          -0.317813   
+3  ...  -0.255554  1.193149                          -0.317813   
+4  ...  -0.255554 -0.838119                          -0.317813   
+
+   INT_No_Asses_Center_Morals_and_Values  \
+0                              -0.648612   
+1                               0.580225   
+2                               0.580225   
+3                               0.170612   
+4                              -1.058225   
+
+   INT_No_Asses_Center_Job_Interview_Grade  \
+0                                 0.100212   
+1                                 0.100212   
+2                                -1.377276   
+3                                -1.377276   
+4                                -1.377276   
+
+   INT_No_Asses_Center_Personal_elevations_index  \
+0                                        0.42468   
+1                                        0.42468   
+2                                        0.42468   
+3                                        0.42468   
+4                                        0.42468   
+
+   INT_No_Asses_Center_composite_measure  \
+0                               0.151961   
+1                               0.151961   
+2                               0.761282   
+3                               0.761282   
+4                               0.151961   
+
+   INT_No_Asses_Center_MMPI_Numeric_0_15_above  \
+0                                     0.265652   
+1                                    -0.152028   
+2                                     0.783576   
+3                                     0.783576   
+4                                     0.098580   
+
+   INT_No_Asses_Center_MMPI_Numeric_1_above  INT_No_Asses_Center_age_very_high  
+0                                  0.240235                            0.69641  
+1                                 -0.523823                            0.69641  
+2                                  0.937530                            0.69641  
+3                                  0.841095                            0.69641  
+4                                  0.128964                            0.69641  
+
+[5 rows x 46 columns]
+Final_engi_list.to_csv('Final_df_after_engineer.csv')
+
