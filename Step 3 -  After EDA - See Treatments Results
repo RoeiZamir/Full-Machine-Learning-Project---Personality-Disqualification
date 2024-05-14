@@ -1,0 +1,1871 @@
+Final Project - EDA - After -Cleaning
+1. Import Packages
+#pip install missingno
+#pip install cloudinary
+#pip install openCV-python
+#pip install chart_studio
+#pip install researchpy
+import pandas as pd
+import numpy as np
+
+from scipy import stats
+from scipy.stats import chisquare
+from scipy.stats import chi2_contingency
+from scipy.stats import f_oneway
+from scipy.stats import kstest
+from scipy.stats import ks_2samp
+from scipy.stats import norm
+from scipy.stats import iqr
+
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
+from sklearn.preprocessing import LabelEncoder
+from sklearn.datasets import load_boston
+from sklearn import linear_model
+
+import matplotlib.pyplot as plt
+plt.style.use('classic')
+import seaborn as sns
+plt.style.use('seaborn')
+get_ipython().run_line_magic('matplotlib', 'inline')
+
+from ydata_profiling import ProfileReport
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+
+import chart_studio
+import re
+import cv2
+
+import missingno as msno
+import warnings
+warnings.filterwarnings("ignore")
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from statsmodels.tools.tools import add_constant
+
+#port csv
+#mport pyodbc
+#.read_sql_query
+
+import researchpy as rp
+import scipy.stats as stats
+
+import pandas as pd
+import numpy as np
+import scipy.stats as ss
+from math import log
+#pd.set_option('display.max_rows', None, 'display.max_columns', None)
+2. Import Data
+### Making list of missing value types
+
+missing_values = ["n/a", "na", "Null", "NaN", "isnull", "None", "?", "<N\A>", "9999"]
+df = pd.read_csv("C:/Users/Knowl/Desktop/Project/project_data_after_EDA/EDA_Final_data.csv", na_values = missing_values)
+df.head()
+   Unnamed: 0      id Population_Type_Dico Assessment_Center_Grade  \
+0           0   540.0                  0.0                     low   
+1           1  1128.0              missing                     low   
+2           2   604.0                  0.0                     low   
+3           3   605.0                  0.0                     low   
+4           4   536.0                  0.0                     low   
+
+   Cognitive_Ability_Test  Morals_and_Values_Test  Job_Interview_Grade  \
+0                     7.0                     4.0                  4.0   
+1                     6.0                     1.0                  4.0   
+2                     9.0                     1.0                  5.0   
+3                     6.0                     2.0                  5.0   
+4                     7.0                     5.0                  5.0   
+
+  Heberew_Test_Grade Filling_Instruction_Test Emotional_Inteligence_Test  ...  \
+0            missing                      low                   very low  ...   
+1           very low                  missing                       high  ...   
+2            missing                 very low                        low  ...   
+3            missing                   medium                        low  ...   
+4            missing                   medium                   very low  ...   
+
+  RT_dico  TRIN_dico VRIN_dico  CR_dico RS_dico  \
+0     0.0        0.0       0.0      0.0     0.0   
+1     0.0        0.0       0.0      0.0     0.0   
+2     0.0        0.0       0.0      0.0     0.0   
+3     0.0        1.0       0.0      0.0     0.0   
+4     0.0        0.0       0.0      0.0     0.0   
+
+   Personality_Disqualification_Dico         Designated_Role  Education_Level  \
+0                                0.0              prosecutor          missing   
+1                                0.0     operational officer          missing   
+2                                0.0  administrative officer          missing   
+3                                0.0  administrative officer          missing   
+4                                0.0              prosecutor          missing   
+
+   Educational_Institution  Rovaee_Training_Type  
+0                  missing               missing  
+1                  missing               missing  
+2                  missing               missing  
+3                  missing               missing  
+4                  missing              rovaee 3  
+
+[5 rows x 113 columns]
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 2300 entries, 0 to 2299
+Columns: 113 entries, Unnamed: 0 to Rovaee_Training_Type
+dtypes: float64(99), int64(2), object(12)
+memory usage: 2.0+ MB
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Part A - EDA exsaminitions
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+In this section, a diverse range of statistical analyses will be undertaken to explore the project data. The statistical analyses within this segment will serve decision-making purposes at different project stages, including data enrichment, feature selection, and the development of important models. Simultaneously, during this stage of the EDA analysis, the data itself will remain untouched within the data frame. The subsequent part of the EDA analysis encompasses the treatment phase, during which modifications will be applied to the data framework, among other actions, grounded in the findings from the EDA testing phase.
+3. Variables Measures Scales 
+### checking datatype before conversions
+df.dtypes
+Unnamed: 0                             int64
+id                                   float64
+Population_Type_Dico                  object
+Assessment_Center_Grade               object
+Cognitive_Ability_Test               float64
+                                      ...   
+Personality_Disqualification_Dico    float64
+Designated_Role                       object
+Education_Level                       object
+Educational_Institution               object
+Rovaee_Training_Type                  object
+Length: 113, dtype: object
+df2 = pd.DataFrame(df)
+#df2.round(1)
+Coding variables type as category
+df2 = df2.astype({"Designated_Role":'category', "Education_Level":'category', "Educational_Institution":'category', "Rovaee_Training_Type":'category',"Assessment_Center_Grade":'category', "Filling_Instruction_Test":'category', "Emotional_Inteligence_Test":'category', "Age":'category', "Commander_in_Army_Dico":'category', "Honesty_Test":'category', "Population_Type_Dico":'category', "Heberew_Test_Grade":'category'})
+Added to the list of categorical variables (variables converted to categorical in the framework of completing the missing data):
+Assessment_Center_Grade; Filling_Instruction_Test; Emotional_Intelligence_Test; Population_Type_Dico; Honesty_Test; Commander_in_Army_Dico; Age, Heberew_Test_Grade.
+*These variables will be coded later (so that the missing values will appear under a separate variable - value present / not present in the variable)
+Coding variables type as object
+df2=df2.astype({"Population_Type_Dico":'object',"Gender_Dico":'object',"Commander_in_Army_Dico":'object', "M2a_dico":'object',"ASP_dico":'object',"R_dico":'object',"CYN_dico":'object',"BIM_dico":'object',"PA_dico":'object',"AAS_dico":'object',"tcent_dico":'object',"OBS_dico":'object',"MDS_dico":'object',"TPA_dico":'object',"BIZ_dico":'object',"ANG_dico":'object',"DEP_dico":'object',"K_dico":'object',"SOD_dico":'object',"D_dico":'object',"D1_dico":'object',"D2_dico":'object',"D3_dico":'object',"D4_dico":'object',"D5_dico":'object',"MF_dico":'object',"DOE_dico":'object',"PT_dico":'object',"ANX_dico":'object',"F_dico":'object',"SC_dico":'object',"HEA_dico":'object',"FP_dico":'object',"HS_dico":'object',"FAM_dico":'object',"PD_dico":'object',"ES_dico":'object',"FCENT_dico":'object',"WRK_dico":'object',"HY_dico":'object',"L_dico":'object',"MA_dico":'object',"SE_dico":'object',"RT_dico":'object',"TRIN_dico":'object',"VRIN_dico":'object',"CR_dico":'object',"RS_dico":'object',"Honesty_Test":'object'})
+df2.dtypes
+Unnamed: 0                              int64
+id                                    float64
+Population_Type_Dico                   object
+Assessment_Center_Grade              category
+Cognitive_Ability_Test                float64
+                                       ...   
+Personality_Disqualification_Dico     float64
+Designated_Role                      category
+Education_Level                      category
+Educational_Institution              category
+Rovaee_Training_Type                 category
+Length: 113, dtype: object
+4. Data Frame structure
+4.1 project Shape, Columns and Categories Names
+df2.shape
+(2300, 113)
+The datafrme contains 113 variables and 2300 observations (The number of participants is the same as the number of participants before performing the EDA analysis).
+df2.columns
+Index(['Unnamed: 0', 'id', 'Population_Type_Dico', 'Assessment_Center_Grade',
+       'Cognitive_Ability_Test', 'Morals_and_Values_Test',
+       'Job_Interview_Grade', 'Heberew_Test_Grade', 'Filling_Instruction_Test',
+       'Emotional_Inteligence_Test',
+       ...
+       'RT_dico', 'TRIN_dico', 'VRIN_dico', 'CR_dico', 'RS_dico',
+       'Personality_Disqualification_Dico', 'Designated_Role',
+       'Education_Level', 'Educational_Institution', 'Rovaee_Training_Type'],
+      dtype='object', length=113)
+4.2 Duplicate values in dataframe
+print(df.duplicated().sum())
+0
+No duplications were found in the data frame
+5. Variables Groups - Numerical  Dummy  Categorical
+To ensure a convenient and intuitive representation of the analyses conducted within the EFA, the project variables were categorized into distinct data sets. This division of variables into separate data frames also facilitated a more efficient, quicker, and simpler analysis of the data.
+df_num = df2.select_dtypes(include = ['float64', 'int64'])
+df_num_no_target = df_num.drop(columns=['Personality_Disqualification_Dico'])
+df_categorical = df2.select_dtypes(include = ['category']).join(df['Personality_Disqualification_Dico'])
+df_categorical_no_target = df2.select_dtypes(include = ['category'])
+df_dummy = df[[col for col in df if np.isin(df[col].dropna().unique(), [0, 1]).all()]]
+for col in df:
+    if col in df_dummy.columns:
+        df_dummy[col] = df_dummy[col].astype('object')
+df_outcome = pd.DataFrame(df2, columns=["Personality_Disqualification_Dico"])
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Descriptive Statistics
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+6.1 Basic Descriptive Statistics
+### change variables decimal to only one after dot 
+
+#df_num.round(1)
+#df_num.head(3)
+6.1 Numeric Variables
+df_num.describe().round(2)
+       Unnamed: 0       id  Cognitive_Ability_Test  Morals_and_Values_Test  \
+count     2300.00  2300.00                 2300.00                 2300.00   
+mean      1149.50  1150.50                    5.52                    2.42   
+std        664.10   664.10                    1.41                    2.12   
+min          0.00     1.00                    1.00                    1.00   
+25%        574.75   575.75                    5.00                    1.00   
+50%       1149.50  1150.50                    6.00                    2.00   
+75%       1724.25  1725.25                    6.00                    3.00   
+max       2299.00  2300.00                    9.00                   17.00   
+
+       Job_Interview_Grade  Years_of_Education      M2a      ASP        R  \
+count              2300.00             2300.00  2300.00  2300.00  2300.00   
+mean                  4.07               12.96    43.24    45.72    62.50   
+std                   0.59                1.77     6.53     7.44     9.36   
+min                   2.00               12.00    35.00    30.00    31.00   
+25%                   4.00               12.00    39.00    40.00    56.00   
+50%                   4.00               12.00    42.00    45.00    63.00   
+75%                   4.00               14.00    46.00    49.00    69.00   
+max                   6.00               26.00    82.00    90.00    92.00   
+
+           CYN  ...       HY        L       MA       SE       RT     TRIN  \
+count  2300.00  ...  2300.00  2300.00  2300.00  2300.00  2300.00  2300.00   
+mean     45.66  ...    52.43    69.91    55.37    44.19    42.67    61.65   
+std       9.34  ...     9.12    12.42     8.75     7.13     7.02     7.84   
+min      32.00  ...     0.00    33.00    36.00    35.00    35.00    50.00   
+25%      38.00  ...    47.00    61.00    49.00    40.00    39.00    57.00   
+50%      44.00  ...    52.00    70.00    53.00    44.00    43.00    64.00   
+75%      51.00  ...    58.00    78.00    62.00    48.00    47.00    65.00   
+max      80.00  ...    96.00   100.00    94.00   106.00    84.00   107.00   
+
+          VRIN       CR       RS  Personality_Disqualification_Dico  
+count  2300.00  2300.00  2300.00                            2300.00  
+mean     47.74    47.00    45.37                               0.09  
+std       9.09     7.54     9.29                               0.29  
+min      30.00    30.00    31.00                               0.00  
+25%      42.00    41.00    38.00                               0.00  
+50%      46.00    46.00    45.00                               0.00  
+75%      54.00    50.00    51.00                               0.00  
+max      96.00    86.00    93.00                               1.00  
+
+[8 rows x 55 columns]
+6.2 Descriptive statistics findings :
+•	Regarding variables with an interval measurement scale, no values surpass the minimum or maximum measurements of their respective scales.
+•	Following the EDA phase, no missing values were identified.
+•	However, an outlier is still noticeable in the "number of years of study" variable. The rationale for retaining these extreme values in this specific variable is based on insights gained from the EDA analysis. The analysis indicated that removing outliers from this variable would result in changes in its distribution and correlations.
+•	It's worth noting that the problematic "q" value on the MMPI-2 scale has been removed from the dataframe.
+•	In general, an examination of the standard deviations of the variables demonstrates a significant variance, considering the measurement units of the different variables. This observation applies to all numerical variables; no variables with negligible dispersion or zero dispersion were observed.
+6.3 Dummy Variables
+df_dummy.describe()
+        Gender_Dico  M2a_dico  ASP_dico  R_dico  CYN_dico  BIM_dico  PA_dico  \
+count          2300    2300.0    2300.0  2300.0    2300.0    2300.0   2300.0   
+unique            2       2.0       2.0     2.0       2.0       2.0      2.0   
+top               1       0.0       0.0     0.0       0.0       0.0      0.0   
+freq           1453    2263.0    2240.0  1248.0    2183.0    2274.0   2224.0   
+
+        AAS_dico  tcent_dico  OBS_dico  ...  HY_dico  L_dico  MA_dico  \
+count     2300.0      2300.0    2300.0  ...   2300.0  2300.0   2300.0   
+unique       2.0         2.0       2.0  ...      2.0     2.0      2.0   
+top          0.0         0.0       0.0  ...      0.0     1.0      0.0   
+freq      2292.0      2298.0    2254.0  ...   2104.0  1591.0   1904.0   
+
+        SE_dico  RT_dico  TRIN_dico  VRIN_dico  CR_dico  RS_dico  \
+count    2300.0   2300.0     2300.0     2300.0   2300.0   2300.0   
+unique      2.0      2.0        2.0        2.0      2.0      2.0   
+top         0.0      0.0        0.0        0.0      0.0      0.0   
+freq     2276.0   2269.0     1584.0     2159.0   2257.0   2224.0   
+
+        Personality_Disqualification_Dico  
+count                              2300.0  
+unique                                2.0  
+top                                   0.0  
+freq                               2089.0  
+
+[4 rows x 47 columns]
+•	The three dichotomous variables without variance are dropped from the dataframe**: M2APS_dico; WSD_dico; DIS_dico.
+•	After EDA - no missing values.
+6.4 Categorical variables
+df_categorical_no_target.describe()
+       Assessment_Center_Grade Heberew_Test_Grade Filling_Instruction_Test  \
+count                     2300               2300                     2300   
+unique                       6                  3                        6   
+top                    missing          very high                  missing   
+freq                       988                907                      704   
+
+       Emotional_Inteligence_Test        Age         Designated_Role  \
+count                        2300       2300                    2300   
+unique                          6          6                      12   
+top                       missing  very high  operational core units   
+freq                         1031        901                    1214   
+
+       Education_Level Educational_Institution Rovaee_Training_Type  
+count             2300                    2300                 2300  
+unique               5                       4                   14  
+top            missing                   other              missing  
+freq               957                     999                  876  
+It is important to note that even after the EDA analysis in the data enrichment and data engineering phase, attention should be paid to departments with a low N of participants in the categorical variables (it is important to examine the possibility of merging small departments with other departments in the variables : Education_Level; Educational_Institution; Rovaee_Training_Type.
+It's crucial to emphasize that even following the completion of EDA analysis during the data enrichment and data engineering phase, special consideration should be given to categories with a low participant count in the categorical variables. It's essential to explore the feasibility of consolidating smaller categories with other departments within variables such as Education_Level, Educational_Institution, and Rovaee_Training_Type.
+As indicated by the provided schedule, it's evident that only a minor proportion of candidates undergo testing for officer positions ("miun_kzinim"), with the overwhelming majority being assessed for non-command positions ("miun_nagadim"). This distribution underscores the need for careful attention when interpreting and making decisions based on the data related to these positions.
+Designated role - frequency table
+df3 = pd.DataFrame(df).groupby(['Designated_Role']).agg({'Designated_Role':'count' })
+df3 = df3.rename(columns={'Designated_Role': 'freq'})
+
+df3['constant'] = 1
+
+df3['sum_all'] = df3.groupby('constant')['freq'].transform('sum')
+df3.freq = df3.freq.astype('float')
+df3.sum_all = df3.sum_all.astype('float')
+df3.constant = df3.constant.astype('float')
+
+df3['valid precent'] = (df3.freq / df3.sum_all) * 100
+df3.drop(columns=['constant', 'sum_all'])
+
+                             freq  valid precent
+Designated_Role                                 
+Border Guard fighters       450.0      19.565217
+Control center volunteers    20.0       0.869565
+Police dispatchers           34.0       1.478261
+Traffic cops                 17.0       0.739130
+administrative nagad        217.0       9.434783
+administrative officer       57.0       2.478261
+intelligence                 17.0       0.739130
+missing                     148.0       6.434783
+operational core units     1214.0      52.782609
+operational officer           9.0       0.391304
+prosecutor                   78.0       3.391304
+special unit                 39.0       1.695652
+Note from the EDA analysis which is still relevant :
+The presented table highlights that the variable "Designated_Role" encompasses five categories with notably low participant counts: Control center volunteers, police dispatchers, traffic cops, intelligence, and operational officers.
+Based on the forthcoming phases of the EDA analysis, it is advised to further investigate the feasibility of consolidating departments characterized by relatively few participants. This can involve merging categories representing candidates designated for positions with similarities in their nature and responsibilities. One potential approach to consider involves grouping categories based on the prevalence of personality disorders within each department. This might entail combining departments with low, medium, and high rates of personality disorders as a means of consolidation.
+Education Level - frequency table
+df3 = pd.DataFrame(df).groupby(['Education_Level']).agg({'Education_Level':'count' })
+df3 = df3.rename(columns={'Education_Level': 'freq'})
+
+df3['constant'] = 1
+
+df3['sum_all'] = df3.groupby('constant')['freq'].transform('sum')
+df3.freq = df3.freq.astype('float')
+df3.sum_all = df3.sum_all.astype('float')
+df3.constant = df3.constant.astype('float')
+
+df3['valid precent'] = (df3.freq / df3.sum_all) * 100
+df3.drop(columns=['constant', 'sum_all'])
+                     freq  valid precent
+Education_Level                         
+Academic education  366.0      15.913043
+complete_bagrot     508.0      22.086957
+diploma             101.0       4.391304
+missing             957.0      41.608696
+without_bagrot      368.0      16.000000
+Note from the EDA analysis which is still relevant :
+The diploma holders category exhibits a comparatively lower proportion of participants. It is advisable to contemplate merging this category with candidates possessing matriculation status or facing academic rejection, contingent upon the outcomes of the analyses to be conducted in the upcoming sections of the EDA.
+Educational_Institution - frequency table
+df3 = pd.DataFrame(df).groupby(['Educational_Institution']).agg({'Educational_Institution':'count' })
+df3 = df3.rename(columns={'Educational_Institution': 'freq'})
+
+df3['constant'] = 1
+
+df3['sum_all'] = df3.groupby('constant')['freq'].transform('sum')
+df3.freq = df3.freq.astype('float')
+df3.sum_all = df3.sum_all.astype('float')
+df3.constant = df3.constant.astype('float')
+
+df3['valid precent'] = (df3.freq / df3.sum_all) * 100
+df3.drop(columns=['constant', 'sum_all'])
+                          freq  valid precent
+Educational_Institution                      
+college                  298.0      12.956522
+missing                  964.0      41.913043
+other                    999.0      43.434783
+university                39.0       1.695652
+Note from the EDA analysis which is still relevant :
+The table reveals that an exceedingly small proportion (1.6%) of candidates possess a university education. Notably, the subset of participants with university education is both limited and insufficient for drawing valid conclusions.
+Given the significance of the educational institution type's impact on predicting personality disqualification, alongside upcoming analyzes in the extended EDA, a determination will be made regarding the inclusion or exclusion of this factor from the data frame. This decision will take into consideration the limited sample size of participants with university education.
+Rovaee_Training_Type - frequency table
+df3 = pd.DataFrame(df).groupby(['Rovaee_Training_Type']).agg({'Rovaee_Training_Type':'count' })
+df3 = df3.rename(columns={'Rovaee_Training_Type': 'freq'})
+
+df3['constant'] = 1
+
+df3['sum_all'] = df3.groupby('constant')['freq'].transform('sum')
+df3.freq = df3.freq.astype('float')
+df3.sum_all = df3.sum_all.astype('float')
+df3.constant = df3.constant.astype('float')
+
+df3['valid precent'] = (df3.freq / df3.sum_all) * 100
+df3.drop(columns=['constant', 'sum_all'])
+                       freq  valid precent
+Rovaee_Training_Type                      
+missing               876.0      38.086957
+rovaee 0              318.0      13.826087
+rovaee 1               11.0       0.478261
+rovaee 10               9.0       0.391304
+rovaee 12              18.0       0.782609
+rovaee 13               1.0       0.043478
+rovaee 2              420.0      18.260870
+rovaee 3              128.0       5.565217
+rovaee 4               13.0       0.565217
+rovaee 5              172.0       7.478261
+rovaee 6               41.0       1.782609
+rovaee 7              199.0       8.652174
+rovaee 8               93.0       4.043478
+rovaee 9                1.0       0.043478
+Note from the EDA analysis which is still relevant :
+Furthermore, pertaining to the variable "Rovaee_Training_Type," it has been observed that certain categories exhibit minimal to no representation of candidates. As previously noted, aligning with forthcoming assessments within the scope of the EDA analysis, we will explore the potential for rationalizing the departments. This involves considering a potential amalgamation between categories encompassing candidates who underwent combat military training (rovaee 5-13) and those who underwent training as combat supporters (rovaee 3-4), or served in administrative office positions (rovaee 0-2). This evaluation will be grounded in several factors, with a particular focus on the personality disqualification rate within each department.
+7. Continuous variables Distribution
+# import sweetviz as sv
+# #analyzing the dataset
+# df_report = sv.analyze(df)
+# #display the report
+# df_report.show_html('df.html')
+describe = df_dummy.iloc[:,:5].describe()
+def highlight(cell_value):
+    highlight = 'background-color: cyan;'
+    default = ''
+    if cell_value == describe.loc['mean']['lang_US']:
+        return highlight
+    else:
+        return default  
+#describe.style.applymap(highlight)
+7.1 Auto EDA Wuth Sweetviz
+#!pip install sweetviz
+#import sweetviz as sv
+#statistics_report_before_cleaning = sv.analyze(df)
+#statistics_report_before_cleaning.show_html('df.html')
+7.2 Numeric Vars - Graphs describtion Using Histograms
+df_num_no_target.iloc[:,2:30].hist(figsize=(50, 50), bins=50, xlabelsize=25);
+ 
+df_num_no_target.iloc[:,:29:-1].hist(figsize=(50, 50), bins=50, xlabelsize=20);
+ 
+The distribution of variables has remained relatively consistent after the EFA analysis. In certain numerical variables, there is a subtle decrease in extreme values. The majority of the variables exhibited positive asymmetric distribution, in addition, a significant number of variables vary approximately normally. Finally, a single number of variables are characterized by negative asymmetric distribution.
+Importance of Independent Variables' Distribution: The distribution nature of variables has significant implications for the analyses performed during model development. This includes considerations of whether assumptions underlying statistical tests (parametric/non-parametric) are met. For instance, non-normally distributed variables will be analyzed using Spearman's test, while normally distributed variables will be assessed using Pearson's test. Additionally, variable distribution nature affects how extreme values are managed, as outlined in more advanced sections of the EDA.
+7.3 Numeric Vars skewness
+In general, the measure of skewness offers valuable insights into the nature of variable distributions. A skewness measure score of 0 signifies a completely normal distribution—a bell-shaped curve where central tendency measures (mean, median, mode, mid-range) are concentrated at the center, and the frequency of values diminishes towards the distribution edges.
+Conversely, higher skewness measure scores indicate increasing asymmetry in the distribution, with positive skewness indicating a rightward skew. Conversely, lower skewness measure scores (below zero) suggest heightened leftward asymmetry in the distribution.
+According to Kalima (2007):
+•	If skewness is less than -1 or greater than 1, the distribution is highly skewed.
+•	If skewness is between -1 and -0.5 or between 0.5 and 1, the distribution is moderately skewed.
+•	If skewness is between -0.5 and 0.5, the distribution is approximately symmetric.
+Skewness measures provide crucial information for understanding how data is distributed and identifying patterns of symmetry or asymmetry within the data.
+def highlight(cell_value):
+    highlight = 'background-color: pink;'
+    default = ''
+    if cell_value >= -0.4 and cell_value <= 0.4:
+        return highlight
+    else:
+        return default
+    print("\nModified Stlying DataFrame:")
+pd.DataFrame(df_num.skew(),columns=['skewness']).sort_values(by='skewness', ascending=False).style.applymap(highlight)
+<pandas.io.formats.style.Styler at 0x245d707bfd0>
+Drawing from the table above and the outcomes of the post-EDA analysis, it becomes apparent that 10 variables within the project display a normal distribution after undergoing the EDA phase. The skewness values for these variables fall within the range of -0.5 to 0.5.
+It's noteworthy that the count of variables exhibiting a normal distribution was initially 16 before any modifications were implemented during the EDA analysis. The reduction in the count of normally distributed variables primarily stems from actions undertaken, such as variable omission or transformation from numeric to categorical, as part of processes like handling missing values and similar procedures.
+8. Frequencies tables of dummy variables
+#a rows number    #b columns number    #c plot counter initialize
+
+a = 20   
+b = 3   
+c = 1   
+
+fig = plt.figure(figsize=(30,65))
+plt.subplots_adjust(hspace = 1)
+sns.set(font_scale = 1.5)
+for i in df_dummy:
+    if i != 'Personality_Disqualification_Dico':
+        
+        plt.subplot(a, b, c)
+        plt.title('{}'.format(i))
+        plt.xlabel(i)
+        sns.countplot(df_dummy[i], palette=['navy','cyan'])
+        c = c + 1
+        
+fig.tight_layout()
+plt.show()
+ 
+Further observations from the post-EDA analysis reveal that a significant portion of the dummy variables feature a sub-classification within a single category. This is particularly notable in reference to the MMPI-2 test's personality scales variables.
+As we progress through the data enrichment, data engineering, and feature selection stages, it's worth exploring potential strategies to address the issue of sub-classification in certain personality scales. One option involves investigating the feasibility of constructing a personality anomalies index, which could serve as a solution to this problem. Alternatively, we will also assess the viability of directly utilizing specific personality scales to address this issue more precisely. This approach aims to enhance the effectiveness and interpretability of the models built using these variables.
+8.1 Categorical vars destributions in graphs (Using Bar charts)
+c = 1
+
+fig = plt.figure(figsize=(30,45))
+for i in df_categorical_no_target:
+    if i != 'Personality_Disqualification_Dico':
+        plt.subplot(10, 1, c)
+        plt.title('{}'.format(i))
+        plt.xlabel(i)
+        sns.set(font_scale = 1.5)
+        sns.countplot(df_categorical_no_target[i])
+        c = c + 1
+
+plt.show()
+ 
+The insights gleaned from the above charts are as follows:
+Designated_Role Variable: The majority of candidates are concentrated in the "operational core units" and "border guard fighters" categories. As previously indicated, certain departments have a limited number of participants, prompting consideration of potential weighting between small and larger departments in the future to ensure balanced representation.
+Process_Type Variable: A significant number of candidates fall under the "miun nagadim" category, while a smaller number are in the "miun kzinim" categories.
+Rovaee_Traning_Type Variable: The table indicates a mere 1.6% of candidates possess a university education. The group of participants with a university education is notably small, making it challenging to draw robust conclusions.
+As previously mentioned, the influence of educational institution type on predicting personality disqualification, coupled with further EDA analyses, will determine whether it's appropriate to retain or omit this factor from the data frame. This decision will be influenced by the relatively limited sample size of participants with university education.
+9. Description of the target variable
+9.1 Below will be shown a histogram of the variable Personality_Disqualification_Dico
+sns.set_theme(style="whitegrid")
+
+g = sns.catplot(data=df_num, x="Personality_Disqualification_Dico",\
+    kind="count", palette="pastel", alpha=.6, height=4.5)
+
+
+g.despine(left=True)
+g.set_axis_labels("", "Personality_Disqualification_Dico (g)")
+<seaborn.axisgrid.FacetGrid at 0x245e3bf3160>
+ 
+depen_table = pd.DataFrame(df).groupby(['Personality_Disqualification_Dico']).agg({'Personality_Disqualification_Dico':'count' })
+depen_table = depen_table.rename(columns={'Personality_Disqualification_Dico': 'freq'})
+
+depen_table['constant'] = 1
+
+depen_table['sum_all'] = depen_table.groupby('constant')['freq'].transform('sum')
+depen_table.freq = depen_table.freq.astype('float')
+depen_table.sum_all = depen_table.sum_all.astype('float')
+depen_table.constant = depen_table.constant.astype('float')
+
+depen_table['valid precent'] = (depen_table.freq / depen_table.sum_all) * 100
+depen_table.drop(columns=['constant', 'sum_all'])
+                                     freq  valid precent
+Personality_Disqualification_Dico                       
+0.0                                2089.0      90.826087
+1.0                                 211.0       9.173913
+Findings:
+The target variable categories in the current project are imbalanced, with the "Rare" category accounting for less than 15% of the data. Specifically, only 9.2% of participants in the data frame were personality disqualified (coded as 1), while the remaining 90.8% were candidates who were not personality disqualified (coded as 0).
+To mitigate issues arising from sub-classification, records of participants who were personality disqualified (coded as 1) will be duplicated using four resampling methods exclusively within the training dataset. These methods include under-sampling, oversampling, a combination of over and under sampling, and the Synthetic Minority Over-sampling Technique (SMOTE). An additional method based on the random forest classifier from the scikit-learn library in Python will also be employed. This method automatically balances the class distribution. After applying these resampling methods, we will select the method that yields the highest accuracy results.
+To address the issue of underclassification in model development, we will explore various strategies, including:
+•	Threshold Adjustment: We will assess the impact of changing the threshold point used by predictive models to classify the classes of the target variable. Modifying this threshold can lead to different classification outcomes, potentially improving the balance between the two categories.
+•	Model Parameters: We will investigate the utilization of model parameters that impose penalties in cases of sub-classification of the rare target factor categories. This penalty mechanism can help the model assign higher costs to misclassifications of the minority class, encouraging more balanced predictions.
+•	Duplicate / omit observations : A random sub-sample of participants will be utilized if duplicating records of the rare category fails to address the sub-classification issues. Such issues might manifest as prediction models significantly favoring one category over the other, particularly the rare category of personality disqualification. If such problems arise even after duplicating rare category observations, we will also explore random omission of records from the common target factor category.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+10. Predictive Statistics - Correlations Between Independents
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+10. Numeric Variables Internal Corr
+10.1.1 Correlations Matrix
+The measurement scale of the numerical variables in the project is generally considered to be interval, which allows for the application of parametric tests based on the disciplinary perspective of the social sciences. Despite this, when investigating the relationship between the project predictors and the outcome factor (personality disqualification), we opted to utilize the Spearman test.
+It's important to clarify that the decision to employ the non-parametric Spearman test was not solely influenced by the measurement scale of the variables (whether they are interval or ordinal),but rather by the distribution characteristics of the variables. In light of the skewness measure, particularly the results obtained from the Smirnov Kolomorov test, it becomes evident that most of the continuous research variables deviate from a normal distribution. Consequently, the selection of the Spearman test is justified, as it is appropriate when the normality assumptions are not met and when variables exhibit non-normal distributions.
+df_num_corr = pd.DataFrame(df_num)
+corr = df_num.corr(method = 'spearman')
+corr
+                                   Unnamed: 0        id  \
+Unnamed: 0                           1.000000 -0.245943   
+id                                  -0.245943  1.000000   
+Cognitive_Ability_Test              -0.095339 -0.017567   
+Morals_and_Values_Test               0.045036  0.002597   
+Job_Interview_Grade                 -0.082100 -0.013545   
+Years_of_Education                  -0.111639 -0.122593   
+M2a                                  0.108180 -0.037016   
+ASP                                  0.070485  0.019326   
+R                                   -0.018706  0.007559   
+CYN                                  0.069663  0.034042   
+BIM                                  0.043759  0.028204   
+PA                                   0.004675 -0.006614   
+M2APS                                0.020620 -0.064233   
+AAS                                  0.017192 -0.041901   
+tcent                                0.056674 -0.029068   
+OBS                                  0.068150 -0.054078   
+MDS                                  0.048517 -0.000267   
+TPA                                  0.046386 -0.027420   
+BIZ                                  0.056485  0.044789   
+ANG                                  0.041475 -0.012580   
+WSD                                  0.067631 -0.003591   
+DEP                                  0.083586 -0.004649   
+DIS                                  0.065704 -0.024782   
+K                                   -0.066939 -0.024801   
+SOD                                  0.046932 -0.002252   
+D                                    0.042246  0.020523   
+D1                                   0.030070 -0.013362   
+D2                                   0.038950 -0.004808   
+D3                                   0.032101  0.011914   
+D4                                   0.011574 -0.001110   
+D5                                   0.090113 -0.022067   
+MF                                  -0.028344 -0.016265   
+DOE                                 -0.014642  0.032544   
+PT                                   0.050368 -0.068416   
+ANX                                  0.085870 -0.022194   
+F                                    0.030893  0.019651   
+SC                                   0.038295  0.022630   
+HEA                                  0.054241  0.026137   
+FP                                   0.048271  0.050591   
+HS                                   0.012655  0.019930   
+FAM                                  0.065778  0.014666   
+PD                                  -0.001881 -0.032063   
+ES                                  -0.037682 -0.009664   
+FCENT                               -0.054684  0.026766   
+WRK                                  0.115964 -0.037977   
+HY                                  -0.021472 -0.021131   
+L                                   -0.012109  0.052866   
+MA                                   0.016905  0.019763   
+SE                                   0.069708 -0.054633   
+RT                                   0.054898  0.005063   
+TRIN                                -0.052421  0.017213   
+VRIN                                 0.044550  0.011463   
+CR                                  -0.021367  0.009942   
+RS                                   0.065380 -0.014119   
+Personality_Disqualification_Dico    0.115977 -0.070461   
+
+                                   Cognitive_Ability_Test  \
+Unnamed: 0                                      -0.095339   
+id                                              -0.017567   
+Cognitive_Ability_Test                           1.000000   
+Morals_and_Values_Test                          -0.144951   
+Job_Interview_Grade                              0.157853   
+Years_of_Education                               0.249123   
+M2a                                             -0.140412   
+ASP                                             -0.096415   
+R                                               -0.042999   
+CYN                                             -0.165141   
+BIM                                             -0.192979   
+PA                                              -0.023327   
+M2APS                                            0.159040   
+AAS                                             -0.044287   
+tcent                                            0.011903   
+OBS                                             -0.086550   
+MDS                                             -0.118029   
+TPA                                             -0.044479   
+BIZ                                             -0.155158   
+ANG                                             -0.033481   
+WSD                                             -0.191437   
+DEP                                             -0.203040   
+DIS                                             -0.097206   
+K                                                0.083620   
+SOD                                             -0.029233   
+D                                               -0.219635   
+D1                                              -0.166008   
+D2                                              -0.050600   
+D3                                              -0.215172   
+D4                                              -0.126068   
+D5                                              -0.141920   
+MF                                               0.059086   
+DOE                                             -0.021088   
+PT                                              -0.090413   
+ANX                                             -0.181714   
+F                                               -0.178524   
+SC                                              -0.210662   
+HEA                                             -0.257597   
+FP                                              -0.195315   
+HS                                              -0.232267   
+FAM                                             -0.169106   
+PD                                              -0.056349   
+ES                                               0.270202   
+FCENT                                           -0.008004   
+WRK                                             -0.103428   
+HY                                              -0.061581   
+L                                               -0.135176   
+MA                                               0.011353   
+SE                                              -0.064470   
+RT                                              -0.196425   
+TRIN                                            -0.007501   
+VRIN                                            -0.196027   
+CR                                               0.038395   
+RS                                              -0.160358   
+Personality_Disqualification_Dico               -0.080856   
+
+                                   Morals_and_Values_Test  \
+Unnamed: 0                                       0.045036   
+id                                               0.002597   
+Cognitive_Ability_Test                          -0.144951   
+Morals_and_Values_Test                           1.000000   
+Job_Interview_Grade                             -0.137188   
+Years_of_Education                              -0.138859   
+M2a                                              0.314169   
+ASP                                              0.374622   
+R                                               -0.188829   
+CYN                                              0.382861   
+BIM                                              0.312371   
+PA                                              -0.047450   
+M2APS                                           -0.010778   
+AAS                                              0.165416   
+tcent                                            0.297296   
+OBS                                              0.263920   
+MDS                                              0.258512   
+TPA                                              0.315747   
+BIZ                                              0.316244   
+ANG                                              0.286646   
+WSD                                              0.281640   
+DEP                                              0.305926   
+DIS                                              0.267226   
+K                                               -0.331258   
+SOD                                              0.114317   
+D                                                0.069756   
+D1                                               0.197517   
+D2                                              -0.092466   
+D3                                               0.155251   
+D4                                               0.174981   
+D5                                               0.208439   
+MF                                              -0.076762   
+DOE                                             -0.179895   
+PT                                               0.008982   
+ANX                                              0.293525   
+F                                                0.273751   
+SC                                               0.282800   
+HEA                                              0.257932   
+FP                                               0.145932   
+HS                                               0.027521   
+FAM                                              0.330428   
+PD                                               0.039348   
+ES                                              -0.229709   
+FCENT                                           -0.296063   
+WRK                                              0.286053   
+HY                                              -0.153865   
+L                                               -0.123243   
+MA                                               0.166538   
+SE                                               0.227414   
+RT                                               0.335469   
+TRIN                                            -0.076818   
+VRIN                                             0.300909   
+CR                                               0.148852   
+RS                                               0.155370   
+Personality_Disqualification_Dico                0.149527   
+
+                                   Job_Interview_Grade  Years_of_Education  \
+Unnamed: 0                                   -0.082100           -0.111639   
+id                                           -0.013545           -0.122593   
+Cognitive_Ability_Test                        0.157853            0.249123   
+Morals_and_Values_Test                       -0.137188           -0.138859   
+Job_Interview_Grade                           1.000000            0.190848   
+Years_of_Education                            0.190848            1.000000   
+M2a                                          -0.148136           -0.182143   
+ASP                                          -0.129289           -0.151207   
+R                                             0.047966            0.035510   
+CYN                                          -0.158303           -0.230850   
+BIM                                          -0.156567           -0.243437   
+PA                                            0.014127            0.036469   
+M2APS                                         0.103419            0.132073   
+AAS                                          -0.032414            0.026436   
+tcent                                        -0.070217           -0.078426   
+OBS                                          -0.112204           -0.117882   
+MDS                                          -0.103168           -0.078008   
+TPA                                          -0.073799           -0.054973   
+BIZ                                          -0.123924           -0.159636   
+ANG                                          -0.076947           -0.113343   
+WSD                                          -0.126135           -0.145942   
+DEP                                          -0.152751           -0.191446   
+DIS                                          -0.108237           -0.064708   
+K                                             0.116584            0.186334   
+SOD                                          -0.082230           -0.043627   
+D                                            -0.112755           -0.137423   
+D1                                           -0.098629           -0.052368   
+D2                                           -0.012137            0.007808   
+D3                                           -0.074900           -0.155933   
+D4                                           -0.066846           -0.065166   
+D5                                           -0.096747           -0.138691   
+MF                                            0.074233            0.166927   
+DOE                                          -0.012663            0.060926   
+PT                                           -0.029521           -0.043489   
+ANX                                          -0.130966           -0.160858   
+F                                            -0.209021           -0.171033   
+SC                                           -0.149830           -0.230040   
+HEA                                          -0.116192           -0.231632   
+FP                                           -0.151119           -0.145728   
+HS                                           -0.044721           -0.119872   
+FAM                                          -0.155865           -0.179098   
+PD                                           -0.021246            0.005896   
+ES                                            0.167139            0.242878   
+FCENT                                         0.071236            0.079108   
+WRK                                          -0.138321           -0.132496   
+HY                                            0.073899            0.040021   
+L                                            -0.079104           -0.082783   
+MA                                           -0.029462           -0.075418   
+SE                                           -0.099656           -0.067293   
+RT                                           -0.149054           -0.145222   
+TRIN                                          0.041510            0.060568   
+VRIN                                         -0.134681           -0.148675   
+CR                                           -0.036795           -0.002352   
+RS                                           -0.077707           -0.058067   
+Personality_Disqualification_Dico            -0.192547           -0.113056   
+
+                                        M2a       ASP         R       CYN  \
+Unnamed: 0                         0.108180  0.070485 -0.018706  0.069663   
+id                                -0.037016  0.019326  0.007559  0.034042   
+Cognitive_Ability_Test            -0.140412 -0.096415 -0.042999 -0.165141   
+Morals_and_Values_Test             0.314169  0.374622 -0.188829  0.382861   
+Job_Interview_Grade               -0.148136 -0.129289  0.047966 -0.158303   
+Years_of_Education                -0.182143 -0.151207  0.035510 -0.230850   
+M2a                                1.000000  0.600065 -0.459641  0.660226   
+ASP                                0.600065  1.000000 -0.422336  0.802071   
+R                                 -0.459641 -0.422336  1.000000 -0.441735   
+CYN                                0.660226  0.802071 -0.441735  1.000000   
+BIM                                0.603996  0.466928 -0.357300  0.542421   
+PA                                 0.003697 -0.266597  0.054826 -0.307917   
+M2APS                              0.256371  0.180249 -0.318244  0.071904   
+AAS                                0.256226  0.296198 -0.101855  0.155860   
+tcent                              0.742833  0.693525 -0.721901  0.710689   
+OBS                                0.796242  0.538100 -0.442818  0.575806   
+MDS                                0.557410  0.454602 -0.266432  0.460546   
+TPA                                0.609899  0.587328 -0.500871  0.639598   
+BIZ                                0.570472  0.488300 -0.381146  0.555863   
+ANG                                0.578935  0.557946 -0.431604  0.536637   
+WSD                                0.543028  0.344930 -0.129016  0.360854   
+DEP                                0.629569  0.436407 -0.255240  0.505047   
+DIS                                0.566742  0.448639 -0.207307  0.418040   
+K                                 -0.730484 -0.694979  0.528066 -0.778764   
+SOD                                0.194723  0.160954  0.215341  0.180809   
+D                                  0.078572 -0.076001  0.267797 -0.008665   
+D1                                 0.291381  0.170277  0.114747  0.192817   
+D2                                -0.205853 -0.272670  0.377266 -0.273691   
+D3                                 0.187304  0.105480  0.047957  0.158543   
+D4                                 0.334229  0.223975 -0.040033  0.215838   
+D5                                 0.581000  0.361223 -0.294353  0.384999   
+MF                                -0.079787 -0.010651  0.073577 -0.073191   
+DOE                               -0.483352 -0.419876  0.401733 -0.381737   
+PT                                 0.171967 -0.099414  0.084219 -0.158400   
+ANX                                0.621037  0.412517 -0.305151  0.465427   
+F                                  0.338050  0.355682 -0.065937  0.357397   
+SC                                 0.483997  0.355243 -0.192686  0.414028   
+HEA                                0.395786  0.291762 -0.050532  0.334098   
+FP                                 0.049352  0.058220  0.043698  0.148259   
+HS                                -0.096678 -0.204834  0.290816 -0.191260   
+FAM                                0.585612  0.500887 -0.366125  0.557529   
+PD                                 0.042742  0.047290  0.135956 -0.078047   
+ES                                -0.509066 -0.296862  0.128268 -0.429431   
+FCENT                             -0.745221 -0.693534  0.726162 -0.711760   
+WRK                                0.734969  0.501139 -0.347170  0.555026   
+HY                                -0.338179 -0.477539  0.420131 -0.539850   
+L                                 -0.433614 -0.406120  0.366387 -0.301243   
+MA                                 0.286073  0.337491 -0.412899  0.298514   
+SE                                 0.575515  0.407827 -0.297224  0.382990   
+RT                                 0.537029  0.447043 -0.257628  0.501751   
+TRIN                              -0.210944 -0.139049  0.345741 -0.163054   
+VRIN                               0.486741  0.413460 -0.140853  0.453233   
+CR                                 0.327975  0.447158 -0.579007  0.342367   
+RS                                 0.417559  0.271106 -0.135820  0.309805   
+Personality_Disqualification_Dico  0.146661  0.121013 -0.072221  0.110643   
+
+                                   ...        HY         L        MA  \
+Unnamed: 0                         ... -0.021472 -0.012109  0.016905   
+id                                 ... -0.021131  0.052866  0.019763   
+Cognitive_Ability_Test             ... -0.061581 -0.135176  0.011353   
+Morals_and_Values_Test             ... -0.153865 -0.123243  0.166538   
+Job_Interview_Grade                ...  0.073899 -0.079104 -0.029462   
+Years_of_Education                 ...  0.040021 -0.082783 -0.075418   
+M2a                                ... -0.338179 -0.433614  0.286073   
+ASP                                ... -0.477539 -0.406120  0.337491   
+R                                  ...  0.420131  0.366387 -0.412899   
+CYN                                ... -0.539850 -0.301243  0.298514   
+BIM                                ... -0.176523 -0.236220  0.317252   
+PA                                 ...  0.270225 -0.026235  0.090553   
+M2APS                              ... -0.113839 -0.458083  0.185258   
+AAS                                ... -0.040145 -0.354920  0.130595   
+tcent                              ... -0.599182 -0.593356  0.455582   
+OBS                                ... -0.325043 -0.431584  0.315132   
+MDS                                ... -0.183974 -0.384979  0.252932   
+TPA                                ... -0.447982 -0.441431  0.294581   
+BIZ                                ... -0.232488 -0.225633  0.340508   
+ANG                                ... -0.355105 -0.557172  0.267605   
+WSD                                ...  0.082523 -0.207337  0.060892   
+DEP                                ... -0.118623 -0.190995  0.116863   
+DIS                                ... -0.159593 -0.412135  0.223096   
+K                                  ...  0.547660  0.483830 -0.280151   
+SOD                                ... -0.069522 -0.009978 -0.138514   
+D                                  ...  0.329805  0.300748 -0.209004   
+D1                                 ...  0.140165  0.034614 -0.082244   
+D2                                 ...  0.330264  0.384132 -0.320577   
+D3                                 ...  0.188657  0.081424 -0.002086   
+D4                                 ...  0.049912 -0.148723  0.143640   
+D5                                 ... -0.114773 -0.280225  0.115074   
+MF                                 ...  0.009725 -0.080859  0.033216   
+DOE                                ...  0.323792  0.577216 -0.333978   
+PT                                 ...  0.340893 -0.009326  0.022616   
+ANX                                ... -0.080111 -0.230731  0.211605   
+F                                  ... -0.059026 -0.019395  0.136509   
+SC                                 ... -0.030143 -0.152358  0.236619   
+HEA                                ...  0.177056 -0.040812  0.081073   
+FP                                 ...  0.019388  0.436097  0.028615   
+HS                                 ...  0.636587  0.335633 -0.114536   
+FAM                                ... -0.180649 -0.270208  0.291975   
+PD                                 ...  0.326852 -0.078926  0.081454   
+ES                                 ...  0.014781  0.009568 -0.043537   
+FCENT                              ...  0.595884  0.588933 -0.453099   
+WRK                                ... -0.258216 -0.380282  0.250844   
+HY                                 ...  1.000000  0.305365 -0.220335   
+L                                  ...  0.305365  1.000000 -0.174622   
+MA                                 ... -0.220335 -0.174622  1.000000   
+SE                                 ... -0.171956 -0.365765  0.113564   
+RT                                 ... -0.210428 -0.201136  0.134046   
+TRIN                               ...  0.236235  0.124934 -0.101975   
+VRIN                               ... -0.093940 -0.138056  0.141574   
+CR                                 ... -0.366762 -0.338919  0.416666   
+RS                                 ... -0.037881 -0.228596 -0.033842   
+Personality_Disqualification_Dico  ...  0.008699 -0.055955  0.067436   
+
+                                         SE        RT      TRIN      VRIN  \
+Unnamed: 0                         0.069708  0.054898 -0.052421  0.044550   
+id                                -0.054633  0.005063  0.017213  0.011463   
+Cognitive_Ability_Test            -0.064470 -0.196425 -0.007501 -0.196027   
+Morals_and_Values_Test             0.227414  0.335469 -0.076818  0.300909   
+Job_Interview_Grade               -0.099656 -0.149054  0.041510 -0.134681   
+Years_of_Education                -0.067293 -0.145222  0.060568 -0.148675   
+M2a                                0.575515  0.537029 -0.210944  0.486741   
+ASP                                0.407827  0.447043 -0.139049  0.413460   
+R                                 -0.297224 -0.257628  0.345741 -0.140853   
+CYN                                0.382990  0.501751 -0.163054  0.453233   
+BIM                                0.363285  0.459607 -0.154808  0.405023   
+PA                                 0.011585  0.007658  0.034945  0.025306   
+M2APS                              0.207190 -0.020113 -0.084951  0.029029   
+AAS                                0.241096  0.288912  0.013671  0.195122   
+tcent                              0.508028  0.438047 -0.319884  0.323252   
+OBS                                0.464924  0.470918 -0.175415  0.384635   
+MDS                                0.358433  0.477000 -0.032014  0.395264   
+TPA                                0.377272  0.434259 -0.185020  0.346305   
+BIZ                                0.322016  0.428046 -0.106860  0.421627   
+ANG                                0.393366  0.402250 -0.134875  0.349020   
+WSD                                0.411909  0.438889 -0.050991  0.440946   
+DEP                                0.411745  0.506369 -0.082791  0.434656   
+DIS                                0.394260  0.399614 -0.001300  0.446089   
+K                                 -0.450104 -0.467361  0.237808 -0.410961   
+SOD                                0.205252  0.262101  0.193807  0.322947   
+D                                  0.046543  0.129776  0.099300  0.194702   
+D1                                 0.234643  0.315721  0.087416  0.358619   
+D2                                -0.107931 -0.116723  0.136029 -0.044251   
+D3                                 0.099301  0.194239 -0.004602  0.217435   
+D4                                 0.279598  0.271893  0.053752  0.297350   
+D5                                 0.396522  0.380391 -0.175449  0.326227   
+MF                                -0.050114 -0.088207  0.171148 -0.014868   
+DOE                               -0.337332 -0.269318  0.145634 -0.214473   
+PT                                 0.222532  0.098100  0.078168  0.122535   
+ANX                                0.382506  0.444049 -0.105528  0.462104   
+F                                  0.271350  0.394204  0.021712  0.380594   
+SC                                 0.310395  0.416065 -0.062713  0.393099   
+HEA                                0.231169  0.343780 -0.019117  0.365844   
+FP                                -0.031259  0.239753  0.030226  0.216065   
+HS                                -0.091378  0.022777  0.154598  0.130915   
+FAM                                0.390115  0.471977 -0.115684  0.460451   
+PD                                 0.049221  0.065940  0.140238  0.161154   
+ES                                -0.283723 -0.416930  0.067937 -0.375184   
+FCENT                             -0.507167 -0.441141  0.320092 -0.326595   
+WRK                                0.500707  0.460009 -0.141991  0.378081   
+HY                                -0.171956 -0.210428  0.236235 -0.093940   
+L                                 -0.365765 -0.201136  0.124934 -0.138056   
+MA                                 0.113564  0.134046 -0.101975  0.141574   
+SE                                 1.000000  0.436922 -0.144290  0.343175   
+RT                                 0.436922  1.000000 -0.086748  0.400023   
+TRIN                              -0.144290 -0.086748  1.000000  0.159421   
+VRIN                               0.343175  0.400023  0.159421  1.000000   
+CR                                 0.233784  0.158464 -0.203407  0.110591   
+RS                                 0.287155  0.317958 -0.048088  0.284029   
+Personality_Disqualification_Dico  0.117935  0.153151  0.003062  0.123545   
+
+                                         CR        RS  \
+Unnamed: 0                        -0.021367  0.065380   
+id                                 0.009942 -0.014119   
+Cognitive_Ability_Test             0.038395 -0.160358   
+Morals_and_Values_Test             0.148852  0.155370   
+Job_Interview_Grade               -0.036795 -0.077707   
+Years_of_Education                -0.002352 -0.058067   
+M2a                                0.327975  0.417559   
+ASP                                0.447158  0.271106   
+R                                 -0.579007 -0.135820   
+CYN                                0.342367  0.309805   
+BIM                                0.261653  0.340633   
+PA                                 0.048124  0.040946   
+M2APS                              0.377611  0.116398   
+AAS                                0.220993  0.180368   
+tcent                              0.587830  0.281607   
+OBS                                0.352065  0.373348   
+MDS                                0.270410  0.312255   
+TPA                                0.412234  0.285869   
+BIZ                                0.289492  0.304256   
+ANG                                0.413097  0.299360   
+WSD                                0.046053  0.383564   
+DEP                                0.157936  0.352248   
+DIS                                0.153427  0.322212   
+K                                 -0.393406 -0.349185   
+SOD                               -0.133374  0.139306   
+D                                 -0.266244  0.167699   
+D1                                -0.093861  0.297584   
+D2                                -0.341258 -0.042759   
+D3                                -0.090785  0.196738   
+D4                                 0.060735  0.217614   
+D5                                 0.168744  0.345234   
+MF                                 0.028489 -0.003562   
+DOE                               -0.365178 -0.226216   
+PT                                -0.091070  0.147380   
+ANX                                0.188814  0.379390   
+F                                  0.095318  0.246886   
+SC                                 0.179767  0.307253   
+HEA                                0.054889  0.341654   
+FP                                -0.096840  0.095207   
+HS                                -0.251018  0.094105   
+FAM                                0.266754  0.348499   
+PD                                 0.068612  0.071539   
+ES                                -0.064263 -0.484531   
+FCENT                             -0.587300 -0.286110   
+WRK                                0.274306  0.357284   
+HY                                -0.366762 -0.037881   
+L                                 -0.338919 -0.228596   
+MA                                 0.416666 -0.033842   
+SE                                 0.233784  0.287155   
+RT                                 0.158464  0.317958   
+TRIN                              -0.203407 -0.048088   
+VRIN                               0.110591  0.284029   
+CR                                 1.000000  0.054965   
+RS                                 0.054965  1.000000   
+Personality_Disqualification_Dico  0.061189  0.084638   
+
+                                   Personality_Disqualification_Dico  
+Unnamed: 0                                                  0.115977  
+id                                                         -0.070461  
+Cognitive_Ability_Test                                     -0.080856  
+Morals_and_Values_Test                                      0.149527  
+Job_Interview_Grade                                        -0.192547  
+Years_of_Education                                         -0.113056  
+M2a                                                         0.146661  
+ASP                                                         0.121013  
+R                                                          -0.072221  
+CYN                                                         0.110643  
+BIM                                                         0.173689  
+PA                                                          0.078044  
+M2APS                                                       0.001668  
+AAS                                                         0.094432  
+tcent                                                       0.095134  
+OBS                                                         0.114624  
+MDS                                                         0.167799  
+TPA                                                         0.087320  
+BIZ                                                         0.114196  
+ANG                                                         0.093937  
+WSD                                                         0.171107  
+DEP                                                         0.169507  
+DIS                                                         0.158312  
+K                                                          -0.103551  
+SOD                                                         0.057043  
+D                                                           0.084552  
+D1                                                          0.104793  
+D2                                                         -0.007654  
+D3                                                          0.069609  
+D4                                                          0.106704  
+D5                                                          0.125987  
+MF                                                         -0.068613  
+DOE                                                        -0.060176  
+PT                                                          0.092970  
+ANX                                                         0.142042  
+F                                                           0.160735  
+SC                                                          0.165180  
+HEA                                                         0.150574  
+FP                                                          0.087728  
+HS                                                          0.086495  
+FAM                                                         0.178317  
+PD                                                          0.152188  
+ES                                                         -0.114200  
+FCENT                                                      -0.093652  
+WRK                                                         0.140609  
+HY                                                          0.008699  
+L                                                          -0.055955  
+MA                                                          0.067436  
+SE                                                          0.117935  
+RT                                                          0.153151  
+TRIN                                                        0.003062  
+VRIN                                                        0.123545  
+CR                                                          0.061189  
+RS                                                          0.084638  
+Personality_Disqualification_Dico                           1.000000  
+
+[55 rows x 55 columns]
+corr = df_num.corr(method = 'spearman')
+corr.style.background_gradient(cmap='coolwarm').set_precision(2)
+<pandas.io.formats.style.Styler at 0x245e7ecb2e0>
+In the diagram above, the shading of the boxes corresponds to the strength of the linear relationship between the variables. A lighter and bluer shade indicates a weaker linear relationship, while a darker and redder shade indicates a stronger linear relationship. It's important to note that correlations with a value of 1 are not meaningful as they indicate a relationship between identical variables.
+Several independent variables exhibit a notably strong correlation with each other. This topic will be further explored in the subsequent section that addresses multicollinearity.
+10.1.2 Multicollinearity examination
+The table below displays the Spearman correlations among all the numerical variables in the project. Our aim is to identify variables with multicollinear relationships, specifically when the positive or negative correlation surpasses a threshold of +/-0.7.
+Multicollinearity, in essence, signifies a scenario in which two or more variables included in a model explain similar variances in the dependent variable. This arises when the variables either represent the same content or are extremely similar. Such a situation can introduce bias and compromise the predictive accuracy of models, particularly those founded on the assumption of a linear connection between predictors and the target variable. This also impacts the assessment of their distinctive contributions towards predicting the target variable. This phenomenon is evident in multivariate linear regression, where incorporating variables with multicollinear relationships can lead to distorted estimations.
+var_correlations = pd.DataFrame(columns=['var1','var2','Spearman correlation','p-value'])
+all_num_df = df.drop(columns=df_categorical.columns)
+for i in df_num.columns:
+        for j in df_num.columns:
+            b = "{}/{}".format(i,j)
+            c = "{}/{}".format(j,i)
+            if i != j and i != 'id' :
+                if (c not in var_correlations.index):
+                    mask = ~pd.isna(df_num[i]) & ~pd.isna(df_num[j]) 
+                    a = stats.spearmanr(df_num[i][mask], df_num[j][mask])
+                    var_correlations.loc[b] = [i,j,abs(a[0]),a[1]]
+        
+var_correlations_filtered = var_correlations.loc[(var_correlations['Spearman correlation'] > 0.7) & (var_correlations['p-value'] < 0.05)]
+var_correlations_filtered = var_correlations_filtered.sort_values(by=['Spearman correlation'], ascending=False)
+var_correlations_filtered
+              var1   var2  Spearman correlation  p-value
+tcent/FCENT  tcent  FCENT              0.994665      0.0
+K/FCENT          K  FCENT              0.803612      0.0
+ASP/CYN        ASP    CYN              0.802071      0.0
+tcent/K      tcent      K              0.801710      0.0
+M2a/OBS        M2a    OBS              0.796242      0.0
+BIM/SC         BIM     SC              0.796133      0.0
+CYN/K          CYN      K              0.778764      0.0
+WSD/D1         WSD     D1              0.758602      0.0
+M2a/FCENT      M2a  FCENT              0.745221      0.0
+M2a/tcent      M2a  tcent              0.742833      0.0
+TPA/FCENT      TPA  FCENT              0.737721      0.0
+tcent/TPA    tcent    TPA              0.736897      0.0
+M2a/WRK        M2a    WRK              0.734969      0.0
+M2a/K          M2a      K              0.730484      0.0
+R/FCENT          R  FCENT              0.726162      0.0
+R/tcent          R  tcent              0.721901      0.0
+CYN/FCENT      CYN  FCENT              0.711760      0.0
+CYN/tcent      CYN  tcent              0.710689      0.0
+After EDA analysis, a total numberof 19 multicollinear relationships were found. Variables that exhibit multicollinearity contribute to explaining the same variance in the dependent variable. Additionally, notably, a significant portion of these multicollinear relationships are observed among the personality scales within the MMPI-2 test.**
+These findings bear substantial significance for the later stages of this project. They will be particularly influential during phases such as data enrichment, data engineering, feature selection, and more. As we progress, we will integrate these findings into the model training process. This integration may involve exploratory factor analysis, regression through stepwise methods, creating indices or composite measures for weighting personality scales, and various other approaches.
+The results of these statistical tests will guide our decisions regarding whether to assign weight to multicollinear variables, and if so, which methodology to adopt. Alternatively, based on the outcomes of the tests, we will assess whether omitting multicollinear variables entirely is a more suitable solution, leaving only one representative variable in the dataset. In such cases, we will make informed choices about which variable to retain and which to exclude.
+11. Categor  Dummy Variables internal correlations
+11.1 Dummy Variables Internal Crrelations
+Chi-Square Test
+def cramers_corrected_stat(df):
+    chi2_df = pd.DataFrame(columns=['var1','var2','p-value','Chi2 Statistic'])
+    for i in df:
+        if ((i in df.columns) and i != 'Personality_Disqualification_Dico'):
+            for j in df:
+                if (i in df.columns) and j != 'Personality_Disqualification_Dico' and i < j:
+                    confusion_matrix = pd.crosstab(df[i], df[j])
+                    chi_res = chi2_contingency(confusion_matrix)
+                    b = "{}/{}".format(i,j)
+                    if chi_res[1] < 0.05:
+                        chi2_df.loc[b] = [i,j,chi_res[1],chi_res[0]]
+                    
+    return chi2_df.sort_values(by='p-value')
+
+dummy_internal_corr = cramers_corrected_stat(df_dummy)
+#dummy_internal_corr.head(50)
+dummy_internal_corr = cramers_corrected_stat(df_dummy)
+dummy_internal_corr.head(50).round(3)
+                            var1      var2  p-value  Chi2 Statistic
+M2a_dico/WRK_dico       M2a_dico  WRK_dico      0.0         860.671
+ANX_dico/M2a_dico       ANX_dico  M2a_dico      0.0         836.813
+RT_dico/WRK_dico         RT_dico  WRK_dico      0.0         827.651
+M2a_dico/OBS_dico       M2a_dico  OBS_dico      0.0         791.186
+D1_dico/D4_dico          D1_dico   D4_dico      0.0         693.030
+OBS_dico/WRK_dico       OBS_dico  WRK_dico      0.0         687.362
+M2a_dico/RT_dico        M2a_dico   RT_dico      0.0         669.436
+DEP_dico/FAM_dico       DEP_dico  FAM_dico      0.0         610.477
+D1_dico/D5_dico          D1_dico   D5_dico      0.0         604.617
+DEP_dico/M2a_dico       DEP_dico  M2a_dico      0.0         559.691
+FAM_dico/M2a_dico       FAM_dico  M2a_dico      0.0         542.068
+OBS_dico/RT_dico        OBS_dico   RT_dico      0.0         533.348
+BIM_dico/FAM_dico       BIM_dico  FAM_dico      0.0         532.210
+ANX_dico/OBS_dico       ANX_dico  OBS_dico      0.0         528.190
+D5_dico/DEP_dico         D5_dico  DEP_dico      0.0         521.076
+D4_dico/DEP_dico         D4_dico  DEP_dico      0.0         521.076
+DEP_dico/SE_dico        DEP_dico   SE_dico      0.0         498.793
+M2a_dico/TPA_dico       M2a_dico  TPA_dico      0.0         487.356
+HS_dico/HY_dico          HS_dico   HY_dico      0.0         464.044
+BIZ_dico/SC_dico        BIZ_dico   SC_dico      0.0         459.550
+SE_dico/WRK_dico         SE_dico  WRK_dico      0.0         456.760
+HEA_dico/SC_dico        HEA_dico   SC_dico      0.0         453.179
+DEP_dico/WRK_dico       DEP_dico  WRK_dico      0.0         441.847
+DOE_dico/K_dico         DOE_dico    K_dico      0.0         425.751
+Gender_Dico/MF_dico  Gender_Dico   MF_dico      0.0         418.804
+ANG_dico/M2a_dico       ANG_dico  M2a_dico      0.0         408.252
+BIM_dico/BIZ_dico       BIM_dico  BIZ_dico      0.0         397.527
+RT_dico/SE_dico          RT_dico   SE_dico      0.0         395.564
+D1_dico/PT_dico          D1_dico   PT_dico      0.0         395.438
+BIZ_dico/F_dico         BIZ_dico    F_dico      0.0         393.257
+FCENT_dico/K_dico     FCENT_dico    K_dico      0.0         393.127
+M2a_dico/SE_dico        M2a_dico   SE_dico      0.0         390.376
+BIM_dico/F_dico         BIM_dico    F_dico      0.0         388.115
+BIZ_dico/FAM_dico       BIZ_dico  FAM_dico      0.0         385.018
+FCENT_dico/R_dico     FCENT_dico    R_dico      0.0         383.679
+DEP_dico/RT_dico        DEP_dico   RT_dico      0.0         383.066
+FAM_dico/RT_dico        FAM_dico   RT_dico      0.0         381.873
+BIZ_dico/M2a_dico       BIZ_dico  M2a_dico      0.0         380.217
+ANX_dico/RT_dico        ANX_dico   RT_dico      0.0         378.993
+F_dico/M2a_dico           F_dico  M2a_dico      0.0         377.011
+FAM_dico/WRK_dico       FAM_dico  WRK_dico      0.0         376.803
+D1_dico/D_dico           D1_dico    D_dico      0.0         373.779
+BIM_dico/DEP_dico       BIM_dico  DEP_dico      0.0         365.965
+D4_dico/SE_dico          D4_dico   SE_dico      0.0         364.696
+ANX_dico/WRK_dico       ANX_dico  WRK_dico      0.0         363.124
+D1_dico/DEP_dico         D1_dico  DEP_dico      0.0         348.057
+D5_dico/M2a_dico         D5_dico  M2a_dico      0.0         343.714
+ANX_dico/SE_dico        ANX_dico   SE_dico      0.0         334.303
+ANX_dico/F_dico         ANX_dico    F_dico      0.0         329.678
+FCENT_dico/MA_dico    FCENT_dico   MA_dico      0.0         327.363
+The table shows a distinct relationship between a large number of dummy variables (p<0.05). In the next section we will estimate the strength of the relationship between the independent variables using the Cramers V measure.
+Internal Correlations Strength - Cramer's-V Measure
+import pandas as pd
+import numpy as np
+import scipy.stats as ss
+
+# create the contingency table matrix
+def contingency_table_matrix(df):
+    columns = df.columns
+    matrix = np.zeros((len(columns), len(columns)))
+    for i, col1 in enumerate(columns):
+        for j, col2 in enumerate(columns):
+            contingency_table = pd.crosstab(df[col1], df[col2])
+            chi2, _, _, _ = ss.chi2_contingency(contingency_table)
+            min_categories = min(contingency_table.shape[0], contingency_table.shape[1])
+            n = contingency_table.sum().sum()
+            V = np.sqrt(chi2 / (n * (min_categories - 1)))
+            matrix[i, j] = V
+    return pd.DataFrame(matrix, columns=columns, index=columns)
+
+
+# generate the Cramer's V coefficient matrix
+dummy_cramers = contingency_table_matrix(df_dummy)
+#dummy_cramers.head()
+sorted_dummy_cramers = dummy_cramers.unstack().sort_values(ascending=False);
+sorted_dummy_cramers_filtered = pd.DataFrame(sorted_dummy_cramers);
+sorted_dummy_rename = sorted_dummy_cramers_filtered.rename(columns={0: "Cramers V"}, errors="raise");
+dummy_cramers_final = sorted_dummy_rename[sorted_dummy_rename["Cramers V"] < 1];
+
+dummy_cramers_final['Variables'] = dummy_cramers_final.index;
+
+pd_dummy_cramers_V = pd.DataFrame(dummy_cramers_final, columns=["Variables","Cramers V"]);                     
+pd_dummy_cramers_V.head(100)
+                                          Variables  Cramers V
+R_dico      R_dico                 (R_dico, R_dico)   0.999124
+K_dico      K_dico                 (K_dico, K_dico)   0.999103
+Gender_Dico Gender_Dico  (Gender_Dico, Gender_Dico)   0.999066
+TRIN_dico   TRIN_dico        (TRIN_dico, TRIN_dico)   0.998986
+DOE_dico    DOE_dico           (DOE_dico, DOE_dico)   0.998982
+...                                             ...        ...
+MF_dico     Gender_Dico      (MF_dico, Gender_Dico)   0.426719
+Gender_Dico MF_dico          (Gender_Dico, MF_dico)   0.426719
+M2a_dico    ANG_dico           (M2a_dico, ANG_dico)   0.421308
+ANG_dico    M2a_dico           (ANG_dico, M2a_dico)   0.421308
+BIM_dico    BIZ_dico           (BIM_dico, BIZ_dico)   0.415738
+
+[100 rows x 2 columns]
+Upon calculation of the Cramer's V index, a considerable number of dummy variables exhibit robust relationships, some of which demonstrate the maximum level of effect magnitude. Notably, these strong relationships primarily pertain to the personality scales within the MMPI-2 test. It is apparent that a significant portion of these scales capture similar underlying content.
+The implications of these findings will be duly incorporated into the phases of data enrichment, data engineering, and feature selection. In these stages, a diverse range of techniques will be employed to address the weighting of personality scales, aiming to minimize any potential interference within the prediction models.
+11.2 Categorial Variables Internal Crrelations
+Chi-Square Test
+def cramers_corrected_stat(df):
+    chi2_df = pd.DataFrame(columns=['var1','var2','p-value','Chi2 Statistic'])
+    for i in df:
+        if ((i in df.columns) and i != 'Personality_Disqualification_Dico'):
+            for j in df:
+                if (i in df.columns) and j != 'Personality_Disqualification_Dico' and i < j:
+                    confusion_matrix = pd.crosstab(df[i], df[j])
+                    chi_res = chi2_contingency(confusion_matrix)
+                    b = "{}/{}".format(i,j)
+                    if chi_res[1] < 0.05:
+                        chi2_df.loc[b] = [i,j,chi_res[1],chi_res[0]]
+                    
+    return chi2_df.sort_values(by='p-value')
+
+df_categorical_corr = cramers_corrected_stat(df_categorical)
+df_categorical_corr.head(50).round(3)
+                                                                          var1  \
+Educational_Institution/Rovaee_Training_Type           Educational_Institution   
+Education_Level/Rovaee_Training_Type                           Education_Level   
+Education_Level/Educational_Institution                        Education_Level   
+Assessment_Center_Grade/Designated_Role                Assessment_Center_Grade   
+Designated_Role/Emotional_Inteligence_Test                     Designated_Role   
+Designated_Role/Education_Level                                Designated_Role   
+Designated_Role/Educational_Institution                        Designated_Role   
+Assessment_Center_Grade/Emotional_Inteligence_Test     Assessment_Center_Grade   
+Designated_Role/Rovaee_Training_Type                           Designated_Role   
+Age/Education_Level                                                        Age   
+Designated_Role/Filling_Instruction_Test                       Designated_Role   
+Filling_Instruction_Test/Heberew_Test_Grade           Filling_Instruction_Test   
+Age/Designated_Role                                                        Age   
+Emotional_Inteligence_Test/Filling_Instruction_...  Emotional_Inteligence_Test   
+Assessment_Center_Grade/Education_Level                Assessment_Center_Grade   
+Designated_Role/Heberew_Test_Grade                             Designated_Role   
+Assessment_Center_Grade/Educational_Institution        Assessment_Center_Grade   
+Age/Educational_Institution                                                Age   
+Assessment_Center_Grade/Rovaee_Training_Type           Assessment_Center_Grade   
+Assessment_Center_Grade/Heberew_Test_Grade             Assessment_Center_Grade   
+Education_Level/Filling_Instruction_Test                       Education_Level   
+Education_Level/Heberew_Test_Grade                             Education_Level   
+Filling_Instruction_Test/Rovaee_Training_Type         Filling_Instruction_Test   
+Age/Assessment_Center_Grade                                                Age   
+Assessment_Center_Grade/Filling_Instruction_Test       Assessment_Center_Grade   
+Age/Rovaee_Training_Type                                                   Age   
+Age/Filling_Instruction_Test                                               Age   
+Emotional_Inteligence_Test/Rovaee_Training_Type     Emotional_Inteligence_Test   
+Emotional_Inteligence_Test/Heberew_Test_Grade       Emotional_Inteligence_Test   
+Educational_Institution/Heberew_Test_Grade             Educational_Institution   
+Education_Level/Emotional_Inteligence_Test                     Education_Level   
+Educational_Institution/Filling_Instruction_Test       Educational_Institution   
+Educational_Institution/Emotional_Inteligence_Test     Educational_Institution   
+Heberew_Test_Grade/Rovaee_Training_Type                     Heberew_Test_Grade   
+Age/Emotional_Inteligence_Test                                             Age   
+Age/Heberew_Test_Grade                                                     Age   
+
+                                                                          var2  \
+Educational_Institution/Rovaee_Training_Type              Rovaee_Training_Type   
+Education_Level/Rovaee_Training_Type                      Rovaee_Training_Type   
+Education_Level/Educational_Institution                Educational_Institution   
+Assessment_Center_Grade/Designated_Role                        Designated_Role   
+Designated_Role/Emotional_Inteligence_Test          Emotional_Inteligence_Test   
+Designated_Role/Education_Level                                Education_Level   
+Designated_Role/Educational_Institution                Educational_Institution   
+Assessment_Center_Grade/Emotional_Inteligence_Test  Emotional_Inteligence_Test   
+Designated_Role/Rovaee_Training_Type                      Rovaee_Training_Type   
+Age/Education_Level                                            Education_Level   
+Designated_Role/Filling_Instruction_Test              Filling_Instruction_Test   
+Filling_Instruction_Test/Heberew_Test_Grade                 Heberew_Test_Grade   
+Age/Designated_Role                                            Designated_Role   
+Emotional_Inteligence_Test/Filling_Instruction_...    Filling_Instruction_Test   
+Assessment_Center_Grade/Education_Level                        Education_Level   
+Designated_Role/Heberew_Test_Grade                          Heberew_Test_Grade   
+Assessment_Center_Grade/Educational_Institution        Educational_Institution   
+Age/Educational_Institution                            Educational_Institution   
+Assessment_Center_Grade/Rovaee_Training_Type              Rovaee_Training_Type   
+Assessment_Center_Grade/Heberew_Test_Grade                  Heberew_Test_Grade   
+Education_Level/Filling_Instruction_Test              Filling_Instruction_Test   
+Education_Level/Heberew_Test_Grade                          Heberew_Test_Grade   
+Filling_Instruction_Test/Rovaee_Training_Type             Rovaee_Training_Type   
+Age/Assessment_Center_Grade                            Assessment_Center_Grade   
+Assessment_Center_Grade/Filling_Instruction_Test      Filling_Instruction_Test   
+Age/Rovaee_Training_Type                                  Rovaee_Training_Type   
+Age/Filling_Instruction_Test                          Filling_Instruction_Test   
+Emotional_Inteligence_Test/Rovaee_Training_Type           Rovaee_Training_Type   
+Emotional_Inteligence_Test/Heberew_Test_Grade               Heberew_Test_Grade   
+Educational_Institution/Heberew_Test_Grade                  Heberew_Test_Grade   
+Education_Level/Emotional_Inteligence_Test          Emotional_Inteligence_Test   
+Educational_Institution/Filling_Instruction_Test      Filling_Instruction_Test   
+Educational_Institution/Emotional_Inteligence_Test  Emotional_Inteligence_Test   
+Heberew_Test_Grade/Rovaee_Training_Type                   Rovaee_Training_Type   
+Age/Emotional_Inteligence_Test                      Emotional_Inteligence_Test   
+Age/Heberew_Test_Grade                                      Heberew_Test_Grade   
+
+                                                    p-value  Chi2 Statistic  
+Educational_Institution/Rovaee_Training_Type          0.000        2131.240  
+Education_Level/Rovaee_Training_Type                  0.000        2229.078  
+Education_Level/Educational_Institution               0.000        3464.213  
+Assessment_Center_Grade/Designated_Role               0.000        1392.801  
+Designated_Role/Emotional_Inteligence_Test            0.000         899.847  
+Designated_Role/Education_Level                       0.000         677.009  
+Designated_Role/Educational_Institution               0.000         627.581  
+Assessment_Center_Grade/Emotional_Inteligence_Test    0.000         520.949  
+Designated_Role/Rovaee_Training_Type                  0.000         705.108  
+Age/Education_Level                                   0.000         357.699  
+Designated_Role/Filling_Instruction_Test              0.000         444.763  
+Filling_Instruction_Test/Heberew_Test_Grade           0.000         316.526  
+Age/Designated_Role                                   0.000         414.399  
+Emotional_Inteligence_Test/Filling_Instruction_...    0.000         310.211  
+Assessment_Center_Grade/Education_Level               0.000         266.850  
+Designated_Role/Heberew_Test_Grade                    0.000         261.297  
+Assessment_Center_Grade/Educational_Institution       0.000         224.996  
+Age/Educational_Institution                           0.000         218.026  
+Assessment_Center_Grade/Rovaee_Training_Type          0.000         285.838  
+Assessment_Center_Grade/Heberew_Test_Grade            0.000         150.311  
+Education_Level/Filling_Instruction_Test              0.000         159.091  
+Education_Level/Heberew_Test_Grade                    0.000         113.566  
+Filling_Instruction_Test/Rovaee_Training_Type         0.000         232.055  
+Age/Assessment_Center_Grade                           0.000         147.895  
+Assessment_Center_Grade/Filling_Instruction_Test      0.000         146.061  
+Age/Rovaee_Training_Type                              0.000         222.195  
+Age/Filling_Instruction_Test                          0.000         139.202  
+Emotional_Inteligence_Test/Rovaee_Training_Type       0.000         211.223  
+Emotional_Inteligence_Test/Heberew_Test_Grade         0.000          97.541  
+Educational_Institution/Heberew_Test_Grade            0.000          76.483  
+Education_Level/Emotional_Inteligence_Test            0.000          95.390  
+Educational_Institution/Filling_Instruction_Test      0.000          83.076  
+Educational_Institution/Emotional_Inteligence_Test    0.000          76.145  
+Heberew_Test_Grade/Rovaee_Training_Type               0.000          93.813  
+Age/Emotional_Inteligence_Test                        0.000          54.988  
+Age/Heberew_Test_Grade                                0.001          31.318  
+Internal Correlations Strength - Cramer's-V Measure
+import pandas as pd
+import numpy as np
+import scipy.stats as ss
+
+# create the contingency table matrix
+def contingency_table_matrix(df):
+    columns = df.columns
+    matrix = np.zeros((len(columns), len(columns)))
+    for i, col1 in enumerate(columns):
+        for j, col2 in enumerate(columns):
+            contingency_table = pd.crosstab(df[col1], df[col2])
+            chi2, _, _, _ = ss.chi2_contingency(contingency_table)
+            min_categories = min(contingency_table.shape[0], contingency_table.shape[1])
+            n = contingency_table.sum().sum()
+            V = np.sqrt(chi2 / (n * (min_categories - 1)))
+            matrix[i, j] = V
+    return pd.DataFrame(matrix, columns=columns, index=columns)
+
+
+# generate the Cramer's V coefficient matrix
+categorical_cramers = contingency_table_matrix(df_categorical)
+#dummy_cramers.head()
+Not surprisingly, a robust correlation was identified between the type of educational institution and the level of education. Additionally, a moderately strong association emerged between the educational institution and the type of rifle. Given these results, it is advisable to explore the feasibility of applying weighting techniques or considering the retention of either the educational institution variable or the education level variable within the dataset. This step aims to ensure that the interrelatedness of these variables does not lead to redundant information or potential multicollinearity issues in subsequent analyses.
+sorted_categorical_cramers = categorical_cramers.unstack().sort_values(ascending=False);
+sorted_categorical_cramers_filtered = pd.DataFrame(sorted_categorical_cramers);
+sorted_categorical_rename = sorted_categorical_cramers_filtered.rename(columns={0: "Cramers V"}, errors="raise");
+categorical_cramers_final = sorted_categorical_rename[sorted_categorical_rename["Cramers V"] < 1];
+
+categorical_cramers_final['Variables'] = categorical_cramers_final.index;
+
+pd_categorical_cramers_V = pd.DataFrame(categorical_cramers_final, columns=["Variables","Cramers V"]);                     
+pd_categorical_cramers_V.head(30)
+                                                                                                             Variables  \
+Assessment_Center_Grade           Assessment_Center_Grade            (Assessment_Center_Grade, Assessment_Center_Gr...   
+Education_Level                   Education_Level                                   (Education_Level, Education_Level)   
+Personality_Disqualification_Dico Personality_Disqualification_Dico  (Personality_Disqualification_Dico, Personalit...   
+Education_Level                   Educational_Institution                   (Education_Level, Educational_Institution)   
+Educational_Institution           Education_Level                           (Educational_Institution, Education_Level)   
+Rovaee_Training_Type              Educational_Institution              (Rovaee_Training_Type, Educational_Institution)   
+Educational_Institution           Rovaee_Training_Type                 (Educational_Institution, Rovaee_Training_Type)   
+Rovaee_Training_Type              Education_Level                              (Rovaee_Training_Type, Education_Level)   
+Education_Level                   Rovaee_Training_Type                         (Education_Level, Rovaee_Training_Type)   
+Assessment_Center_Grade           Designated_Role                           (Assessment_Center_Grade, Designated_Role)   
+Designated_Role                   Assessment_Center_Grade                   (Designated_Role, Assessment_Center_Grade)   
+Educational_Institution           Designated_Role                           (Educational_Institution, Designated_Role)   
+Designated_Role                   Educational_Institution                   (Designated_Role, Educational_Institution)   
+Emotional_Inteligence_Test        Designated_Role                        (Emotional_Inteligence_Test, Designated_Role)   
+Designated_Role                   Emotional_Inteligence_Test             (Designated_Role, Emotional_Inteligence_Test)   
+                                  Personality_Disqualification_Dico  (Designated_Role, Personality_Disqualification...   
+Personality_Disqualification_Dico Designated_Role                    (Personality_Disqualification_Dico, Designated...   
+Education_Level                   Designated_Role                                   (Education_Level, Designated_Role)   
+Designated_Role                   Education_Level                                   (Designated_Role, Education_Level)   
+Filling_Instruction_Test          Heberew_Test_Grade                    (Filling_Instruction_Test, Heberew_Test_Grade)   
+Heberew_Test_Grade                Filling_Instruction_Test              (Heberew_Test_Grade, Filling_Instruction_Test)   
+Personality_Disqualification_Dico Assessment_Center_Grade            (Personality_Disqualification_Dico, Assessment...   
+Assessment_Center_Grade           Personality_Disqualification_Dico  (Assessment_Center_Grade, Personality_Disquali...   
+Heberew_Test_Grade                Designated_Role                                (Heberew_Test_Grade, Designated_Role)   
+Designated_Role                   Heberew_Test_Grade                             (Designated_Role, Heberew_Test_Grade)   
+Assessment_Center_Grade           Emotional_Inteligence_Test         (Assessment_Center_Grade, Emotional_Inteligenc...   
+Emotional_Inteligence_Test        Assessment_Center_Grade            (Emotional_Inteligence_Test, Assessment_Center...   
+Education_Level                   Age                                                           (Education_Level, Age)   
+Age                               Education_Level                                               (Age, Education_Level)   
+Designated_Role                   Filling_Instruction_Test                 (Designated_Role, Filling_Instruction_Test)   
+
+                                                                     Cramers V  
+Assessment_Center_Grade           Assessment_Center_Grade             1.000000  
+Education_Level                   Education_Level                     1.000000  
+Personality_Disqualification_Dico Personality_Disqualification_Dico   0.997391  
+Education_Level                   Educational_Institution             0.708562  
+Educational_Institution           Education_Level                     0.708562  
+Rovaee_Training_Type              Educational_Institution             0.555766  
+Educational_Institution           Rovaee_Training_Type                0.555766  
+Rovaee_Training_Type              Education_Level                     0.492231  
+Education_Level                   Rovaee_Training_Type                0.492231  
+Assessment_Center_Grade           Designated_Role                     0.348013  
+Designated_Role                   Assessment_Center_Grade             0.348013  
+Educational_Institution           Designated_Role                     0.301585  
+Designated_Role                   Educational_Institution             0.301585  
+Emotional_Inteligence_Test        Designated_Role                     0.279728  
+Designated_Role                   Emotional_Inteligence_Test          0.279728  
+                                  Personality_Disqualification_Dico   0.275201  
+Personality_Disqualification_Dico Designated_Role                     0.275201  
+Education_Level                   Designated_Role                     0.271271  
+Designated_Role                   Education_Level                     0.271271  
+Filling_Instruction_Test          Heberew_Test_Grade                  0.262317  
+Heberew_Test_Grade                Filling_Instruction_Test            0.262317  
+Personality_Disqualification_Dico Assessment_Center_Grade             0.257146  
+Assessment_Center_Grade           Personality_Disqualification_Dico   0.257146  
+Heberew_Test_Grade                Designated_Role                     0.238335  
+Designated_Role                   Heberew_Test_Grade                  0.238335  
+Assessment_Center_Grade           Emotional_Inteligence_Test          0.212838  
+Emotional_Inteligence_Test        Assessment_Center_Grade             0.212838  
+Education_Level                   Age                                 0.197181  
+Age                               Education_Level                     0.197181  
+Designated_Role                   Filling_Instruction_Test            0.196660  
+--- Chapter 8 Summary ---
+The findings of these chapters show that a large number of variables within the data have multicollinear relationships, especially variables related to the MMPI-2 personality test scales. These variables are strongly related to each other and may lead to a bias in the results of some models. In order to address this problem, it will be necessary to examine different solutions to weight / remove multicollinear variables from the data frame.
+The way of handling the multicollinear variables will be determined according to the statistical analyzes that will be conducted later, such as - probe factor analysis / weighting by average / creation of an index / creation of an integrative index according to Spearman weights or according to coefficient b in logistic regression / creation of interaction variables and the like. It is important to note that the method of solution is also related to the level of measurement of the variables between which a weighting will be carried out (for example - factor analysis is not suitable for variables on an ordinal scale).
+Main multicollinear variables:
+•	Most personality scales (Dummy & Numerical)
+•	Educational_Institution / Education_Level
+•	Cognitive_Ability_Test / Filling_Instruction_Test
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Job Selection Processes Predictors :
+df_selection_process = pd.DataFrame(df, columns=['Morals_and_Values_Test', 'Assessment_Center_Grade', 'Honesty_Test', 'Recruit_Quality_Measure_Score', 'Cognitive_Ability_Test', 'Filling_Instruction_Test', 'Heberew_Test_Grade', 'Years_of_Education', 'Emotional_Inteligence_Test', 'Job_Interview_Grade', 'Personality_Disqualification_Dico'])
+plt.figure(figsize= (5,10))
+sns.heatmap(df_selection_process.corr()[['Personality_Disqualification_Dico']].sort_values(by='Personality_Disqualification_Dico', ascending=False), vmin=-1, vmax=1, annot=True, cmap='coolwarm')
+<AxesSubplot:>
+ 
+MMPI-2 Personality Scsles
+df_num_MMPI = df_num
+df_num_MMPI = df_num_MMPI.drop(columns=['Morals_and_Values_Test', 'Cognitive_Ability_Test', 'Years_of_Education', 'Job_Interview_Grade'])
+plt.figure(figsize= (5,10))
+sns.heatmap(df_num_MMPI.corr()[['Personality_Disqualification_Dico']].sort_values(by='Personality_Disqualification_Dico', ascending=False), vmin=-1, vmax=1, annot=True, cmap='coolwarm')
+<AxesSubplot:>
+ 
+After the EDA analysis, it is possible to see a slight decrease in the strength of the correlations between the independent variables in the project on the target factor. Finding a decrease in the correlation strengths may be due, among other things, to the omission of extreme values.
+12.2 Correlations Between The Dummy and The Categor Variables With the Outcome Variable
+12.2.1 Dummy Variables - Chi-Squre test
+def cramers_corrected_stat(df):
+    chi2_df = pd.DataFrame(columns=['var1','var2','p-value','Chi2 Statistic'])
+    for i in df:
+        if ((i in df.columns) and i != 'Personality_Disqualification_Dico'):
+            for j in df:
+                    confusion_matrix = pd.crosstab(df[i], df[j])
+                    chi_res = chi2_contingency(confusion_matrix)
+                    b = "{}/{}".format(i,j)
+                    if chi_res[1] < 0.05:
+                        chi2_df.loc[b] = [i,j,chi_res[1],chi_res[0]]
+                    
+    return chi2_df.sort_values(by='p-value')
+
+chi2_df = cramers_corrected_stat(df_dummy)
+chi2_df_filtered_1 = pd.DataFrame.from_records(chi2_df);
+chi2_df_filtered_2 = chi2_df_filtered_1[chi2_df_filtered_1.var2=='Personality_Disqualification_Dico'];
+
+chi2_df_filtered_3 = chi2_df_filtered_2.rename(columns={"var1": "Dummy variable", "var2" :"Outcome variable"}, errors="raise");
+chi2_df_filtered_3.round(2)
+     Dummy variable                   Outcome variable  p-value  \
+654         PT_dico  Personality_Disqualification_Dico     0.00   
+681         PD_dico  Personality_Disqualification_Dico     0.00   
+770        FAM_dico  Personality_Disqualification_Dico     0.00   
+793        HEA_dico  Personality_Disqualification_Dico     0.00   
+800        ANX_dico  Personality_Disqualification_Dico     0.00   
+899        MDS_dico  Personality_Disqualification_Dico     0.00   
+932         D1_dico  Personality_Disqualification_Dico     0.00   
+939        ASP_dico  Personality_Disqualification_Dico     0.00   
+978          F_dico  Personality_Disqualification_Dico     0.00   
+989         SC_dico  Personality_Disqualification_Dico     0.00   
+994        M2a_dico  Personality_Disqualification_Dico     0.00   
+1011       BIM_dico  Personality_Disqualification_Dico     0.00   
+1018      VRIN_dico  Personality_Disqualification_Dico     0.00   
+1035        D4_dico  Personality_Disqualification_Dico     0.00   
+1042       WRK_dico  Personality_Disqualification_Dico     0.00   
+1055    Gender_Dico  Personality_Disqualification_Dico     0.00   
+1058       DEP_dico  Personality_Disqualification_Dico     0.00   
+1065        HS_dico  Personality_Disqualification_Dico     0.00   
+1070       OBS_dico  Personality_Disqualification_Dico     0.00   
+1079       BIZ_dico  Personality_Disqualification_Dico     0.00   
+1116        PA_dico  Personality_Disqualification_Dico     0.00   
+1121        RT_dico  Personality_Disqualification_Dico     0.00   
+1136       ANG_dico  Personality_Disqualification_Dico     0.00   
+1157        SE_dico  Personality_Disqualification_Dico     0.00   
+1252     FCENT_dico  Personality_Disqualification_Dico     0.00   
+1267         D_dico  Personality_Disqualification_Dico     0.00   
+1286        HY_dico  Personality_Disqualification_Dico     0.00   
+1307        D3_dico  Personality_Disqualification_Dico     0.00   
+1344       SOD_dico  Personality_Disqualification_Dico     0.00   
+1349        RS_dico  Personality_Disqualification_Dico     0.00   
+1370        D2_dico  Personality_Disqualification_Dico     0.00   
+1435         K_dico  Personality_Disqualification_Dico     0.00   
+1470        MA_dico  Personality_Disqualification_Dico     0.00   
+1509        FP_dico  Personality_Disqualification_Dico     0.00   
+1526       TPA_dico  Personality_Disqualification_Dico     0.00   
+1583       CYN_dico  Personality_Disqualification_Dico     0.01   
+1610         R_dico  Personality_Disqualification_Dico     0.01   
+1611        D5_dico  Personality_Disqualification_Dico     0.01   
+1620         L_dico  Personality_Disqualification_Dico     0.02   
+1669        MF_dico  Personality_Disqualification_Dico     0.03   
+1672       AAS_dico  Personality_Disqualification_Dico     0.03   
+1705        ES_dico  Personality_Disqualification_Dico     0.05   
+
+      Chi2 Statistic  
+654            82.22  
+681            76.55  
+770            64.15  
+793            61.43  
+800            60.95  
+899            49.29  
+932            46.41  
+939            46.18  
+978            42.14  
+989            41.09  
+994            40.66  
+1011           38.79  
+1018           38.35  
+1035           37.10  
+1042           36.62  
+1055           34.47  
+1058           34.26  
+1065           34.06  
+1070           33.87  
+1079           32.74  
+1116           29.89  
+1121           29.40  
+1136           28.78  
+1157           26.92  
+1252           20.31  
+1267           19.54  
+1286           18.27  
+1307           17.20  
+1344           15.26  
+1349           14.83  
+1370           14.15  
+1435           10.96  
+1470            9.57  
+1509            8.45  
+1526            7.90  
+1583            6.52  
+1610            6.08  
+1611            6.06  
+1620            5.85  
+1669            4.78  
+1672            4.70  
+1705            3.91  
+significant relationship was found between all of the dichotomous research variables and the outcome factor (p>0.05-0.001). Under the large sample of participants, the significance of statistical significance is limited, since significant differences may be obtained even given low, and sometimes negligible, effect sizes. Therefore, using the Cramers V index, in the next section we will examine the strength of the relationships between the predictors and the target factor.
+12.2.2 Dummy Variables - Cramers V (correlation strength)
+cramers_results_dummy_final = dummy_cramers.Personality_Disqualification_Dico
+print(cramers_results_dummy_final)
+Gender_Dico                          0.122423
+M2a_dico                             0.132959
+ASP_dico                             0.141704
+R_dico                               0.051428
+CYN_dico                             0.053238
+BIM_dico                             0.129862
+PA_dico                              0.113991
+AAS_dico                             0.045183
+tcent_dico                           0.016175
+OBS_dico                             0.121359
+MDS_dico                             0.146386
+TPA_dico                             0.058625
+BIZ_dico                             0.119317
+ANG_dico                             0.111871
+DEP_dico                             0.122047
+K_dico                               0.069025
+SOD_dico                             0.081468
+D_dico                               0.092178
+D1_dico                              0.142044
+D2_dico                              0.078440
+D3_dico                              0.086481
+D4_dico                              0.127009
+D5_dico                              0.051318
+MF_dico                              0.045567
+DOE_dico                             0.008886
+PT_dico                              0.189067
+ANX_dico                             0.162790
+F_dico                               0.135355
+SC_dico                              0.133660
+HEA_dico                             0.163431
+FP_dico                              0.060598
+HS_dico                              0.121688
+FAM_dico                             0.167006
+PD_dico                              0.182434
+ES_dico                              0.041228
+FCENT_dico                           0.093980
+WRK_dico                             0.126180
+HY_dico                              0.089116
+L_dico                               0.050418
+MA_dico                              0.064518
+SE_dico                              0.108180
+RT_dico                              0.113068
+TRIN_dico                            0.002650
+VRIN_dico                            0.129124
+CR_dico                              0.039535
+RS_dico                              0.080285
+Personality_Disqualification_Dico    0.997391
+Name: Personality_Disqualification_Dico, dtype: float64
+While a significant relationship was found between all of the dichotomous research variables and the outcome factor (p>0.05-0.001), the Cramers V index was found to be of negligible to low power in relation to all predictors. This result shows that each individual factor has a limited contribution in predicting the target factor. As part of the data enrichment and data engineering stages, we will try to examine different methods of weighting / creating different combinations between the variables and try to create a whole that is greater than the sum of its parts.
+---------------------------------------------------------------------------------------------------------------
+12.2.3 Chi-Squre test - examine the correlation between categor predictors and the outcome variable
+### Designated Role ###
+crosstab, test_results, expected = rp.crosstab(df_categorical["Designated_Role"], df_categorical["Personality_Disqualification_Dico"],
+test= "chi-square", expected_freqs= True, prop= "cell")
+print(crosstab)
+############################
+test_results
+                                  Personality_Disqualification_Dico        \
+Personality_Disqualification_Dico                               0.0   1.0   
+Designated_Role                                                             
+Border Guard fighters                                         14.70  4.87   
+Control center volunteers                                      0.83  0.04   
+Police dispatchers                                             1.35  0.13   
+Traffic cops                                                   0.74  0.00   
+administrative nagad                                           8.70  0.74   
+administrative officer                                         2.48  0.00   
+intelligence                                                   0.74  0.00   
+missing                                                        5.96  0.48   
+operational core units                                        49.96  2.83   
+operational officer                                            0.39  0.00   
+prosecutor                                                     3.30  0.09   
+special unit                                                   1.70  0.00   
+All                                                           90.83  9.17   
+
+                                           
+Personality_Disqualification_Dico     All  
+Designated_Role                            
+Border Guard fighters               19.57  
+Control center volunteers            0.87  
+Police dispatchers                   1.48  
+Traffic cops                         0.74  
+administrative nagad                 9.43  
+administrative officer               2.48  
+intelligence                         0.74  
+missing                              6.43  
+operational core units              52.78  
+operational officer                  0.39  
+prosecutor                           3.39  
+special unit                         1.70  
+All                                100.00  
+                 Chi-square test   results
+0  Pearson Chi-square ( 11.0) =   174.1917
+1                     p-value =     0.0000
+2                  Cramer's V =     0.2752
+---------------------------------------------------------------------------------------------------------------
+####### Education Level #######
+crosstab, test_results, expected = rp.crosstab(df_categorical["Education_Level"], df_categorical["Personality_Disqualification_Dico"],
+test= "chi-square", expected_freqs= True, prop= "cell")
+print(crosstab)
+############################
+test_results
+                                  Personality_Disqualification_Dico        \
+Personality_Disqualification_Dico                               0.0   1.0   
+Education_Level                                                             
+Academic education                                            15.26  0.65   
+complete_bagrot                                               20.52  1.57   
+diploma                                                        3.91  0.48   
+missing                                                       36.83  4.78   
+without_bagrot                                                14.30  1.70   
+All                                                           90.83  9.17   
+
+                                           
+Personality_Disqualification_Dico     All  
+Education_Level                            
+Academic education                  15.91  
+complete_bagrot                     22.09  
+diploma                              4.39  
+missing                             41.61  
+without_bagrot                      16.00  
+All                                100.00  
+                Chi-square test  results
+0  Pearson Chi-square ( 4.0) =   21.4086
+1                    p-value =    0.0003
+2                 Cramer's V =    0.0965
+---------------------------------------------------------------------------------------------------------------
+####### Educational Institution #######
+crosstab, test_results, expected = rp.crosstab(df_categorical["Educational_Institution"], df_categorical["Personality_Disqualification_Dico"],
+test= "chi-square", expected_freqs= True, prop= "cell")
+print(crosstab)
+############################
+test_results
+                                  Personality_Disqualification_Dico        \
+Personality_Disqualification_Dico                               0.0   1.0   
+Educational_Institution                                                     
+college                                                       12.17  0.78   
+missing                                                       37.04  4.87   
+other                                                         39.91  3.52   
+university                                                     1.70  0.00   
+All                                                           90.83  9.17   
+
+                                           
+Personality_Disqualification_Dico     All  
+Educational_Institution                    
+college                             12.96  
+missing                             41.91  
+other                               43.43  
+university                           1.70  
+All                                100.00  
+                Chi-square test  results
+0  Pearson Chi-square ( 3.0) =   15.7256
+1                    p-value =    0.0013
+2                 Cramer's V =    0.0827
+---------------------------------------------------------------------------------------------------------------
+####### Rovaee Training_Type #######
+crosstab, test_results, expected = rp.crosstab(df_categorical["Rovaee_Training_Type"], df_categorical["Personality_Disqualification_Dico"],
+test= "chi-square", expected_freqs= True, prop= "cell")
+print(crosstab)
+############################
+test_results
+                                  Personality_Disqualification_Dico        \
+Personality_Disqualification_Dico                               0.0   1.0   
+Rovaee_Training_Type                                                        
+missing                                                       33.78  4.30   
+rovaee 0                                                      13.04  0.78   
+rovaee 1                                                       0.48  0.00   
+rovaee 10                                                      0.39  0.00   
+rovaee 12                                                      0.74  0.04   
+rovaee 13                                                      0.04  0.00   
+rovaee 2                                                      17.30  0.96   
+rovaee 3                                                       5.43  0.13   
+rovaee 4                                                       0.48  0.09   
+rovaee 5                                                       6.22  1.26   
+rovaee 6                                                       1.52  0.26   
+rovaee 7                                                       7.70  0.96   
+rovaee 8                                                       3.65  0.39   
+rovaee 9                                                       0.04  0.00   
+All                                                           90.83  9.17   
+
+                                           
+Personality_Disqualification_Dico     All  
+Rovaee_Training_Type                       
+missing                             38.09  
+rovaee 0                            13.83  
+rovaee 1                             0.48  
+rovaee 10                            0.39  
+rovaee 12                            0.78  
+rovaee 13                            0.04  
+rovaee 2                            18.26  
+rovaee 3                             5.57  
+rovaee 4                             0.57  
+rovaee 5                             7.48  
+rovaee 6                             1.78  
+rovaee 7                             8.65  
+rovaee 8                             4.04  
+rovaee 9                             0.04  
+All                                100.00  
+                 Chi-square test  results
+0  Pearson Chi-square ( 13.0) =   42.0882
+1                     p-value =    0.0001
+2                  Cramer's V =    0.1353
+---------------------------------------------------------------------------------------------------------------
+After EDA, A statistically significant relationship was observed between Designated_Role, Educational_Institution, Education_Level, Rovaee_Training_Type, and Personality_Disqualification (p < 0.05 - 0.001).
+To assess the strength of these relationships more comprehensively, we used Cramers V index. This index revealed weak to modearte effect size regarding the Designated_Role (Cramers V = 0.275, p<0.001) in predicting the personality disqualification. On the other hand, in the other variables the size of the effect was found to be negligible to low only.
+---------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Outliers and Missing Values Examinatios
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+13. Outliers Examintion
+The plotted charts depict the interquartile range (IQR) of the data. The height of the blue box represents the observations within the interquartile range, which spans from the first quartile (q1) to the third quartile (q3). The vertical lines extending from the box denote the maximum and minimum points of the distribution. For each relevant variable, the blue box showcases the distribution's central tendency. The points outside the vertical lines are considered extreme values in the variable.
+The continuous variables in the project are categorized into three main groups: socio-demographic factors, selection test factors, and MMPI-2 personality scales. To facilitate clarity, the box plot charts will be presented separately for each of these three factor groups.
+The project continuous variables divided into three main groups: socio-demographic factors; selection test factors; MMPI-2 personality scales. For convenience, the box plot charts will be presented separately for each of the three groups of factors.
+13.1 Division to Factors Groups
+socio_demographic_plots = df[['Years_of_Education']].copy()
+selection_test_plots = df[['Cognitive_Ability_Test', 'Morals_and_Values_Test', 'Job_Interview_Grade']].copy()
+MMPI_2_scales_plots = df[df_num.columns[~df_num.columns.isin(['Assessment_Center_Grade', 'Cognitive_Ability_Test', 'Morals_and_Values_Test', 'Job_Interview_Grade', 'Heberew_Test_Grade', 'Filling_Instruction_Test', 'Emotional_Inteligence_Test', 'Recruit_Quality_Measure_Score', 'Honesty_Test', 'Honesty_Test', 'Years_of_Education', 'Age', 'Personality_Disqualification_Dico', 'Q'])]]
+13.1.1 Socio-demographic factors
+The chart is not shown with respect to the age variable because this variable was converted to categorical (---as part of the missing values completion process---).
+It can be seen that after the omission of the extreme values, the range of the variable is concentrated between a minimum age of 18 and a maximum age of 22. Before the omission of the extreme values, the age range reached up to 65
+plt.figure(figsize=(20,200))
+
+def outliers_boxplot(socio_demographic_plots):
+    for i, col in enumerate(socio_demographic_plots.columns):
+        ax = plt.subplot(60, 3, i+1)
+        sns.boxplot(data=df, x=col, ax=ax)
+        plt.subplots_adjust(hspace = 0.7)
+        plt.title('Box Plot: {}'.format(col), fontsize=15)
+        plt.xlabel('{}'.format(col), fontsize=14)
+        
+outliers_boxplot(socio_demographic_plots)
+ 
+As can be seen in the two charts above, extreme values were found in the two continuous socio-demographic factors
+13.1.2 Selection test plots
+selection_test_plots.head()
+   Cognitive_Ability_Test  Morals_and_Values_Test  Job_Interview_Grade
+0                     7.0                     4.0                  4.0
+1                     6.0                     1.0                  4.0
+2                     9.0                     1.0                  5.0
+3                     6.0                     2.0                  5.0
+4                     7.0                     5.0                  5.0
+Extreme values remained in the variables --- because in the EDA analysis it was found that extreme values should not be omitted for these variables (due to the change in the distribution of the variable and the nature of the relationship with the dependent variable in the project following the omission of extreme values).
+As indicated, Box plots are not shown for many numeric variables, as they were converted to categorical variables as part of the missing value completion process.
+plt.figure(figsize=(20,200))
+
+def outliers_boxplot(selection_test_plots):
+    for i, col in enumerate(selection_test_plots.columns):
+        ax = plt.subplot(60, 3, i+1)
+        sns.boxplot(data=df, x=col, ax=ax)
+        plt.subplots_adjust(hspace = 0.7)
+        plt.title('Box Plot: {}'.format(col), fontsize=15)
+        plt.xlabel('{}'.format(col), fontsize=14)
+        
+outliers_boxplot(selection_test_plots)
+ 
+13.1.3 MMPI-2 scales plots
+plt.figure(figsize=(20,200))
+
+def outliers_boxplot(MMPI_2_scales_plots):
+    for i, col in enumerate(MMPI_2_scales_plots.columns):
+        ax = plt.subplot(60, 3, i+1)
+        sns.boxplot(data=df, x=col, ax=ax)
+        plt.subplots_adjust(hspace = 0.7)
+        plt.title('Box Plot: {}'.format(col), fontsize=15)
+        plt.xlabel('{}'.format(col), fontsize=14)
+        
+outliers_boxplot(MMPI_2_scales_plots)
+ 
+Important Note :
+In a conscientious effort to prevent biases that could potentially lead to issues like overfitting and generalization challenges, it is advisable to consider omitting extreme values from the research variables. However, exercising discretion is crucial in this regard, taking into account the inherent characteristics of the predictor variable, the data type under examination, and the intricate relationship between the independent variables and the dependent variable.
+It's worth noting that after extensive consultation with key stakeholders, including the head of the police research unit at the "DBS" (Department of Behavioral Sciences) and senior PhD researchers within the selection and behavioral sciences departments at the Israel Police, a unanimous consensus was reached. Omitting extreme values from the MMPI-2 test scales was deemed incongruent with the purpose and essence of these scales.
+In the context of evaluating candidate disqualification based on personality mismatch, an essential criterion is the identification of abnormal scores on personality scales. A significant number of candidates who are disqualified during the police selection process due to personality incompatibility exhibit extreme or abnormal scores on the MMPI-2 personality scales.
+Considering this, the exclusion of extreme values from the MMPI-2 personality scales would undermine their utility in pinpointing candidates with elevated scores—a core objective in the selection process. Hence, since the rationale behind the application of personality scales would be compromised by their omission, it was concluded that such omission is unwarranted.
+Given the importance of these scales and their integral role in assessing candidate suitability, the decision was made not to omit extreme values from the MMPI-2 personality scales within the research variables. This decision stands irrespective of any potential impact on the distribution of the variable or its relationship with the dependent variable.
+14. Missing Values Examintions
+14.1 Number  proportion of missing values among project variables
+df2.isnull().sum().sort_values(ascending=False)
+Unnamed: 0              0
+SE                      0
+D4_dico                 0
+D3_dico                 0
+D2_dico                 0
+                       ..
+D                       0
+SOD                     0
+K                       0
+DIS                     0
+Rovaee_Training_Type    0
+Length: 113, dtype: int64
+Following the imputation of missing values using the K-Nearest Neighbors algorithm, mode and the inclusion of missing values as a distinct category in cases where imputation was not feasible, the data frame is now entirely devoid of any missing values. This rigorous process has effectively addressed any gaps in the dataset, ensuring a comprehensive and complete dataset for analysis.
+----------------------------------------------------------------------------------RE-RUN AFTER EDA STAGE END--------------------------------------------------------------------------------
