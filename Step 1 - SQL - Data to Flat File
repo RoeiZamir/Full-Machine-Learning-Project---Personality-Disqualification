@@ -1,0 +1,367 @@
+USE Personality_1;
+
+CREATE DATABASE Personality_1;
+
+_________________________________________________________________________
+
+--Import data (Tasks - Import Flat File)
+_________________________________________________________________________
+
+SELECT * FROM dbo.SSS
+
+
+SELECT * FROM dbo.Army_service_predictors_a
+
+SELECT * FROM dbo.MMPI2_personality_scales_a
+
+SELECT * FROM dbo.Personality_Disqualification_Outcome_Factor_a
+
+SELECT * FROM dbo.Selection_Process_Predictors_a
+
+SELECT * FROM dbo.Socio_demographics_predictors_a
+
+_________________________________________________________________________
+
+--Recoding binary variables - String values to dummy True\ False 
+
+-- The dummy-coding is intended for easy handling and adjustment variable categories to the models for analyzes in the following sections.
+
+-- The dummy coding does not create changes in the distribution of the variable and the ability to examine the variables in the EDA tests.
+
+_________________________________________________________________________
+
+---Population_type re-coding
+
+SELECT *, 
+
+        case when(Population_Type = 'citizen') then ('false')  
+        when(Population_Type = 'Candidate') then ('true')
+    END AS Population_Type_Dico  
+    INTO dbo.Selection_Process_Predictors_a_1  
+    FROM dbo.Selection_Process_Predictors_a
+
+    ALTER TABLE Selection_Process_Predictors_a_1
+    ALTER COLUMN Population_Type_Dico bit  
+
+
+--Gender re-coding
+
+SELECT *, 
+
+        case when(Gender = 'male') then ('TRUE')  
+        when(Gender = 'female') then ('FALSE') 
+    END AS Gender_Dico
+    INTO dbo.Socio_demographics_predictors_a_1
+    FROM dbo.Socio_demographics_predictors_a
+
+    ALTER TABLE Socio_demographics_predictors_a_1
+    ALTER COLUMN Gender_Dico bit  
+	
+
+--Commander_in_army re-coding
+
+
+SELECT *, 
+
+        case when(Commander_in_army = 'commander') then ('TRUE')  
+        when(Commander_in_army = 'No_commander') then ('FALSE') 
+    END AS Commander_in_Army_Dico
+    INTO dbo.Army_service_predictors_a_1
+    FROM dbo.Army_service_predictors_a
+
+	ALTER TABLE dbo.Army_service_predictors_a_1
+    ALTER COLUMN Commander_in_Army_Dico bit  
+
+--Service_in_combat_unit re-coding
+
+SELECT *, 
+
+        case when(Combat_Army_Unit = 'Combat_Army_Unit') then ('TRUE')  
+        when(Combat_Army_Unit = 'No_Combat_Army_Unit') then ('FALSE') 
+    END AS Combat_Army_Unit_Dico
+    INTO dbo.Army_service_predictors_a_2
+    FROM dbo.Army_service_predictors_a_1
+
+	ALTER TABLE dbo.Army_service_predictors_a_2
+    ALTER COLUMN Combat_Army_Unit_Dico bit  
+
+--Service_in_combat_unit re-coding
+
+--- Personality_Disqualification_Dico rename
+
+EXEC sp_rename 'dbo.Personality_Disqualification_Outcome_Factor_a.Personality_Disqualification', 'Personality_Disqualification_Dico', 'COLUMN';
+
+__________________________________________________________________________________________________________________________________________________
+
+	-- More changes in data frame features :
+	
+	-- With the exception of the above, in this part no changes, distributions / manipulations / other transformations were made on the features 
+	-- within the data frame, and this, in order to cleanly and accurately examine the variables in the EDA analysis. 
+
+	-- Enhancement and addition of predictors into the data frame will be performed after the EDA analysis.
+
+__________________________________________________________________________________________________________________________________________________
+
+
+------------------flat table-------------------
+
+SELECT  
+
+---dbo.Selection_Process_Predictors_1 as a
+
+     a.id
+    ,a.Population_Type_Dico
+    ,a.Process_Type
+    ,a.Designated_Role
+    ,a.Assessment_Center_Grade
+    ,a.Cognitive_Ability_Test
+    ,a.Morals_and_Values_Test
+    ,a.Job_Interview_Grade
+    ,a.Heberew_Test_Grade
+    ,a.Filling_Instruction_Test
+    ,a.Emotional_Inteligence_Test
+    ,a.Recruit_Quality_Measure_Score
+    ,a.Honesty_Test
+    ,a.Exam_Language
+	,a.Examination_Date
+
+---Socio_demographics_predictors as b
+
+    ,b.Education_Level
+    ,b.Educational_Institution
+	,b.Years_of_Education
+    ,b.Age
+    ,b.Gender_Dico
+
+
+--- dbo.Army_service_predictors as c
+
+    ,c.Commander_in_Army_Dico
+    ,c.Combat_Army_Unit_Dico
+    ,c.Rovaee_Training_Type
+
+
+--- dbo.MMPI2_personality as d
+
+	,d.M2a
+	,d.ASP
+	,d.R
+	,d.CYN
+	,d.BIM
+	,d.PA
+	,d.M2APS
+	,d.AAS
+	,d.tcent
+	,d.OBS
+	,d.MDS
+	,d.TPA
+	,d.BIZ
+	,d.ANG
+	,d.WSD
+	,d.DEP
+	,d.DIS
+	,d.K
+	,d.SOD
+	,d.D
+	,d.D1
+	,d.D2
+	,d.D3
+	,d.D4
+	,d.D5
+	,d.MF
+	,d.DOE
+	,d.PT
+	,d.ANX
+	,d.F
+	,d.SC
+	,d.HEA
+	,d.FP
+	,d.HS
+	,d.FAM
+	,d.PD
+	,d.ES
+	,d.FCENT
+	,d.WRK
+	,d.HY
+	,d.L
+	,d.MA
+	,d.SE
+	,d.RT
+	,d.TRIN
+	,d.VRIN
+	,d.CR
+	,d.Q
+	,d.RS
+
+	,d.M2a_dico
+	,d.ASP_dico
+	,d.R_dico
+	,d.CYN_dico
+	,d.BIM_dico
+	,d.PA_dico
+	,d.M2APS_dico
+	,d.AAS_dico
+	,d.tcent_dico
+	,d.OBS_dico
+	,d.MDS_dico
+	,d.TPA_dico
+	,d.BIZ_dico
+	,d.ANG_dico
+	,d.WSD_dico
+	,d.DEP_dico
+	,d.DIS_dico
+	,d.K_dico
+	,d.SOD_dico
+	,d.D_dico
+	,d.D1_dico
+	,d.D2_dico
+	,d.D3_dico
+	,d.D4_dico
+	,d.D5_dico
+	,d.MF_dico
+	,d.DOE_dico
+	,d.PT_dico
+	,d.ANX_dico
+	,d.F_dico
+	,d.SC_dico
+	,d.HEA_dico
+	,d.FP_dico
+	,d.HS_dico
+	,d.FAM_dico
+	,d.PD_dico
+	,d.ES_dico
+	,d.FCENT_dico
+	,d.WRK_dico
+	,d.HY_dico
+	,d.L_dico
+	,d.MA_dico
+	,d.SE_dico
+	,d.RT_dico
+	,d.TRIN_dico
+	,d.VRIN_dico
+	,d.CR_dico
+	,d.Q_dico
+	,d.RS_dico
+
+
+--- dbo.outcome varaiable as e
+
+	,e.Personality_Disqualification_Dico
+
+
+INTO dbo.Final_project_Flat_File
+
+
+FROM dbo.Selection_Process_Predictors_a_1 AS a
+LEFT OUTER JOIN dbo.Socio_demographics_predictors_a_1 AS b
+    ON a.id = b.id
+LEFT OUTER JOIN dbo.Army_service_predictors_a_2 AS c 
+    ON a.id = c.id
+LEFT OUTER JOIN dbo.MMPI2_personality_scales_a AS d 
+    ON a.id = d.id
+LEFT OUTER JOIN dbo.Personality_Disqualification_Outcome_Factor_a AS e 
+    ON a.id = e.id
+
+
+SELECT * FROM dbo.Final_project_Flat_File
+
+
+
+---table columns
+
+SELECT count(*) 
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_NAME='dbo.Final_project_Flat_File'
+
+---show table properties
+
+EXEC sp_help 'dbo.Final_project_Flat_File';
+
+--- Variables (Columns) re-arrangement in table
+
+SELECT  id,Examination_Date,Population_Type_Dico,Process_Type,Designated_Role,Assessment_Center_Grade,Cognitive_Ability_Test,Morals_and_Values_Test,Job_Interview_Grade,Heberew_Test_Grade,Filling_Instruction_Test,Emotional_Inteligence_Test,Recruit_Quality_Measure_Score,Honesty_Test,Exam_Language,Education_Level,Educational_Institution,Years_of_Education,Age,Gender_Dico,Commander_in_Army_Dico,Combat_Army_Unit_Dico,Rovaee_Training_Type,M2a,ASP,R,CYN,BIM,PA,M2APS,AAS,tcent,OBS,MDS,TPA,BIZ,ANG,WSD,DEP,DIS,K,SOD,D,D1,D2,D3,D4,D5,MF,DOE,PT,ANX,F,SC,HEA,FP,HS,FAM,PD,ES,FCENT,WRK,HY,L,MA,SE,RT,TRIN,VRIN,CR,Q,RS,M2a_dico,ASP_dico,R_dico,CYN_dico,BIM_dico,PA_dico,M2APS_dico,AAS_dico,tcent_dico,OBS_dico,MDS_dico,TPA_dico,BIZ_dico,ANG_dico,WSD_dico,DEP_dico,DIS_dico,K_dico,SOD_dico,D_dico,D1_dico,D2_dico,D3_dico,D4_dico,D5_dico,MF_dico,DOE_dico,PT_dico,ANX_dico,F_dico,SC_dico,HEA_dico,FP_dico,HS_dico,FAM_dico,PD_dico,ES_dico,FCENT_dico,WRK_dico,HY_dico,L_dico,MA_dico,SE_dico,RT_dico,TRIN_dico,VRIN_dico,CR_dico,Q_dico,RS_dico,Personality_Disqualification_Dico   
+INTO  dbo.Flat_File_before_EDA
+FROM  dbo.Final_project_Flat_File;
+
+SELECT * FROM dbo.Final_project_Flat_File;
+
+--- Participants (Rows) Arranging file observations randomly
+
+SELECT *
+INTO dbo.Final_Flat_File_before_EDA
+FROM dbo.Flat_File_before_EDA
+ORDER BY CHECKSUM(NEWID())
+
+--- Change Outcome Variables Type From bit to int
+
+--ALTER TABLE [Final_Flat_File_before_EDA] ALTER COLUMN [Personality_Disqualification] INT;
+
+--SELECT COLUMN_NAME, DATA_TYPE 
+--FROM INFORMATION_SCHEMA.COLUMNS 
+--WHERE TABLE_NAME = 'Final_Flat_File_before_EDA'
+
+SELECT * FROM dbo.Final_Flat_File_before_EDA
+
+__________________________________________________________________________________________________________________________________________________
+
+
+---Export final table to CSV file
+---Using CMD \ .bat file  Export CSV to designated file path
+
+__________________________________________________________________________________________________________________________________________________
+
+---exsamine sql deatails
+--- (LENOVO\Guest-Desktop123,1433)
+
+SELECT @@SERVERNAME
+SELECT SUSER_NAME()
+SELECT SUSER_ID()
+
+--- step 1 : Copy and paste the script to CMD - check if the script runs - location of file create - Full and proper structure of data
+
+sqlcmd -S . -d Personality -E  -s, -W -Q "SELECT * FROM dbo.Final_project_Flat_File_re_arrange" | findstr /V /C:"-" /B > "C:\Users\Knowl\Desktop\Final Project\1Assiment Parts\1Data preparetion\1.1Import data to SQL - Flat File Generation\submission files\Flat File After SQL.csv" 
+
+--- step 2 : open notepade file - copy and paste the below script - save the notepade in the same location write in script with the end of .bat --- options to re-run another types of files - .sql \ .xls \ .txt and more
+
+@Echo off
+sqlcmd -S . -d Personality -E  -s, -W -Q "SELECT * FROM dbo.Final_project_Flat_File_re_arrange" | findstr /V /C:"-" /B > "C:\Users\Knowl\Desktop\Final Project\1Assiment Parts\1Data preparetion\1.1Import data to SQL - Flat File Generation\submission files\Flat File After SQL.csv" 
+
+--- step 3 : open task scheduler --- cearte basic task --- set triger criterion (time) --- set action (stat program) --- upload script from .bat file
+
+---more details in : https://codingsight.com/automating-sql-database-maintenance-tasks-using-sqlcmd/
+
+---more details in : https://codingsight.com/automating-sql-database-maintenance-tasks-using-sqlcmd/
+
+---another means to set schedule refresh : SQL SERVER AGENT (https://www.youtube.com/watch?v=H-qlKt3jy2g)
+
+__________________________________________________________________________________________________________________________________________________
+
+----------SQL END------------
+__________________________________________________________________________________________________________________________________________________
+
+
+--- General codes for select tables
+
+---SELECT * FROM dbo.Final_project_sql_import
+---SELECT * FROM dbo.Final_project_Population_type
+---SELECT * FROM dbo.Final_project_gender
+---SELECT * FROM dbo.Final_project_Commander
+---SELECT * FROM dbo.Final_project_combat_unit
+---SELECT * FROM dbo.Tironot_rovaee_categ
+---SELECT * FROM dbo.Final_project_MMPI2_dico
+
+---SELECT * FROM dbo.Final_project_Flat_File
+---SELECT * FROM Final_project_Flat_File_re_arrange
+
+--- General codes for drop tables
+
+---DROP TABLE dbo.Final_project_sql_import
+---DROP TABLE dbo.Final_project_Population_type
+---DROP TABLE dbo.Final_project_gender
+---DROP TABLE dbo.Final_project_Commander
+---DROP TABLE dbo.Final_project_combat_unit
+---DROP TABLE dbo.Tironot_rovaee_categ
+---DROP TABLE dbo.Final_project_MMPI2_dico
+
+---DROP TABLE dbo.Final_project_Flat_File
+---DROP TABLE Final_project_Flat_File_re_arrange
