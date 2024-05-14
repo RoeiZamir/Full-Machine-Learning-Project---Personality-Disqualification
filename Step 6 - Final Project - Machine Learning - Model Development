@@ -1,0 +1,2550 @@
+Final Project - Machine Learning - Model Development
+1. Import Packages
+#pip install shap
+import matplotlib.pyplot as plt
+plt.style.use('classic')
+%matplotlib inline
+
+import pandas as pd
+import numpy as np
+
+from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet, SGDRegressor
+from sklearn.tree import  DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor, GradientBoostingRegressor
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.svm import SVR
+
+from sklearn.metrics import mean_squared_error
+import sklearn.metrics as metrics 
+
+import seaborn as sns
+
+from prettytable import PrettyTable
+import prettytable
+
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import make_scorer, roc_auc_score
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix
+from sklearn.metrics import confusion_matrix
+
+import time
+import xgboost as xgb
+from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
+import pandas as pd
+import pickle
+import statistics
+from statistics import mean
+from sklearn import metrics
+from sklearn import preprocessing
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import AdaBoostClassifier
+import pandas as pd
+import numpy as np
+
+from scipy import stats
+from scipy.stats import chisquare
+from scipy.stats import chi2_contingency
+from scipy.stats import f_oneway
+from scipy.stats import kstest
+from scipy.stats import ks_2samp
+from scipy.stats import norm
+from scipy.stats import iqr
+
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
+from sklearn.preprocessing import LabelEncoder
+from sklearn.datasets import load_boston
+from sklearn import linear_model
+
+import matplotlib.pyplot as plt
+plt.style.use('classic')
+import seaborn as sns
+plt.style.use('seaborn')
+get_ipython().run_line_magic('matplotlib', 'inline')
+
+from ydata_profiling import ProfileReport
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+
+import chart_studio
+import re
+import cv2
+
+import missingno as msno
+import warnings
+warnings.filterwarnings("ignore")
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from statsmodels.tools.tools import add_constant
+
+#port csv
+#mport pyodbc
+#.read_sql_query
+
+import researchpy as rp
+import scipy.stats as stats
+
+import pandas as pd
+import numpy as np
+import scipy.stats as ss
+from math import log
+
+import shap
+import eli5
+from eli5.sklearn import PermutationImportance
+#pd.set_option('display.max_rows', None, 'display.max_columns', None)
+2. Import Data
+Df_Gold_List = pd.read_csv("C:/Users/Knowl/Desktop/Project/project_data_after_feature_selection/Df_Gold_List.csv")
+Df_Gold_List
+      Unnamed: 0  Assessment_Center_Grade_missing  Morals_and_Values_Test  \
+0              0                        -0.867784                0.747435   
+1              1                        -0.867784               -0.668628   
+2              2                        -0.867784               -0.668628   
+3              3                        -0.867784               -0.196607   
+4              4                        -0.867784                1.219457   
+...          ...                              ...                     ...   
+2295        2295                         1.152361               -0.668628   
+2296        2296                         1.152361               -0.196607   
+2297        2297                         1.152361               -0.668628   
+2298        2298                         1.152361               -0.668628   
+2299        2299                         1.152361               -0.196607   
+
+      Job_Interview_Grade  Gender_Dico  Assessment_Center_Grade_medium  \
+0               -0.115481     0.763500                        1.300022   
+1               -0.115481    -1.309758                        1.300022   
+2                1.587119     0.763500                        1.300022   
+3                1.587119    -1.309758                        1.300022   
+4                1.587119    -1.309758                        1.300022   
+...                   ...          ...                             ...   
+2295             1.587119     0.763500                       -0.769217   
+2296            -0.115481     0.763500                       -0.769217   
+2297            -0.115481     0.763500                       -0.769217   
+2298             1.587119    -1.309758                       -0.769217   
+2299            -0.115481     0.763500                       -0.769217   
+
+      Designated_Role_continuous  MMPI_factor_group_A  MMPI_factor_group_B  \
+0                      -0.677716            -0.321513            -0.234499   
+1                      -1.038226             1.343208             0.625857   
+2                      -1.038226            -1.236473            -0.473487   
+3                      -1.038226            -0.562961            -0.855867   
+4                      -0.677716             1.114468            -1.047058   
+...                          ...                  ...                  ...   
+2295                   -0.401326            -0.143604            -0.043309   
+2296                   -0.401326            -0.524837            -1.190450   
+2297                   -0.401326            -0.651915            -0.138904   
+2298                   -0.341241            -0.944194            -0.664677   
+2299                   -0.341241             0.275754            -0.951462   
+
+      num_composite_measure  dummy_composite_measure  \
+0                  0.519271                -0.175114   
+1                  0.292065                -0.175114   
+2                 -1.101533                -0.877271   
+3                 -1.165992                -0.877271   
+4                 -0.879655                -0.175114   
+...                     ...                      ...   
+2295               0.180727                -0.175114   
+2296               0.257172                -0.877271   
+2297              -0.676155                -0.175114   
+2298              -0.857014                -0.877271   
+2299               0.216952                -0.175114   
+
+      Personal_elevations_index       FAM        PD  \
+0                     -0.489385 -1.038061  1.689679   
+1                     -0.489385  0.491760 -0.930025   
+2                     -0.489385 -1.038061 -0.792146   
+3                     -0.489385 -0.655606 -0.378508   
+4                     -0.489385  0.491760 -0.654267   
+...                         ...       ...       ...   
+2295                  -0.489385 -0.528121  0.310888   
+2296                  -0.489385  0.364275 -0.240629   
+2297                  -0.489385 -1.038061 -1.067904   
+2298                   0.235396 -0.655606  0.173008   
+2299                  -0.489385 -0.528121 -0.516388   
+
+      INT_No_Asses_Center_Morals_and_Values  \
+0                                 -0.648612   
+1                                  0.580225   
+2                                  0.580225   
+3                                  0.170612   
+4                                 -1.058225   
+...                                     ...   
+2295                              -0.770501   
+2296                              -0.226562   
+2297                              -0.770501   
+2298                              -0.770501   
+2299                              -0.226562   
+
+      INT_No_Asses_Center_Job_Interview_Grade  \
+0                                    0.100212   
+1                                    0.100212   
+2                                   -1.377276   
+3                                   -1.377276   
+4                                   -1.377276   
+...                                       ...   
+2295                                 1.828934   
+2296                                -0.133075   
+2297                                -0.133075   
+2298                                 1.828934   
+2299                                -0.133075   
+
+      INT_No_Asses_Center_Personal_elevations_index  \
+0                                          0.424680   
+1                                          0.424680   
+2                                          0.424680   
+3                                          0.424680   
+4                                          0.424680   
+...                                             ...   
+2295                                      -0.563948   
+2296                                      -0.563948   
+2297                                      -0.563948   
+2298                                       0.271261   
+2299                                      -0.563948   
+
+      INT_No_Asses_Center_composite_measure  \
+0                                  0.151961   
+1                                  0.151961   
+2                                  0.761282   
+3                                  0.761282   
+4                                  0.151961   
+...                                     ...   
+2295                              -0.201795   
+2296                              -1.010933   
+2297                              -0.201795   
+2298                              -1.010933   
+2299                              -0.201795   
+
+      INT_No_Asses_Center_MMPI_Numeric_0_15_above  \
+0                                        0.265652   
+1                                       -0.152028   
+2                                        0.783576   
+3                                        0.783576   
+4                                        0.098580   
+...                                           ...   
+2295                                    -0.530258   
+2296                                    -0.397141   
+2297                                    -0.929608   
+2298                                    -1.018352   
+2299                                    -0.485885   
+
+      Personality_Disqualification_Dico  
+0                             -0.317813  
+1                             -0.317813  
+2                             -0.317813  
+3                             -0.317813  
+4                             -0.317813  
+...                                 ...  
+2295                          -0.317813  
+2296                           3.146502  
+2297                           3.146502  
+2298                          -0.317813  
+2299                          -0.317813  
+
+[2300 rows x 20 columns]
+Df_Gold_List = Df_Gold_List.drop(columns=['Unnamed: 0'])
+Df_Gold_List.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 2300 entries, 0 to 2299
+Data columns (total 19 columns):
+ #   Column                                         Non-Null Count  Dtype  
+---  ------                                         --------------  -----  
+ 0   Assessment_Center_Grade_missing                2300 non-null   float64
+ 1   Morals_and_Values_Test                         2300 non-null   float64
+ 2   Job_Interview_Grade                            2300 non-null   float64
+ 3   Gender_Dico                                    2300 non-null   float64
+ 4   Assessment_Center_Grade_medium                 2300 non-null   float64
+ 5   Designated_Role_continuous                     2300 non-null   float64
+ 6   MMPI_factor_group_A                            2300 non-null   float64
+ 7   MMPI_factor_group_B                            2300 non-null   float64
+ 8   num_composite_measure                          2300 non-null   float64
+ 9   dummy_composite_measure                        2300 non-null   float64
+ 10  Personal_elevations_index                      2300 non-null   float64
+ 11  FAM                                            2300 non-null   float64
+ 12  PD                                             2300 non-null   float64
+ 13  INT_No_Asses_Center_Morals_and_Values          2300 non-null   float64
+ 14  INT_No_Asses_Center_Job_Interview_Grade        2300 non-null   float64
+ 15  INT_No_Asses_Center_Personal_elevations_index  2300 non-null   float64
+ 16  INT_No_Asses_Center_composite_measure          2300 non-null   float64
+ 17  INT_No_Asses_Center_MMPI_Numeric_0_15_above    2300 non-null   float64
+ 18  Personality_Disqualification_Dico              2300 non-null   float64
+dtypes: float64(19)
+memory usage: 341.5 KB
+Df_Gold_List.columns
+Index(['Assessment_Center_Grade_missing', 'Morals_and_Values_Test',
+       'Job_Interview_Grade', 'Gender_Dico', 'Assessment_Center_Grade_medium',
+       'Designated_Role_continuous', 'MMPI_factor_group_A',
+       'MMPI_factor_group_B', 'num_composite_measure',
+       'dummy_composite_measure', 'Personal_elevations_index', 'FAM', 'PD',
+       'INT_No_Asses_Center_Morals_and_Values',
+       'INT_No_Asses_Center_Job_Interview_Grade',
+       'INT_No_Asses_Center_Personal_elevations_index',
+       'INT_No_Asses_Center_composite_measure',
+       'INT_No_Asses_Center_MMPI_Numeric_0_15_above',
+       'Personality_Disqualification_Dico'],
+      dtype='object')
+Df_Gold_List.isnull().sum()
+Assessment_Center_Grade_missing                  0
+Morals_and_Values_Test                           0
+Job_Interview_Grade                              0
+Gender_Dico                                      0
+Assessment_Center_Grade_medium                   0
+Designated_Role_continuous                       0
+MMPI_factor_group_A                              0
+MMPI_factor_group_B                              0
+num_composite_measure                            0
+dummy_composite_measure                          0
+Personal_elevations_index                        0
+FAM                                              0
+PD                                               0
+INT_No_Asses_Center_Morals_and_Values            0
+INT_No_Asses_Center_Job_Interview_Grade          0
+INT_No_Asses_Center_Personal_elevations_index    0
+INT_No_Asses_Center_composite_measure            0
+INT_No_Asses_Center_MMPI_Numeric_0_15_above      0
+Personality_Disqualification_Dico                0
+dtype: int64
+Df_Gold_List.shape
+(2300, 19)
+3. Data Preperations
+Arranging, organizing, and preparing project data with the intention of developing prediction models.
+Data Categorization
+Df_Gold_List.head()
+   Assessment_Center_Grade_missing  Morals_and_Values_Test  \
+0                        -0.867784                0.747435   
+1                        -0.867784               -0.668628   
+2                        -0.867784               -0.668628   
+3                        -0.867784               -0.196607   
+4                        -0.867784                1.219457   
+
+   Job_Interview_Grade  Gender_Dico  Assessment_Center_Grade_medium  \
+0            -0.115481     0.763500                        1.300022   
+1            -0.115481    -1.309758                        1.300022   
+2             1.587119     0.763500                        1.300022   
+3             1.587119    -1.309758                        1.300022   
+4             1.587119    -1.309758                        1.300022   
+
+   Designated_Role_continuous  MMPI_factor_group_A  MMPI_factor_group_B  \
+0                   -0.677716            -0.321513            -0.234499   
+1                   -1.038226             1.343208             0.625857   
+2                   -1.038226            -1.236473            -0.473487   
+3                   -1.038226            -0.562961            -0.855867   
+4                   -0.677716             1.114468            -1.047058   
+
+   num_composite_measure  dummy_composite_measure  Personal_elevations_index  \
+0               0.519271                -0.175114                  -0.489385   
+1               0.292065                -0.175114                  -0.489385   
+2              -1.101533                -0.877271                  -0.489385   
+3              -1.165992                -0.877271                  -0.489385   
+4              -0.879655                -0.175114                  -0.489385   
+
+        FAM        PD  INT_No_Asses_Center_Morals_and_Values  \
+0 -1.038061  1.689679                              -0.648612   
+1  0.491760 -0.930025                               0.580225   
+2 -1.038061 -0.792146                               0.580225   
+3 -0.655606 -0.378508                               0.170612   
+4  0.491760 -0.654267                              -1.058225   
+
+   INT_No_Asses_Center_Job_Interview_Grade  \
+0                                 0.100212   
+1                                 0.100212   
+2                                -1.377276   
+3                                -1.377276   
+4                                -1.377276   
+
+   INT_No_Asses_Center_Personal_elevations_index  \
+0                                        0.42468   
+1                                        0.42468   
+2                                        0.42468   
+3                                        0.42468   
+4                                        0.42468   
+
+   INT_No_Asses_Center_composite_measure  \
+0                               0.151961   
+1                               0.151961   
+2                               0.761282   
+3                               0.761282   
+4                               0.151961   
+
+   INT_No_Asses_Center_MMPI_Numeric_0_15_above  \
+0                                     0.265652   
+1                                    -0.152028   
+2                                     0.783576   
+3                                     0.783576   
+4                                     0.098580   
+
+   Personality_Disqualification_Dico  
+0                          -0.317813  
+1                          -0.317813  
+2                          -0.317813  
+3                          -0.317813  
+4                          -0.317813  
+#df1= pd.get_dummies(df1,columns= ['season','weather','Day_of_week'],drop_first= True)
+Df_Gold_List1 = Df_Gold_List.astype({"Assessment_Center_Grade_missing":'category', "Gender_Dico":'category', "Assessment_Center_Grade_medium":'category'})
+Categorical Variables - Dummy Coding (1,0)
+Recoding Outcome variable to binary (Personality_Disqualification)
+Df_Gold_List1.loc[(Df_Gold_List['Personality_Disqualification_Dico'] > 0), 'Personality_Disqualification_Dico_final'] = True   
+Df_Gold_List1.loc[(Df_Gold_List['Personality_Disqualification_Dico'] < 0), 'Personality_Disqualification_Dico_final'] = False   
+Df_Gold_List1 = Df_Gold_List1.drop(columns=['Personality_Disqualification_Dico'])
+Recoding all relevant project features to binary
+Df_Gold_List1.loc[(Df_Gold_List['Assessment_Center_Grade_missing'] > 0), 'Assessment_Center_Grade_missing_new'] = True   
+Df_Gold_List1.loc[(Df_Gold_List['Assessment_Center_Grade_missing'] < 0), 'Assessment_Center_Grade_missing_new'] = False
+
+Df_Gold_List1.loc[(Df_Gold_List['Assessment_Center_Grade_medium'] > 0), 'Assessment_Center_Grade_medium_new'] = True   
+Df_Gold_List1.loc[(Df_Gold_List['Assessment_Center_Grade_medium'] < 0), 'Assessment_Center_Grade_medium_new'] = False
+
+Df_Gold_List1.loc[(Df_Gold_List['Gender_Dico'] > 0), 'Gender_Dico_new'] = True   
+Df_Gold_List1.loc[(Df_Gold_List['Gender_Dico'] < 0), 'Gender_Dico_new'] = False
+###drop original variables
+
+Df_Gold_List1 = Df_Gold_List1.drop(columns=['Assessment_Center_Grade_missing'])
+Df_Gold_List1 = Df_Gold_List1.drop(columns=['Assessment_Center_Grade_medium'])
+Df_Gold_List1 = Df_Gold_List1.drop(columns=['Gender_Dico'])
+Df_Gold_List1.head()
+   Morals_and_Values_Test  Job_Interview_Grade  Designated_Role_continuous  \
+0                0.747435            -0.115481                   -0.677716   
+1               -0.668628            -0.115481                   -1.038226   
+2               -0.668628             1.587119                   -1.038226   
+3               -0.196607             1.587119                   -1.038226   
+4                1.219457             1.587119                   -0.677716   
+
+   MMPI_factor_group_A  MMPI_factor_group_B  num_composite_measure  \
+0            -0.321513            -0.234499               0.519271   
+1             1.343208             0.625857               0.292065   
+2            -1.236473            -0.473487              -1.101533   
+3            -0.562961            -0.855867              -1.165992   
+4             1.114468            -1.047058              -0.879655   
+
+   dummy_composite_measure  Personal_elevations_index       FAM        PD  \
+0                -0.175114                  -0.489385 -1.038061  1.689679   
+1                -0.175114                  -0.489385  0.491760 -0.930025   
+2                -0.877271                  -0.489385 -1.038061 -0.792146   
+3                -0.877271                  -0.489385 -0.655606 -0.378508   
+4                -0.175114                  -0.489385  0.491760 -0.654267   
+
+   INT_No_Asses_Center_Morals_and_Values  \
+0                              -0.648612   
+1                               0.580225   
+2                               0.580225   
+3                               0.170612   
+4                              -1.058225   
+
+   INT_No_Asses_Center_Job_Interview_Grade  \
+0                                 0.100212   
+1                                 0.100212   
+2                                -1.377276   
+3                                -1.377276   
+4                                -1.377276   
+
+   INT_No_Asses_Center_Personal_elevations_index  \
+0                                        0.42468   
+1                                        0.42468   
+2                                        0.42468   
+3                                        0.42468   
+4                                        0.42468   
+
+   INT_No_Asses_Center_composite_measure  \
+0                               0.151961   
+1                               0.151961   
+2                               0.761282   
+3                               0.761282   
+4                               0.151961   
+
+   INT_No_Asses_Center_MMPI_Numeric_0_15_above  \
+0                                     0.265652   
+1                                    -0.152028   
+2                                     0.783576   
+3                                     0.783576   
+4                                     0.098580   
+
+  Personality_Disqualification_Dico_final Assessment_Center_Grade_missing_new  \
+0                                   False                               False   
+1                                   False                               False   
+2                                   False                               False   
+3                                   False                               False   
+4                                   False                               False   
+
+  Assessment_Center_Grade_medium_new Gender_Dico_new  
+0                               True            True  
+1                               True           False  
+2                               True            True  
+3                               True           False  
+4                               True           False  
+Df_Gold_List1 = Df_Gold_List1.astype({"Personality_Disqualification_Dico_final":'category', "Assessment_Center_Grade_missing_new":'category', "Assessment_Center_Grade_medium_new":'category', "Gender_Dico_new":'category'})
+Df_Gold_List1.dtypes
+Morals_and_Values_Test                            float64
+Job_Interview_Grade                               float64
+Designated_Role_continuous                        float64
+MMPI_factor_group_A                               float64
+MMPI_factor_group_B                               float64
+num_composite_measure                             float64
+dummy_composite_measure                           float64
+Personal_elevations_index                         float64
+FAM                                               float64
+PD                                                float64
+INT_No_Asses_Center_Morals_and_Values             float64
+INT_No_Asses_Center_Job_Interview_Grade           float64
+INT_No_Asses_Center_Personal_elevations_index     float64
+INT_No_Asses_Center_composite_measure             float64
+INT_No_Asses_Center_MMPI_Numeric_0_15_above       float64
+Personality_Disqualification_Dico_final          category
+Assessment_Center_Grade_missing_new              category
+Assessment_Center_Grade_medium_new               category
+Gender_Dico_new                                  category
+dtype: object
+Duplicate Rows / Observations in The Data Frame
+•	Imbalanced Outcome Variable Classes: The target factor in the current project is dichotomous, featuring only two classes. It is distinguished by an underrepresentation of the "personality disqualification" category. In this context, approximately 10% of the project participants were disqualified during the Israel Police recruitment process due to personality disqualification. More specifically, within the dataset, only 9.2% of the participants were coded as personality disqualified (coding = 1), while the remaining 90.8% were coded as candidates without personality disqualification (coding = 0).
+•	Methods for Addressing Imbalanced Treatments:
+There are a variety of ways to approaches used to handle imbalanced categorical or dummy outcome variables (where the rare category comprises less than 15% of the data). one of the approaches used to handle imbalanced outcome variable data involves replicating observations or variances that pertain to the rare category of the dependent variable. In this method, records of participants who were personality disqualified (limited to the training dataset only) are randomly duplicated using four resampling techniques: under-sampling, over-sampling, over/under combination, and SMOTE. an alternative approach utilizes the random forest and scikit-learn classifier in Python to automatically create balance within the target outcome. Another method to address the challenge of imbalanced categorical or dummy outcome variables involves generating a parallel solution—a random subset of participants from the common category is selected, leading to the omission of random participants or rows from the data frame.
+Additionally, alternative methods involve implementing regulations and "penalties" for the model based on a restricted count of predictions associated with the underrepresented category of the dependent variable. Another approach is adjusting the threshold or cut-off point at which the model's predictions are categorized as positive (1 - personality disqualification) or negative (0 - personality test pass). Following this principle, as the threshold point is decreased, it inherently results in a greater portion of participants being classified by the model as prone to failing a personality test.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+The treatment in the current project :
+•	In a broader context, one of the challenges arising from the underrepresentation of a specific outcome category (in classification problems) manifests as the underclassification of the less frequent category within the model's predictions. This issue becomes more pronounced when facing imbalanced class frequencies in prediction models. In many instances, models tend to err on the side of under-predicting the rarer category of the target factor. In some cases, the model might not predict the rare category at all. While avoiding predictions of the rare category might superficially yield high accuracy rates, this approach leads to a misleadingly high overall accuracy. This can deceive statisticians, analysts, readers, and those with limited expertise.
+•	On the contrary, attempting to rectify the class imbalance issue by manipulating the dataset through duplication or deletion of observations isn't ideal. Particularly when the underrepresentation of the rare target factor category accurately reflects the real-world situation, such actions could harm the external validity of research findings, hinder model generalizability, and even result in model overfitting. Additionally, artificially inflating the rare target factor category may boost predictions of that category, leading to an increased likelihood of false positives (Type I errors).
+•	In light of these considerations, before resorting to more aggressive techniques that impact the dataset's structure and participant composition (like randomly adding/omitting observations to bolster the rare category), we explored alternative, less intrusive approaches to mitigate outcome variable imbalance and potential bias:
+•	Step 1: As a preliminary measure during prediction model development, we examined the occurrence and proportion of cases in which the models predicted the rare target category.
+•	Step 2: In instances where the models exhibited sub-classification of the rare target factor category, we manually adjusted the threshold or cut-off point. This alteration determined from which point onward observations in the data frame were classified as positive (personality rejection) or negative (successful personality assessment) by the models.
+•	Step 3: In cases where threshold adjustments didn't yield substantial improvements in predicting the rare target factor category, we incorporated "penalties" into the model. This tactic aimed to compel the models to generate more predictions of the rare target category.
+•	The ensuing analyses, presented later in this chapter, will demonstrate that these methods facilitated the models to generate a significant number of predictions for the rare target category. Remarkably, achieving this outcome didn't necessitate duplicating or artificially omitting any observations or rows from the data frame.
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+Set Relevant Regression Metrics  Measures
+Inappropriate Quality Metric in situations of target variable category imbalance :
+•	Accuracy: This is the percentage of overall correct predictions of the target factor without distinguishing between the types of errors or precise matches. A result closer to 100% might suggest a valid model. However, this metric is not suitable when dealing with imbalanced categories, as it can be misleading due to the overwhelming majority of one category overshadowing the rare category.
+Appropriate Quality Metric in situations of target variable category imbalance :
+•	Recall: This evaluates how effectively the model identifies personality disorders among all the candidates who were rejected in the personality test. It's particularly useful when the aim is to capture as many personality disorders as possible, even if this results in higher false alarms. A result closer to 1 indicates a higher quality model in this context.
+•	Precision: Precision assesses the model's accuracy in identifying personality failures out of all the candidates the model predicted to fail the personality test. It's significant when aiming to minimize false alarms regarding candidates expected to fail the test. The closer the result is to 1, the better the model quality in this aspect.
+•	F1 Score: This index strikes a balance between recall and precision, representing a trade-off between detecting non-failure candidates and managing false alarms. A result closer to 1 indicates a higher model quality.
+•	Area Under the Curve (AUC): AUC reflects the model's predictive quality compared to random guessing. It helps determine the optimal threshold for classifying positive and negative predictions. A result of 0.5 implies randomness, while 1 signifies perfect predictions.
+•	Log-loss/Binary Cross-Entropy: This measures the model's overall errors, accounting for all possible types of misclassifications. The closer the result is to 0, the better the model performs.
+Selected Metrics for Model Evaluation in the Current Project:
+(1) Area Under the Curve (AUC): Chosen for its common use in machine learning to assess model quality. Its relevance extends to evaluating changes in the threshold point that determines class predictions, which aligns with the project's needs.
+(2) Recall: Chosen due to its relevance to the project's focus on errors that hold more significant consequences for decision makers in the Israel Police's Department of Behavioral Sciences. Incorrectly omitting candidates with personality issues is highly undesirable, as it can lead to unsuitable individuals entering the police force, potentially causing various problems.
+When compared to errors related to non-recognition (recall), errors involving "false alarms" (precision) carry less weight for those in the Department of Behavioral Sciences. They are more interested in identifying personality-disordered candidates comprehensively. High precision might not be as valued, as it could classify only a small group of candidates as failures without capturing the broader issue.
+def classificationMetrics(y, yhat):
+    prf1 = metrics.precision_recall_fscore_support(y,yhat)
+    res = {'Recall': prf1[1][1],
+           'AUC': metrics.roc_auc_score(y,yhat)
+          }
+    return res
+#def classificationMetrics(y, yhat):
+#    prf1 = metrics.precision_recall_fscore_support(y,yhat)
+#    res = {'Accuracy': metrics.accuracy_score(y,yhat),
+#           'Precision':prf1[0][1],
+#           'Recall': prf1[1][1],
+#           'f1-score': prf1[2][1],
+#           'Log-loss': metrics.log_loss(y,yhat),
+#           'AUC': metrics.roc_auc_score(y,yhat)
+#          }
+#    return res
+Building on the explanation above and considering the project's inherent leniency toward potential overclassification errors—particularly concerning candidates being labeled as personality-disordered—the current project's primary focus in model quality assessment lies in giving substantial weight to the evaluation of the recall metric. The intention is to create a model that attains a high recall score. Comparatively, less emphasis will be placed on scrutinizing the precision index or the F1 score metric, which aims to strike a balance between recall and precision.
+In addition, as mentioned, another measure that will be examined as part of the development and adjustment of the models is AUC, and this, in part, because changes were made in the cutoff point for classifying the model's predictions as positive (rejecting personality) or negative (passing personality test) in the target factor.
+The models will be tested and compared based on the quality indicators that will be obtained in three testing environments:
+Phase A - Basic examination of all models - train-dataset & validation-dataset
+models_list_train = pd.DataFrame()
+models_list_validation = pd.DataFrame()
+Phase B - selected model finetuning - test-dataset
+models_list_test = pd.DataFrame()
+Final Variables (Models Predictors)
+df_train = Df_Gold_List1
+df_train.columns
+Index(['Morals_and_Values_Test', 'Job_Interview_Grade',
+       'Designated_Role_continuous', 'MMPI_factor_group_A',
+       'MMPI_factor_group_B', 'num_composite_measure',
+       'dummy_composite_measure', 'Personal_elevations_index', 'FAM', 'PD',
+       'INT_No_Asses_Center_Morals_and_Values',
+       'INT_No_Asses_Center_Job_Interview_Grade',
+       'INT_No_Asses_Center_Personal_elevations_index',
+       'INT_No_Asses_Center_composite_measure',
+       'INT_No_Asses_Center_MMPI_Numeric_0_15_above',
+       'Personality_Disqualification_Dico_final',
+       'Assessment_Center_Grade_missing_new',
+       'Assessment_Center_Grade_medium_new', 'Gender_Dico_new'],
+      dtype='object')
+df_train.head()
+   Morals_and_Values_Test  Job_Interview_Grade  Designated_Role_continuous  \
+0                0.747435            -0.115481                   -0.677716   
+1               -0.668628            -0.115481                   -1.038226   
+2               -0.668628             1.587119                   -1.038226   
+3               -0.196607             1.587119                   -1.038226   
+4                1.219457             1.587119                   -0.677716   
+
+   MMPI_factor_group_A  MMPI_factor_group_B  num_composite_measure  \
+0            -0.321513            -0.234499               0.519271   
+1             1.343208             0.625857               0.292065   
+2            -1.236473            -0.473487              -1.101533   
+3            -0.562961            -0.855867              -1.165992   
+4             1.114468            -1.047058              -0.879655   
+
+   dummy_composite_measure  Personal_elevations_index       FAM        PD  \
+0                -0.175114                  -0.489385 -1.038061  1.689679   
+1                -0.175114                  -0.489385  0.491760 -0.930025   
+2                -0.877271                  -0.489385 -1.038061 -0.792146   
+3                -0.877271                  -0.489385 -0.655606 -0.378508   
+4                -0.175114                  -0.489385  0.491760 -0.654267   
+
+   INT_No_Asses_Center_Morals_and_Values  \
+0                              -0.648612   
+1                               0.580225   
+2                               0.580225   
+3                               0.170612   
+4                              -1.058225   
+
+   INT_No_Asses_Center_Job_Interview_Grade  \
+0                                 0.100212   
+1                                 0.100212   
+2                                -1.377276   
+3                                -1.377276   
+4                                -1.377276   
+
+   INT_No_Asses_Center_Personal_elevations_index  \
+0                                        0.42468   
+1                                        0.42468   
+2                                        0.42468   
+3                                        0.42468   
+4                                        0.42468   
+
+   INT_No_Asses_Center_composite_measure  \
+0                               0.151961   
+1                               0.151961   
+2                               0.761282   
+3                               0.761282   
+4                               0.151961   
+
+   INT_No_Asses_Center_MMPI_Numeric_0_15_above  \
+0                                     0.265652   
+1                                    -0.152028   
+2                                     0.783576   
+3                                     0.783576   
+4                                     0.098580   
+
+  Personality_Disqualification_Dico_final Assessment_Center_Grade_missing_new  \
+0                                   False                               False   
+1                                   False                               False   
+2                                   False                               False   
+3                                   False                               False   
+4                                   False                               False   
+
+  Assessment_Center_Grade_medium_new Gender_Dico_new  
+0                               True            True  
+1                               True           False  
+2                               True            True  
+3                               True           False  
+4                               True           False  
+re-orginize variables in final file
+target variable to last column
+df_train = pd.DataFrame(df_train)
+temp_cols=df_train.columns.tolist()
+index=df_train.columns.get_loc("Personality_Disqualification_Dico_final")
+new_cols=temp_cols[index:index+1] + temp_cols[0:index] + temp_cols[index+1:]
+df_train=df_train[new_cols]
+df_train = pd.DataFrame(df_train)
+temp_cols=df_train.columns.tolist()
+new_cols=temp_cols[1:] + temp_cols[0:1]
+df_train=df_train[new_cols]
+df_train
+      Morals_and_Values_Test  Job_Interview_Grade  Designated_Role_continuous  \
+0                   0.747435            -0.115481                   -0.677716   
+1                  -0.668628            -0.115481                   -1.038226   
+2                  -0.668628             1.587119                   -1.038226   
+3                  -0.196607             1.587119                   -1.038226   
+4                   1.219457             1.587119                   -0.677716   
+...                      ...                  ...                         ...   
+2295               -0.668628             1.587119                   -0.401326   
+2296               -0.196607            -0.115481                   -0.401326   
+2297               -0.668628            -0.115481                   -0.401326   
+2298               -0.668628             1.587119                   -0.341241   
+2299               -0.196607            -0.115481                   -0.341241   
+
+      MMPI_factor_group_A  MMPI_factor_group_B  num_composite_measure  \
+0               -0.321513            -0.234499               0.519271   
+1                1.343208             0.625857               0.292065   
+2               -1.236473            -0.473487              -1.101533   
+3               -0.562961            -0.855867              -1.165992   
+4                1.114468            -1.047058              -0.879655   
+...                   ...                  ...                    ...   
+2295            -0.143604            -0.043309               0.180727   
+2296            -0.524837            -1.190450               0.257172   
+2297            -0.651915            -0.138904              -0.676155   
+2298            -0.944194            -0.664677              -0.857014   
+2299             0.275754            -0.951462               0.216952   
+
+      dummy_composite_measure  Personal_elevations_index       FAM        PD  \
+0                   -0.175114                  -0.489385 -1.038061  1.689679   
+1                   -0.175114                  -0.489385  0.491760 -0.930025   
+2                   -0.877271                  -0.489385 -1.038061 -0.792146   
+3                   -0.877271                  -0.489385 -0.655606 -0.378508   
+4                   -0.175114                  -0.489385  0.491760 -0.654267   
+...                       ...                        ...       ...       ...   
+2295                -0.175114                  -0.489385 -0.528121  0.310888   
+2296                -0.877271                  -0.489385  0.364275 -0.240629   
+2297                -0.175114                  -0.489385 -1.038061 -1.067904   
+2298                -0.877271                   0.235396 -0.655606  0.173008   
+2299                -0.175114                  -0.489385 -0.528121 -0.516388   
+
+      INT_No_Asses_Center_Morals_and_Values  \
+0                                 -0.648612   
+1                                  0.580225   
+2                                  0.580225   
+3                                  0.170612   
+4                                 -1.058225   
+...                                     ...   
+2295                              -0.770501   
+2296                              -0.226562   
+2297                              -0.770501   
+2298                              -0.770501   
+2299                              -0.226562   
+
+      INT_No_Asses_Center_Job_Interview_Grade  \
+0                                    0.100212   
+1                                    0.100212   
+2                                   -1.377276   
+3                                   -1.377276   
+4                                   -1.377276   
+...                                       ...   
+2295                                 1.828934   
+2296                                -0.133075   
+2297                                -0.133075   
+2298                                 1.828934   
+2299                                -0.133075   
+
+      INT_No_Asses_Center_Personal_elevations_index  \
+0                                          0.424680   
+1                                          0.424680   
+2                                          0.424680   
+3                                          0.424680   
+4                                          0.424680   
+...                                             ...   
+2295                                      -0.563948   
+2296                                      -0.563948   
+2297                                      -0.563948   
+2298                                       0.271261   
+2299                                      -0.563948   
+
+      INT_No_Asses_Center_composite_measure  \
+0                                  0.151961   
+1                                  0.151961   
+2                                  0.761282   
+3                                  0.761282   
+4                                  0.151961   
+...                                     ...   
+2295                              -0.201795   
+2296                              -1.010933   
+2297                              -0.201795   
+2298                              -1.010933   
+2299                              -0.201795   
+
+      INT_No_Asses_Center_MMPI_Numeric_0_15_above  \
+0                                        0.265652   
+1                                       -0.152028   
+2                                        0.783576   
+3                                        0.783576   
+4                                        0.098580   
+...                                           ...   
+2295                                    -0.530258   
+2296                                    -0.397141   
+2297                                    -0.929608   
+2298                                    -1.018352   
+2299                                    -0.485885   
+
+     Assessment_Center_Grade_missing_new Assessment_Center_Grade_medium_new  \
+0                                  False                               True   
+1                                  False                               True   
+2                                  False                               True   
+3                                  False                               True   
+4                                  False                               True   
+...                                  ...                                ...   
+2295                                True                              False   
+2296                                True                              False   
+2297                                True                              False   
+2298                                True                              False   
+2299                                True                              False   
+
+     Gender_Dico_new Personality_Disqualification_Dico_final  
+0               True                                   False  
+1              False                                   False  
+2               True                                   False  
+3              False                                   False  
+4              False                                   False  
+...              ...                                     ...  
+2295            True                                   False  
+2296            True                                    True  
+2297            True                                    True  
+2298           False                                   False  
+2299            True                                   False  
+
+[2300 rows x 19 columns]
+id to first column
+#df_final_train2 = pd.DataFrame(df_final_train1)
+#temp_cols=df_final_train2.columns.tolist()
+#index=df_final_train2.columns.get_loc("id")
+#new_cols=temp_cols[index:index+1] + temp_cols[0:index] + temp_cols[index+1:]
+#df_final_train2=df_final_train2[new_cols]
+Splitting Data to Train  Validation  Test Sets
+import pickle
+from sklearn.model_selection import train_test_split 
+data = pd.DataFrame(df_train)
+X_data = df_train[df_train.columns[~df_train.columns.isin(['Personality_Disqualification_Dico_final'])]]
+y_data = df_train['Personality_Disqualification_Dico_final']
+60% of data observations - train-set | 20% of data observations - validation-set | 20% of data observations - test-set
+# Split the data into train, validation and test sets
+
+X_train, X_temp, y_train, y_temp = train_test_split(X_data, y_data, test_size=0.4, random_state=42)
+X_valid, X_test, y_valid, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
+print("Train data shape:", X_train.shape)
+print("Validation data shape:", X_valid.shape)
+print("Test data shape:", X_test.shape)
+Train data shape: (1380, 18)
+Validation data shape: (460, 18)
+Test data shape: (460, 18)
+### Split the data into train and test sets
+#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+#X = df_train.loc[:, df_train.columns != 'cnt']
+#y = df_train['cnt']
+Convert y values to categorical values
+###only if needed
+lab = preprocessing.LabelEncoder()
+y_train = lab.fit_transform(y_train)
+y_test = lab.fit_transform(y_test)
+y_valid = lab.fit_transform(y_valid)
+Selection Bias Examination - Features
+# Convert target variables to DataFrames
+y_train_diff = pd.DataFrame(y_train, columns=['target'])
+y_valid_diff = pd.DataFrame(y_valid, columns=['target'])
+y_test_diff = pd.DataFrame(y_test, columns=['target'])
+# Calculate means of features for each dataset
+train_means = X_train.mean()
+valid_means = X_valid.mean()
+test_means = X_test.mean()
+# Combine means into a DataFrame for comparison
+feature_means_df = pd.DataFrame({
+    'Train Means': train_means,
+    'Validation Means': valid_means,
+    'Test Means': test_means
+})
+# Display the means of features across datasets
+print("Means of Features Across Datasets:")
+print(feature_means_df)
+Means of Features Across Datasets:
+                                               Train Means  Validation Means  \
+Morals_and_Values_Test                           -0.001984          0.050691   
+Job_Interview_Grade                              -0.021714         -0.011844   
+Designated_Role_continuous                       -0.013752         -0.017409   
+MMPI_factor_group_A                               0.009912         -0.001580   
+MMPI_factor_group_B                              -0.030736          0.036804   
+num_composite_measure                            -0.022965          0.064448   
+dummy_composite_measure                          -0.030066         -0.004325   
+Personal_elevations_index                        -0.032458          0.028991   
+FAM                                              -0.001182          0.036416   
+PD                                               -0.043702          0.077392   
+INT_No_Asses_Center_Morals_and_Values             0.072778          0.089779   
+INT_No_Asses_Center_Job_Interview_Grade           0.005705         -0.051360   
+INT_No_Asses_Center_Personal_elevations_index     0.082329          0.099628   
+INT_No_Asses_Center_composite_measure             0.084926          0.094013   
+INT_No_Asses_Center_MMPI_Numeric_0_15_above       0.108643          0.090676   
+
+                                               Test Means  
+Morals_and_Values_Test                          -0.044739  
+Job_Interview_Grade                              0.076987  
+Designated_Role_continuous                       0.058664  
+MMPI_factor_group_A                             -0.028156  
+MMPI_factor_group_B                              0.055404  
+num_composite_measure                            0.004447  
+dummy_composite_measure                          0.094524  
+Personal_elevations_index                        0.068382  
+FAM                                             -0.032869  
+PD                                               0.053713  
+INT_No_Asses_Center_Morals_and_Values            0.030765  
+INT_No_Asses_Center_Job_Interview_Grade         -0.018187  
+INT_No_Asses_Center_Personal_elevations_index    0.092270  
+INT_No_Asses_Center_composite_measure            0.061049  
+INT_No_Asses_Center_MMPI_Numeric_0_15_above      0.042197  
+Eta Squred to effect Power (Alternatively - We can extract a root and get the power index - eta)
+η2 (eta squred) = 0.01 indicates a small effect.
+η2 = 0.06 indicates a medium effect.
+η2 = 0.14 indicates a large effect.
+# One-way ANOVA and Eta squared calculation for features
+feature_columns = ['Morals_and_Values_Test','Job_Interview_Grade', 'Designated_Role_continuous', 'MMPI_factor_group_A', 'MMPI_factor_group_B', 'num_composite_measure', 'dummy_composite_measure', 'Personal_elevations_index', 'FAM', 'PD', 'INT_No_Asses_Center_Morals_and_Values', 'INT_No_Asses_Center_Job_Interview_Grade', 'INT_No_Asses_Center_Personal_elevations_index', 'INT_No_Asses_Center_composite_measure', 'INT_No_Asses_Center_MMPI_Numeric_0_15_above', 'Assessment_Center_Grade_missing_new', 'Assessment_Center_Grade_medium_new', 'Gender_Dico_new'
+]
+for feature in feature_columns:
+    print(f"\n{feature} Analysis:")
+    f_statistic, p_value = f_oneway(X_train[feature], X_valid[feature], X_test[feature])
+    eta_squared = f_statistic / (f_statistic + (len(X_train) + len(X_valid) + len(X_test)) - len(feature_columns))
+    
+    print("ANOVA F-statistic:", f_statistic)
+    print("p-value:", p_value)
+    print("Eta squared (effect size):", eta_squared)
+
+Morals_and_Values_Test Analysis:
+ANOVA F-statistic: 1.053680089237109
+p-value: 0.34882077044838783
+Eta squared (effect size): 0.0004615222578541929
+
+Job_Interview_Grade Analysis:
+ANOVA F-statistic: 1.7211532269866823
+p-value: 0.17909035113130745
+Eta squared (effect size): 0.000753661726412888
+
+Designated_Role_continuous Analysis:
+ANOVA F-statistic: 0.9912828073732443
+p-value: 0.3712590322396052
+Eta squared (effect size): 0.00043420350083609295
+
+MMPI_factor_group_A Analysis:
+ANOVA F-statistic: 0.2504293023867632
+p-value: 0.7784877654125819
+Eta squared (effect size): 0.00010972910736325798
+
+MMPI_factor_group_B Analysis:
+ANOVA F-statistic: 1.6696304076437596
+p-value: 0.18854511365033952
+Eta squared (effect size): 0.0007311173146116255
+
+num_composite_measure Analysis:
+ANOVA F-statistic: 1.3235534670837845
+p-value: 0.2663906580582708
+Eta squared (effect size): 0.0005796609355139579
+
+dummy_composite_measure Analysis:
+ANOVA F-statistic: 2.6858435575148243
+p-value: 0.06837774086020738
+Eta squared (effect size): 0.0011755855034023676
+
+Personal_elevations_index Analysis:
+ANOVA F-statistic: 1.996573696024447
+p-value: 0.1360353821356603
+Eta squared (effect size): 0.0008741579208210186
+
+FAM Analysis:
+ANOVA F-statistic: 0.5540087943823244
+p-value: 0.5747183311507026
+Eta squared (effect size): 0.0002427144296467032
+
+PD Analysis:
+ANOVA F-statistic: 3.3643993174459994
+p-value: 0.03475328744887609
+Eta squared (effect size): 0.0014721500511913205
+
+INT_No_Asses_Center_Morals_and_Values Analysis:
+ANOVA F-statistic: 0.4314686547171625
+p-value: 0.649607056142969
+Eta squared (effect size): 0.00018903904044552692
+
+INT_No_Asses_Center_Job_Interview_Grade Analysis:
+ANOVA F-statistic: 0.5853466116400687
+p-value: 0.5569958454445698
+Eta squared (effect size): 0.0002564401863478973
+
+INT_No_Asses_Center_Personal_elevations_index Analysis:
+ANOVA F-statistic: 0.053276680560245156
+p-value: 0.9481188220203381
+Eta squared (effect size): 2.3345940738833493e-05
+
+INT_No_Asses_Center_composite_measure Analysis:
+ANOVA F-statistic: 0.1349070889283151
+p-value: 0.8738040162220311
+Eta squared (effect size): 5.911442330129441e-05
+
+INT_No_Asses_Center_MMPI_Numeric_0_15_above Analysis:
+ANOVA F-statistic: 0.7361807051096505
+p-value: 0.47905260623903023
+Eta squared (effect size): 0.00032249924951128307
+
+Assessment_Center_Grade_missing_new Analysis:
+ANOVA F-statistic: 0.9718922758578091
+p-value: 0.37852192312273436
+Eta squared (effect size): 0.00042571364069180254
+
+Assessment_Center_Grade_medium_new Analysis:
+ANOVA F-statistic: 1.2936021424780306
+p-value: 0.2744807437487307
+Eta squared (effect size): 0.000566550942578829
+
+Gender_Dico_new Analysis:
+ANOVA F-statistic: 0.0709287632606461
+p-value: 0.9315302889507082
+Eta squared (effect size): 3.1080875868781624e-05
+In the ANOVA test, a significant difference was found between the three sets only with reference to the pd feature (P<0.05), at the same time, the size of the difference is of low intensity and lacks substantive significance.
+Selection Bias Examination - Target Outcome
+target_means = pd.DataFrame({
+    'Train Mean': y_train_diff['target'].mean(),
+    'Validation Mean': y_valid_diff['target'].mean(),
+    'Test Mean': y_test_diff['target'].mean()
+}, index=['target'])
+
+# Display the mean differences in the outcome variable
+print("\nMean Differences in Outcome Variable Across Datasets:")
+print(target_means)
+
+Mean Differences in Outcome Variable Across Datasets:
+        Train Mean  Validation Mean  Test Mean
+target    0.089855         0.104348   0.084783
+# One-way ANOVA and Eta squared calculation for the outcome variable
+print("\nOutcome Variable Analysis:")
+f_statistic, p_value = f_oneway(y_train_diff['target'], y_valid_diff['target'], y_test_diff['target'])
+eta_squared = f_statistic / (f_statistic + (len(y_train_diff) + len(y_valid_diff) + len(y_test_diff)) - 3)
+
+
+print("ANOVA F-statistic:", f_statistic)
+print("p-value:", p_value)
+print("Eta squared (effect size):", eta_squared)
+
+Outcome Variable Analysis:
+ANOVA F-statistic: 0.60134302327781
+p-value: 0.5481613233758695
+Eta squared (effect size): 0.000261726441405426
+In the ANOVA test, a significant difference was found between the three sets in relate to the outcome variable.
+4. Models Development
+In this phase, our objective is to identify models that exhibit superior quality indicators for predicting the target factor. To achieve this, we will conduct only basic operations in the construction of the models, without implementing changes and tracking optimal parameters / hyperparameters to improve the level of accuracy and predictive validity of the models. In this rule, we will limit ourselves at this stage to implementing changes in the threshold point at which the model assigns positive or negative predictions to the target factor (personality disqualification or passing the personality exam).
+At the end of the basic testing process, based on the metrics chosen to evaluate the quality of the model, we can get an indication of the quality of the models, and by comparing the metrics, choose the best quality model.The selected model will be used by us for the next step, where we will implement tests and changes in the model's parameters / hyperparameters in order to maximize its accuracy / predictive validity.
+Cross Validation
+The validity and accuracy of the prediction models in the current project were assessed through a triple cross-validation analysis. It's essential to clarify that this evaluation of model validity was exclusively carried out within the training set. The validation and test sets, however, were not subjected to the same cross-validation scrutiny.
+It's worth noting that due to the relatively limited number of participants in the validation and test sets, particularly the scarcity of instances with personality disorders, a comprehensive validation and accuracy assessment using the same cross-analysis methodology is not feasible. The reduced sample size in these sets raises concerns about the risk of random outcomes, potential over-adjustment, and compromised generalizability of the findings. Consequently, subdividing participants into smaller groups within these sets, as indicated by the cross-analysis approach, may lead to inadvertent outcomes that could undermine the accuracy of the results and hinder the broader applicability of the conclusions.
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_predict
+4.1 Logistic Regression
+Algorithm fit base on train set
+Model_Logistic_Regression = LogisticRegression(random_state=1)
+Model_Logistic_Regression.fit(X_train, y_train)
+LogisticRegression(random_state=1)
+parameters : (penalty='l2', *, dual=False, tol=0.0001, C=1.0, fit_intercept=True, intercept_scaling=1, class_weight=None, random_state=None, solver='lbfgs', max_iter=100, multi_class='auto', verbose=0, warm_start=False, n_jobs=None, l1_ratio=None)
+Training Scores :
+### predictions --based-- on cross validation test
+num_folds = 3
+cross_v_predictions = cross_val_predict(Model_Logistic_Regression, X_train,y_train, cv=num_folds)
+### predictions --not-- based on cross validation test
+predictions = Model_Logistic_Regression.predict(X_train)
+Metrics = classificationMetrics(y_train, cross_v_predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.35, 'AUC': 0.67}
+pd.crosstab(y_train, cross_v_predictions)
+col_0     0   1
+row_0          
+0      1239  17
+1        81  43
+Changing Cut-Off
+num_folds = 3
+cross_v_predictions  = cross_val_predict(Model_Logistic_Regression, X_train,y_train, cv=num_folds, method='predict_proba')
+predictions_cat = np.where(cross_v_predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_train, predictions_cat)
+col_0     0    1
+row_0           
+0      1071  185
+1        35   89
+model_dict = {'model': "Logistic-Regression"}
+
+models_list_train = models_list_train.append({**model_dict, **classificationMetrics(y_train, predictions_cat)}, ignore_index=True)
+models_list_train.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.72  0.79
+Validation Scores :
+predictions = Model_Logistic_Regression.predict(X_valid)
+Metrics = classificationMetrics(y_valid, predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.27, 'AUC': 0.62}
+pd.crosstab(y_valid, predictions)
+col_0    0   1
+row_0         
+0      403   9
+1       35  13
+Changing Cut-Off
+predictions =  Model_Logistic_Regression.predict_proba(X_valid)
+predictions_cat = np.where(predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_valid, predictions_cat)
+col_0    0   1
+row_0         
+0      337  75
+1       16  32
+model_dict = {'model': "Logistic-Regression"}
+models_list_validation = models_list_validation.append({**model_dict, **classificationMetrics(y_valid, predictions_cat)}, ignore_index=True)
+models_list_validation.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.67  0.74
+4.2 DecisionTree Classifier
+Algorithm fit base on train set
+Model_Decision_Tree  = DecisionTreeClassifier(random_state=1)
+Model_Decision_Tree.fit(X_train,y_train)
+DecisionTreeClassifier(random_state=1)
+parameters : (*, criterion='gini', splitter='best', max_depth=None, min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features=None, random_state=None, max_leaf_nodes=None, min_impurity_decrease=0.0, class_weight=None, ccp_alpha=0.0)
+Training Scores :
+### predictions --based-- on cross validation test
+num_folds = 3
+cross_v_predictions = cross_val_predict(Model_Decision_Tree, X_train,y_train, cv=num_folds)
+### predictions --not-- based on cross validation test
+predictions = Model_Decision_Tree.predict(X_train)
+Metrics = classificationMetrics(y_train, cross_v_predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.32, 'AUC': 0.62}
+pd.crosstab(y_train, cross_v_predictions)
+col_0     0    1
+row_0           
+0      1153  103
+1        84   40
+Changing Cut-Off
+num_folds = 3
+cross_v_predictions  = cross_val_predict(Model_Decision_Tree, X_train,y_train, cv=num_folds, method='predict_proba')
+predictions_cat = np.where(cross_v_predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_train, predictions_cat)
+col_0     0    1
+row_0           
+0      1153  103
+1        84   40
+model_dict = {'model': "Decision_Tree"}
+models_list_train = models_list_train.append({**model_dict, **classificationMetrics(y_train, predictions_cat)}, ignore_index=True)
+models_list_train.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.72  0.79
+1        Decision_Tree    0.32  0.62
+Validation Scores :
+predictions = Model_Decision_Tree.predict(X_valid)
+Metrics = classificationMetrics(y_valid, predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.29, 'AUC': 0.6}
+pd.crosstab(y_valid, predictions)
+col_0    0   1
+row_0         
+0      374  38
+1       34  14
+Changing Cut-Off
+predictions =  Model_Decision_Tree.predict_proba(X_valid)
+predictions_cat = np.where(predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_valid, predictions_cat)
+col_0    0   1
+row_0         
+0      374  38
+1       34  14
+model_dict = {'model': "Decision_Tree"}
+models_list_validation = models_list_validation.append({**model_dict, **classificationMetrics(y_valid, predictions_cat)}, ignore_index=True)
+models_list_validation.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.67  0.74
+1        Decision_Tree    0.29  0.60
+4.3 Random Forest
+Algorithm fit base on train set
+Model_Random_Forest  = RandomForestClassifier(random_state=1)
+Model_Random_Forest.fit(X_train,y_train)
+RandomForestClassifier(random_state=1)
+parameters : (n_estimators=100, *, criterion='gini', max_depth=None, min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features='sqrt', max_leaf_nodes=None, min_impurity_decrease=0.0, bootstrap=True, oob_score=False, n_jobs=None, random_state=None, verbose=0, warm_start=False, class_weight=None, ccp_alpha=0.0, max_samples=None)
+Training Scores :
+### predictions --based-- on cross validation test
+num_folds = 3
+cross_v_predictions = cross_val_predict(Model_Random_Forest, X_train,y_train, cv=num_folds)
+### predictions --not-- based on cross validation test
+predictions = Model_Random_Forest.predict(X_train)
+Metrics = classificationMetrics(y_train, cross_v_predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.28, 'AUC': 0.63}
+pd.crosstab(y_train, cross_v_predictions)
+col_0     0   1
+row_0          
+0      1231  25
+1        89  35
+Changing Cut-Off
+num_folds = 3
+cross_v_predictions  = cross_val_predict(Model_Random_Forest, X_train,y_train, cv=num_folds, method='predict_proba')
+predictions_cat = np.where(cross_v_predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_train, predictions_cat)
+col_0    0    1
+row_0          
+0      995  261
+1       31   93
+model_dict = {'model': "Random_Forest"}
+models_list_train = models_list_train.append({**model_dict, **classificationMetrics(y_train, predictions_cat)}, ignore_index=True)
+models_list_train.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.72  0.79
+1        Decision_Tree    0.32  0.62
+2        Random_Forest    0.75  0.77
+Validation Scores :
+predictions = Model_Random_Forest.predict(X_valid)
+Metrics = classificationMetrics(y_valid, predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.27, 'AUC': 0.62}
+pd.crosstab(y_valid, predictions)
+col_0    0   1
+row_0         
+0      402  10
+1       35  13
+Changing Cut-Off
+predictions =  Model_Random_Forest.predict_proba(X_valid)
+predictions_cat = np.where(predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_valid, predictions_cat)
+col_0    0   1
+row_0         
+0      315  97
+1       13  35
+model_dict = {'model': "Random_Forest"}
+models_list_validation = models_list_validation.append({**model_dict, **classificationMetrics(y_valid, predictions_cat)}, ignore_index=True)
+models_list_validation.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.67  0.74
+1        Decision_Tree    0.29  0.60
+2        Random_Forest    0.73  0.75
+4.4 Adaptive Boosting (ADABoost)
+Algorithm fit base on train set
+Model_ADABoost  = AdaBoostClassifier(random_state=1)
+Model_ADABoost.fit(X_train,y_train)
+AdaBoostClassifier(random_state=1)
+parameters : (estimator=None, *, n_estimators=50, learning_rate=1.0, algorithm='SAMME.R', random_state=None, base_estimator='deprecated')
+Training Scores :
+### predictions --based-- on cross validation test
+num_folds = 3
+cross_v_predictions = cross_val_predict(Model_ADABoost, X_train,y_train, cv=num_folds)
+### predictions --not-- based on cross validation test
+predictions = Model_ADABoost.predict(X_train)
+Metrics = classificationMetrics(y_train, cross_v_predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.33, 'AUC': 0.65}
+pd.crosstab(y_train, cross_v_predictions)
+col_0     0   1
+row_0          
+0      1224  32
+1        83  41
+Changing Cut-Off
+num_folds = 3
+cross_v_predictions = cross_val_predict(Model_ADABoost, X_train,y_train, cv=num_folds, method='predict_proba')
+predictions_cat = np.where(cross_v_predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_train, predictions_cat)
+col_0     1
+row_0      
+0      1256
+1       124
+model_dict = {'model': "ADABoost"}
+models_list_train = models_list_train.append({**model_dict, **classificationMetrics(y_train, predictions_cat)}, ignore_index=True)
+models_list_train.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.72  0.79
+1        Decision_Tree    0.32  0.62
+2        Random_Forest    0.75  0.77
+3             ADABoost    1.00  0.50
+Validation Scores :
+predictions = Model_ADABoost.predict(X_valid)
+Metrics = classificationMetrics(y_valid, predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.25, 'AUC': 0.61}
+pd.crosstab(y_valid, predictions)
+col_0    0   1
+row_0         
+0      397  15
+1       36  12
+Changing Cut-Off
+predictions =  Model_ADABoost.predict_proba(X_valid)
+predictions_cat = np.where(predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_valid, predictions_cat)
+col_0    1
+row_0     
+0      412
+1       48
+model_dict = {'model': "ADABoost"}
+models_list_validation = models_list_validation.append({**model_dict, **classificationMetrics(y_valid, predictions_cat)}, ignore_index=True)
+models_list_validation.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.67  0.74
+1        Decision_Tree    0.29  0.60
+2        Random_Forest    0.73  0.75
+3             ADABoost    1.00  0.50
+4.5 Gradient Boosting Machine (GBM)
+Algorithm fit base on train set
+Model_Gradient  = GradientBoostingClassifier(random_state=1)
+Model_Gradient.fit(X_train,y_train)
+GradientBoostingClassifier(random_state=1)
+parameters : (*, loss='log_loss', learning_rate=0.1, n_estimators=100, subsample=1.0, criterion='friedman_mse', min_samples_split=2, min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_depth=3, min_impurity_decrease=0.0, init=None, random_state=None, max_features=None, verbose=0, max_leaf_nodes=None, warm_start=False, validation_fraction=0.1, n_iter_no_change=None, tol=0.0001, ccp_alpha=0.0)
+Training Scores :
+### predictions --based-- on cross validation test
+num_folds = 3
+cross_v_predictions = cross_val_predict(Model_Gradient, X_train,y_train, cv=num_folds)
+### predictions --not-- based on cross validation test
+predictions = Model_Gradient.predict(X_train)
+Metrics = classificationMetrics(y_train, cross_v_predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.34, 'AUC': 0.66}
+pd.crosstab(y_train, cross_v_predictions)
+col_0     0   1
+row_0          
+0      1225  31
+1        82  42
+Changing Cut-Off
+num_folds = 3
+cross_v_predictions = cross_val_predict(Model_Gradient, X_train,y_train, cv=num_folds, method='predict_proba')
+predictions_cat = np.where(cross_v_predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_train, predictions_cat)
+col_0     0    1
+row_0           
+0      1098  158
+1        44   80
+model_dict = {'model': "Gradient_Boosting"}
+models_list_train = models_list_train.append({**model_dict, **classificationMetrics(y_train, predictions_cat)}, ignore_index=True)
+models_list_train.round(2)
+
+ 
+                 model  Recall   AUC
+0  Logistic-Regression    0.72  0.79
+1        Decision_Tree    0.32  0.62
+2        Random_Forest    0.75  0.77
+3             ADABoost    1.00  0.50
+4    Gradient_Boosting    0.65  0.76
+Validation Scores :
+predictions = Model_Gradient.predict(X_valid)
+Metrics = classificationMetrics(y_valid, predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.29, 'AUC': 0.64}
+pd.crosstab(y_valid, predictions)
+col_0    0   1
+row_0         
+0      406   6
+1       34  14
+Changing Cut-Off
+predictions =  Model_Gradient.predict_proba(X_valid)
+predictions_cat = np.where(predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_valid, predictions_cat)
+col_0    0   1
+row_0         
+0      351  61
+1       17  31
+model_dict = {'model': "Gradient_Boosting"}
+models_list_validation = models_list_validation.append({**model_dict, **classificationMetrics(y_valid, predictions_cat)}, ignore_index=True)
+models_list_validation.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.67  0.74
+1        Decision_Tree    0.29  0.60
+2        Random_Forest    0.73  0.75
+3             ADABoost    1.00  0.50
+4    Gradient_Boosting    0.65  0.75
+4.6 Support Vector Machine (SVM)
+Algorithm fit base on train set
+Model_SVC = SVC(random_state=1, probability=True)
+Model_SVC.fit(X_train,y_train)
+SVC(probability=True, random_state=1)
+parameters : (*, C=1.0, kernel='rbf', degree=3, gamma='scale', coef0=0.0, shrinking=True, probability=False, tol=0.001, cache_size=200, class_weight=None, verbose=False, max_iter=-1, decision_function_shape='ovr', break_ties=False, random_state=None)
+Training Scores :
+### predictions --based-- on cross validation test
+num_folds = 3
+cross_v_predictions = cross_val_predict(Model_SVC, X_train,y_train, cv=num_folds)
+### predictions --not-- based on cross validation test
+predictions = Model_SVC.predict(X_train)
+Metrics = classificationMetrics(y_train, cross_v_predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.23, 'AUC': 0.61}
+pd.crosstab(y_train, cross_v_predictions)
+col_0     0   1
+row_0          
+0      1243  13
+1        95  29
+Changing Cut-Off
+num_folds = 3
+cross_v_predictions = cross_val_predict(Model_SVC, X_train,y_train, cv=num_folds, method='predict_proba')
+predictions_cat = np.where(cross_v_predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_train, predictions_cat)
+col_0     0   1
+row_0          
+0      1168  88
+1        61  63
+model_dict = {'model': "SVC"}
+models_list_train = models_list_train.append({**model_dict, **classificationMetrics(y_train, predictions_cat)}, ignore_index=True)
+models_list_train.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.72  0.79
+1        Decision_Tree    0.32  0.62
+2        Random_Forest    0.75  0.77
+3             ADABoost    1.00  0.50
+4    Gradient_Boosting    0.65  0.76
+5                  SVC    0.51  0.72
+Validation Scores :
+predictions = Model_SVC.predict(X_valid)
+Metrics = classificationMetrics(y_valid, predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.23, 'AUC': 0.61}
+pd.crosstab(y_valid, predictions)
+col_0    0   1
+row_0         
+0      407   5
+1       37  11
+Changing Cut-Off
+predictions =  Model_SVC.predict_proba(X_valid)
+predictions_cat = np.where(predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_valid, predictions_cat)
+col_0    0   1
+row_0         
+0      378  34
+1       26  22
+model_dict = {'model': "SVC"}
+models_list_validation = models_list_validation.append({**model_dict, **classificationMetrics(y_valid, predictions_cat)}, ignore_index=True)
+models_list_validation.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.67  0.74
+1        Decision_Tree    0.29  0.60
+2        Random_Forest    0.73  0.75
+3             ADABoost    1.00  0.50
+4    Gradient_Boosting    0.65  0.75
+5                  SVC    0.46  0.69
+model_dict = {'model': "SVC"}
+models_list_test = models_list_test.append({**model_dict, **classificationMetrics(y_test, predictions_cat)}, ignore_index=True)
+models_list_test.round(2)
+  model  Recall  AUC
+0   SVC    0.13  0.5
+4.7 Neural Network - MLP Classifier
+Algorithm fit base on train set
+from sklearn.neural_network import MLPClassifier
+MLP_Classifier = MLPClassifier(random_state=1)
+parameters : (hidden_layer_sizes=(100,), activation='relu', *, solver='adam', alpha=0.0001, batch_size='auto', learning_rate='constant', learning_rate_init=0.001, power_t=0.5, max_iter=200, shuffle=True, random_state=None, tol=0.0001, verbose=False, warm_start=False, momentum=0.9, nesterovs_momentum=True, early_stopping=False, validation_fraction=0.1, beta_1=0.9, beta_2=0.999, epsilon=1e-08, n_iter_no_change=10, max_fun=15000)
+MLP_Classifier.fit(X_train,y_train)
+MLPClassifier(random_state=1)
+Training Scores :
+### predictions --based-- on cross validation test
+num_folds = 3
+cross_v_predictions = cross_val_predict(MLP_Classifier, X_train,y_train, cv=num_folds)
+### predictions --not-- based on cross validation test
+predictions = MLP_Classifier.predict(X_train)
+Metrics = classificationMetrics(y_train, cross_v_predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.37, 'AUC': 0.68}
+pd.crosstab(y_train, cross_v_predictions)
+col_0     0   1
+row_0          
+0      1232  24
+1        78  46
+Changing Cut-Off
+num_folds = 3
+cross_v_predictions = cross_val_predict(MLP_Classifier, X_train,y_train, cv=num_folds, method='predict_proba')
+predictions_cat = np.where(cross_v_predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_train, predictions_cat)
+col_0     0    1
+row_0           
+0      1056  200
+1        38   86
+model_dict = {'model': "MLP"}
+models_list_train = models_list_train.append({**model_dict, **classificationMetrics(y_train, predictions_cat)}, ignore_index=True)
+models_list_train.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.72  0.79
+1        Decision_Tree    0.32  0.62
+2        Random_Forest    0.75  0.77
+3             ADABoost    1.00  0.50
+4    Gradient_Boosting    0.65  0.76
+5                  SVC    0.51  0.72
+6                  MLP    0.69  0.77
+Validation Scores :
+predictions = MLP_Classifier.predict(X_valid)
+Metrics = classificationMetrics(y_valid, predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.25, 'AUC': 0.61}
+pd.crosstab(y_valid, predictions)
+col_0    0   1
+row_0         
+0      397  15
+1       36  12
+Changing Cut-Off
+predictions =  MLP_Classifier.predict_proba(X_valid)
+predictions_cat = np.where(predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_valid, predictions_cat)
+col_0    0   1
+row_0         
+0      333  79
+1       23  25
+model_dict = {'model': "MLP"}
+models_list_validation = models_list_validation.append({**model_dict, **classificationMetrics(y_valid, predictions_cat)}, ignore_index=True)
+models_list_validation.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.67  0.74
+1        Decision_Tree    0.29  0.60
+2        Random_Forest    0.73  0.75
+3             ADABoost    1.00  0.50
+4    Gradient_Boosting    0.65  0.75
+5                  SVC    0.46  0.69
+6                  MLP    0.52  0.66
+4.8 Gaussian Naiv Bayes
+from sklearn.naive_bayes import GaussianNB
+Algorithm fit base on train set
+Model_GaussianNB = GaussianNB()
+Model_GaussianNB.fit(X_train,y_train)
+GaussianNB()
+parameters : (*, priors=None, var_smoothing=1e-09)
+Training Scores :
+### predictions --based-- on cross validation test
+num_folds = 3
+cross_v_predictions = cross_val_predict(Model_GaussianNB, X_train,y_train, cv=num_folds)
+### predictions --not-- based on cross validation test
+predictions = Model_GaussianNB.predict(X_train)
+Metrics = classificationMetrics(y_train, cross_v_predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.5, 'AUC': 0.71}
+pd.crosstab(y_train, cross_v_predictions)
+col_0     0   1
+row_0          
+0      1168  88
+1        62  62
+Changing Cut-Off
+num_folds = 3
+cross_v_predictions  = cross_val_predict(Model_GaussianNB, X_train,y_train, cv=num_folds, method='predict_proba')
+predictions_cat = np.where(cross_v_predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_train, predictions_cat)
+col_0     0    1
+row_0           
+0      1143  113
+1        57   67
+model_dict = {'model': "GaussianNB"}
+
+models_list_train = models_list_train.append({**model_dict, **classificationMetrics(y_train, predictions_cat)}, ignore_index=True)
+models_list_train.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.72  0.79
+1        Decision_Tree    0.32  0.62
+2        Random_Forest    0.75  0.77
+3             ADABoost    1.00  0.50
+4    Gradient_Boosting    0.65  0.76
+5                  SVC    0.51  0.72
+6                  MLP    0.69  0.77
+7           GaussianNB    0.54  0.73
+Validation Scores :
+predictions = Model_GaussianNB.predict(X_valid)
+Metrics = classificationMetrics(y_valid, predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.35, 'AUC': 0.62}
+pd.crosstab(y_valid, predictions)
+col_0    0   1
+row_0         
+0      363  49
+1       31  17
+Changing Cut-Off
+predictions =  Model_GaussianNB.predict_proba(X_valid)
+predictions_cat = np.where(predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_valid, predictions_cat)
+col_0    0   1
+row_0         
+0      355  57
+1       28  20
+model_dict = {'model': "GaussianNB"}
+models_list_validation = models_list_validation.append({**model_dict, **classificationMetrics(y_valid, predictions_cat)}, ignore_index=True)
+models_list_validation.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.67  0.74
+1        Decision_Tree    0.29  0.60
+2        Random_Forest    0.73  0.75
+3             ADABoost    1.00  0.50
+4    Gradient_Boosting    0.65  0.75
+5                  SVC    0.46  0.69
+6                  MLP    0.52  0.66
+7           GaussianNB    0.42  0.64
+4.9 K-Neighbors Classifier
+from sklearn.neighbors import KNeighborsClassifier
+Algorithm fit base on train set
+Model_KNeighbors = KNeighborsClassifier()
+Model_KNeighbors.fit(X_train,y_train)
+KNeighborsClassifier()
+parameters : (n_neighbors=5, *, weights='uniform', algorithm='auto', leaf_size=30, p=2, metric='minkowski', metric_params=None, n_jobs=None)
+Training Scores :
+### predictions --based-- on cross validation test
+num_folds = 3
+cross_v_predictions = cross_val_predict(Model_KNeighbors, X_train,y_train, cv=num_folds)
+### predictions --not-- based on cross validation test
+predictions = Model_KNeighbors.predict(X_train)
+Metrics = classificationMetrics(y_train, cross_v_predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.32, 'AUC': 0.65}
+pd.crosstab(y_train, cross_v_predictions)
+col_0     0   1
+row_0          
+0      1236  20
+1        84  40
+Changing Cut-Off
+num_folds = 3
+cross_v_predictions  = cross_val_predict(Model_KNeighbors, X_train,y_train, cv=num_folds, method='predict_proba')
+predictions_cat = np.where(cross_v_predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_train, predictions_cat)
+col_0     0    1
+row_0           
+0      1002  254
+1        35   89
+model_dict = {'model': "KNeighbors"}
+
+models_list_train = models_list_train.append({**model_dict, **classificationMetrics(y_train, predictions_cat)}, ignore_index=True)
+models_list_train.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.72  0.79
+1        Decision_Tree    0.32  0.62
+2        Random_Forest    0.75  0.77
+3             ADABoost    1.00  0.50
+4    Gradient_Boosting    0.65  0.76
+5                  SVC    0.51  0.72
+6                  MLP    0.69  0.77
+7           GaussianNB    0.54  0.73
+8           KNeighbors    0.72  0.76
+Validation Scores :
+predictions = Model_KNeighbors.predict(X_valid)
+Metrics = classificationMetrics(y_valid, predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.25, 'AUC': 0.61}
+pd.crosstab(y_valid, predictions)
+col_0    0   1
+row_0         
+0      398  14
+1       36  12
+Changing Cut-Off
+predictions =  Model_KNeighbors.predict_proba(X_valid)
+predictions_cat = np.where(predictions[:,1] > 0.1,1,0)
+pd.crosstab(y_valid, predictions_cat)
+col_0    0    1
+row_0          
+0      312  100
+1       19   29
+model_dict = {'model': "KNeighbors"}
+models_list_validation = models_list_validation.append({**model_dict, **classificationMetrics(y_valid, predictions_cat)}, ignore_index=True)
+models_list_validation.round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.67  0.74
+1        Decision_Tree    0.29  0.60
+2        Random_Forest    0.73  0.75
+3             ADABoost    1.00  0.50
+4    Gradient_Boosting    0.65  0.75
+5                  SVC    0.46  0.69
+6                  MLP    0.52  0.66
+7           GaussianNB    0.42  0.64
+8           KNeighbors    0.60  0.68
+5. Final Model Selection
+The determination of the "optimal" models, relative to the others, hinged on the evaluation of model quality metrics. These metrics provided an overarching understanding of the models' accuracy, predictive efficacy, and overall quality. Furthermore, they facilitated a comparative assessment of the models' quality levels.
+In the process of identifying the most exceptional prediction models, we employed two distinct quality metrics:
+•	AUC (Area Under the Curve): This metric gauges the model's ability to distinguish between positive and negative instances, serving as a reliable measure of overall model performance.
+•	Recall: We also utilized the recall metric, which focuses on the model's effectiveness in correctly identifying true positive cases in relation to the total number of actual positive cases. This metric is especially significant in scenarios where certain types of errors hold greater consequences than others.
+These two quality metrics formed the foundation for our selection of the highest-quality prediction models.
+Considerations in Selecting Evaluation Metrics for the Models:
+•	It's essential to highlight that the Accuracy index isn't a suitable measure for assessing model quality within the current project's context. This stems from the fact that the project's target variable is characterized by the underrepresentation of one category (approximately 10% of project participants experienced disqualification in the Israel Police recruitment process due to personality issues).
+•	To gauge model quality, our focus will be on the AUC metric. This choice is rooted in its capacity to evaluate the accuracy and validity of models when adjustments are made to the threshold point at which models classify predictions as positive (personality disqualification, 1) or negative (passing the personality test, 0) for the target factor.
+•	Ultimately, the recall metric was selected to assess model quality. This decision was influenced by the type of prediction errors that carry greater significance for decision makers and policy creators within the Department of Behavioral Sciences at the Israel Police. Here, errors related to failing to recognize unsuitable candidates (recall) hold critical consequences. In contrast, errors in the model's predictions that result in a higher number of "false alarms" (precision) are considered relatively less impactful by law enforcement authorities.
+•	Officials in the Department of Behavioral Sciences prioritize achieving an exhaustive identification of the "group of personality-disordered candidates." They place less emphasis on the proportion of candidates correctly or incorrectly classified as personality-disordered among all candidates marked by the models as such.
+•	In accordance with the above explanation, the current project's model quality assessment will place a significant emphasis on evaluating the recall and AUC metrics.
+Systematic Process for Selecting the Highest-Quality Models:
+Step 1: Arrangement of Relevant Models :
+•	The nine pertinent models developed during the data analysis phase were ordered based on their respective scores in the two crucial quality indices: AUC and recall. Arrangement was conducted in ascending order, ranging from low to high.
+Step 2: Scoring Models :
+•	Each model was assigned a score ranging from 1 to 9, corresponding to their position on the quality index spectrum. A model receiving a score of 1 had the lowest quality index score among the nine tested models. Conversely, a score of 9 indicated the model achieved the highest quality index score among those tested. This scoring process was executed for all three data sets (training, validation, and test sets) and was repeated for both the AUC and recall indices.
+Step 3: Aggregating Scores :
+•	The scores assigned to the models (ranging from 1 to 9) were aggregated to form an index with a scale ranging from 9 (minimum) to 36 (maximum). A lower score in this index signified lower quality levels of prediction models, whereas a higher score denoted a higher quality level of models.
+In the subsequent fine-tuning phase, where efforts will be directed towards enhancing the models' accuracy (primarily by adjusting parameters and hyperparameters), priority will be given to models possessing the highest scores in the aforementioned index.
+All quality metrics
+models_list_train.sort_values('AUC',ascending=False).round(2)
+                 model  Recall   AUC
+0  Logistic-Regression    0.72  0.79
+2        Random_Forest    0.75  0.77
+6                  MLP    0.69  0.77
+4    Gradient_Boosting    0.65  0.76
+8           KNeighbors    0.72  0.76
+7           GaussianNB    0.54  0.73
+5                  SVC    0.51  0.72
+1        Decision_Tree    0.32  0.62
+3             ADABoost    1.00  0.50
+models_list_validation.sort_values('AUC',ascending=False).round(2)
+                 model  Recall   AUC
+4    Gradient_Boosting    0.65  0.75
+2        Random_Forest    0.73  0.75
+0  Logistic-Regression    0.67  0.74
+5                  SVC    0.46  0.69
+8           KNeighbors    0.60  0.68
+6                  MLP    0.52  0.66
+7           GaussianNB    0.42  0.64
+1        Decision_Tree    0.29  0.60
+3             ADABoost    1.00  0.50
+Most Relevant Quality Metrics
+selected_columns = ['model', 'AUC', 'Recall']
+train_ranked_list = models_list_train[selected_columns];
+
+column_mapping = {'AUC': 'AUC_train_set','Recall': 'Recall_train_set'};
+train_ranked_list.rename(columns=column_mapping, inplace=True);
+
+train_ranked_list
+                 model  AUC_train_set  Recall_train_set
+0  Logistic-Regression       0.785224          0.717742
+1        Decision_Tree       0.620287          0.322581
+2        Random_Forest       0.771099          0.750000
+3             ADABoost       0.500000          1.000000
+4    Gradient_Boosting       0.759683          0.645161
+5                  SVC       0.719000          0.508065
+6                  MLP       0.767156          0.693548
+7           GaussianNB       0.725177          0.540323
+8           KNeighbors       0.757756          0.717742
+validation_ranked_list = models_list_validation[selected_columns];
+
+column_mapping = {'AUC': 'AUC_valid_set','Recall': 'Recall_valid_set'};
+validation_ranked_list.rename(columns=column_mapping, inplace=True);
+
+validation_ranked_list
+                 model  AUC_valid_set  Recall_valid_set
+0  Logistic-Regression       0.742314          0.666667
+1        Decision_Tree       0.599717          0.291667
+2        Random_Forest       0.746865          0.729167
+3             ADABoost       0.500000          1.000000
+4    Gradient_Boosting       0.748888          0.645833
+5                  SVC       0.687905          0.458333
+6                  MLP       0.664543          0.520833
+7           GaussianNB       0.639159          0.416667
+8           KNeighbors       0.680724          0.604167
+The relevant metrics in a joined data frame
+merged_metrics = train_ranked_list.merge(validation_ranked_list, on='model').round(2)
+merged_metrics
+                 model  AUC_train_set  Recall_train_set  AUC_valid_set  \
+0  Logistic-Regression           0.79              0.72           0.74   
+1        Decision_Tree           0.62              0.32           0.60   
+2        Random_Forest           0.77              0.75           0.75   
+3             ADABoost           0.50              1.00           0.50   
+4    Gradient_Boosting           0.76              0.65           0.75   
+5                  SVC           0.72              0.51           0.69   
+6                  MLP           0.77              0.69           0.66   
+7           GaussianNB           0.73              0.54           0.64   
+8           KNeighbors           0.76              0.72           0.68   
+
+   Recall_valid_set  
+0              0.67  
+1              0.29  
+2              0.73  
+3              1.00  
+4              0.65  
+5              0.46  
+6              0.52  
+7              0.42  
+8              0.60  
+Models' scores were assigned based on a relative metrics rating scale, ranging from 1 to 9.
+For each metric and within each dataset, the models' relative scores were arranged in ascending order, akin to the calculation of a median. The model with the lowest score for a specific metric was assigned a score of 1, while the model with the highest score for that metric was awarded a score of 9, with intermediary scores allocated accordingly.
+for col in merged_metrics.columns[1:]:
+    merged_metrics[col] = merged_metrics[col].rank(axis=0, method='min');
+    
+merged_metrics
+                 model  AUC_train_set  Recall_train_set  AUC_valid_set  \
+0  Logistic-Regression            9.0               6.0            7.0   
+1        Decision_Tree            2.0               1.0            2.0   
+2        Random_Forest            7.0               8.0            8.0   
+3             ADABoost            1.0               9.0            1.0   
+4    Gradient_Boosting            5.0               4.0            8.0   
+5                  SVC            3.0               2.0            6.0   
+6                  MLP            7.0               5.0            4.0   
+7           GaussianNB            4.0               3.0            3.0   
+8           KNeighbors            5.0               6.0            5.0   
+
+   Recall_valid_set  
+0               7.0  
+1               1.0  
+2               8.0  
+3               9.0  
+4               6.0  
+5               3.0  
+6               4.0  
+7               2.0  
+8               5.0  
+merged_metrics['Combined_Column'] = merged_metrics.sum(axis=1);
+merged_metrics = merged_metrics.sort_values(by='Combined_Column', ascending=False);
+merged_metrics
+                 model  AUC_train_set  Recall_train_set  AUC_valid_set  \
+2        Random_Forest            7.0               8.0            8.0   
+0  Logistic-Regression            9.0               6.0            7.0   
+4    Gradient_Boosting            5.0               4.0            8.0   
+8           KNeighbors            5.0               6.0            5.0   
+3             ADABoost            1.0               9.0            1.0   
+6                  MLP            7.0               5.0            4.0   
+5                  SVC            3.0               2.0            6.0   
+7           GaussianNB            4.0               3.0            3.0   
+1        Decision_Tree            2.0               1.0            2.0   
+
+   Recall_valid_set  Combined_Column  
+2               8.0             31.0  
+0               7.0             29.0  
+4               6.0             23.0  
+8               5.0             21.0  
+3               9.0             20.0  
+6               4.0             20.0  
+5               3.0             14.0  
+7               2.0             12.0  
+1               1.0              6.0  
+6. The Selected Model :
+The test results highlighted two standout models that garnered a substantial cumulative score when compared to others in the index that factors in quality metrics. The particularly notable models are: Random Forest; Logistic Regression.
+selected model - logistic regression :
+•	the selected model is Logistic Regression. This decision is attributed to the fact that there is no notable distinction in their quality indicators (recall, AUC), and conversely, Logistic Regression presents itself as a straightforward and comprehensible model, lending itself to easier explanation, presentation, and comprehension.
+•	Logistic Regression operates by calculating the odds ratio for personality rejection based on the independent variables integrated into the model. Consequently, the rationale behind the model's predictions regarding candidate rejection/passing in the personality test can be effectively communicated in a relatively simple manner. In contrast, the alternative algorithm (Random Forest) involves complex weightings across multiple decision trees. Logistic Regression, being more conventional and widely recognized, even finds a place in numerous social science subjects today, and is particularly familiar to the majority of psychologists within the Behavioral Sciences Department of the Israel Police, the context of the current project.
+•	Due to its recognized and relatively uncomplicated nature, Logistic Regression is more amenable to being conveyed and simplified for department officials, candidates, or anyone seeking an understanding of how the model generates predictions for personality test outcomes. This approach serves to preemptively address any criticisms or concerns about the model being a "black box," thereby rendering it more transparent and understandable. Given that both models exhibit marginal discrepancies in their quality measures, a preference arises for the simple and intuitive model. This choice maintains accuracy and predictive validity without compromising these aspects in favor of user comprehensibility.
+7. Models Fine-Tuning
+this step involves applying techniques to moderately enhance the models' accuracy. These fine-tuning actions will be concentrated on the most potent models that have demonstrated superior quality metrics in comparison to others (refer to above details). Below, we outline the techniques employed in our endeavor to moderately elevate the models' accuracy:
+Manual Operations:
+The finetuning operations are mainly based on changes in the parameters / hyperparameters of the selected model, such as :
+•	Gradient Descent: Exploring adjustments in learning rate and iterations to locate optimal parameter values for minimizing the loss function (achieving minimal error).
+•	Changing Penalties / Cut-off Points: Addressing instances, especially in scenarios with extremely rare outcome categories, where models tend to avoid predicting the unique category. Overcoming this involves modifying penalty costs for classification errors or altering threshold cut-off points for result prediction.
+•	specipic Logistic Regression parametes : Experimenting with parameter adjustments including alpha, inverse regularization strength (c), iteration count, class weights, gradient descent algorithm, lib-linear solver, and penalty modifications.
+•	and more.
+Auto Methods Operations:
+•	Grid Search: Systematically exploring all parameter possibilities and iterations to identify the optimal parameters/hyperparameters that enhance predictive accuracy.
+•	Random Search: Randomly selecting iterations and aggregating results based on the chosen combinations.
+In our current project, our pursuit of increased predictive validity/accuracy levels led us to employ a ---Grid Search--- analysis, which automatically identifies the best parameters/hyperparameters for refining model accuracy.
+Accompanying the Grid Search analysis, we assessed the accuracy levels, error nature, and quality indicators of the models under varying thresholds/cut-off points for classifying the target factor as positive (personality rejection) or negative (passing the personality test).
+It is important to note that in the finetuning phase we will conduct an examination of the quality indicators of the selected model on the ---train and validation data sets---. In this framework, we will examine whether the quality indicators have maintained stability as reflected in the training, as well as, the validation data set, or alternatively, whether there has been a decrease in the quality indicators in the validation data set compare to the train data set.
+Examining the model on the test data set will be expressed only with reference to the selected model, and also, only after fine-tuning of the data. The purpose of the test is for the test data set to provide a sort of final "feedback" for the quality of the model, to check that there are no significant gaps/decrease in the quality indicators of the selected model in the test set compared to the training and validation data set and so on.
+Fine-Tuning Logistic Regression Model
+Logistic Reggression Metrics - Before Fine-Tuning (reminder)
+This section is intended as a reminder regarding the quality measures of the logistic regression model - without fine-tuning interventions / actions.
+Model_Logistic_Regression = LogisticRegression(random_state=1)
+Model_Logistic_Regression.fit(X_train, y_train)
+LogisticRegression(random_state=1)
+training set
+### predictions --based-- on cross validation test
+num_folds = 3
+cross_v_predictions = cross_val_predict(Model_Logistic_Regression, X_train,y_train, cv=num_folds)
+Metrics = classificationMetrics(y_train, cross_v_predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.35, 'AUC': 0.67}
+confusion_matrix = metrics.confusion_matrix(y_train, cross_v_predictions)
+
+cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = [False, True])
+
+cm_display.plot()
+plt.show()
+ 
+Validation Set
+predictions = Model_Logistic_Regression.predict(X_valid)
+Metrics = classificationMetrics(y_valid, predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.27, 'AUC': 0.62}
+confusion_matrix = metrics.confusion_matrix(y_valid, predictions)
+
+cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = [False, True])
+
+cm_display.plot()
+plt.show()
+ 
+In general, before the implementation of fine-tuning operations, especially those related to solving the imbalance problem in the target variable categories, low quality indicators (Recall\RUC) can be seen, both in the training data set and in the validation data set.
+In any case, it can be seen that the quality metrics (RUC\Recall) in the validation data set are slightly lower compared to the training data set.
+Grid Search
+model = LogisticRegression(random_state=1)
+
+# Define the expanded grid of parameters to search through
+
+param_grid = {
+    'penalty': ['l1', 'l2', 'elasticnet', 'none'],
+    'C': [0.001, 0.01, 0.1, 1, 10, 100],
+    'fit_intercept': [True, False],
+    'class_weight': [None, 'balanced'],
+    'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
+    'max_iter': [50, 100, 200],
+    'multi_class': ['auto', 'ovr', 'multinomial'],
+    'warm_start': [True, False]
+}
+
+# Perform GridSearchCV with 3-fold cross-validation
+grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=3)
+grid_search.fit(X_train, y_train)
+GridSearchCV(cv=3, estimator=LogisticRegression(random_state=1),
+             param_grid={'C': [0.001, 0.01, 0.1, 1, 10, 100],
+                         'class_weight': [None, 'balanced'],
+                         'fit_intercept': [True, False],
+                         'max_iter': [50, 100, 200],
+                         'multi_class': ['auto', 'ovr', 'multinomial'],
+                         'penalty': ['l1', 'l2', 'elasticnet', 'none'],
+                         'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag',
+                                    'saga'],
+                         'warm_start': [True, False]})
+best_model_parameters = grid_search.best_estimator_
+best_model_parameters
+LogisticRegression(C=0.01, max_iter=50, random_state=1, solver='liblinear',
+                   warm_start=True)
+# Predictions on the train set
+y_train_pred = grid_search.predict(X_train)
+
+# Predictions on the valid set
+y_valid_pred = grid_search.predict(X_valid)
+Train Set
+### Train Set Evaluation Metrics
+
+#print('accuracy_score :' + str(accuracy_score(y_train, y_train_pred)))
+#print('precision_score :' + str(precision_score(y_train, y_train_pred)))
+print('recall_score :' + str(recall_score(y_train, y_train_pred)))
+#print('f1_score :' + str(f1_score(y_train, y_train_pred)))
+recall_score :0.3225806451612903
+import matplotlib.pyplot as plt
+import numpy
+from sklearn import metrics
+confusion_matrix = metrics.confusion_matrix(y_train, y_train_pred)
+#confusion_matrix(y_train, y_train_pred)
+
+cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = [False, True])
+
+cm_display.plot()
+plt.show()
+ 
+Validation Set
+### validation Set Evaluation Metrics
+
+#print('accuracy_score :' + str(accuracy_score(y_valid, y_valid_pred)))
+#print('precision_score :' + str(precision_score(y_valid, y_valid_pred)))
+print('recall_score :' + str(recall_score(y_valid, y_valid_pred)))
+#print('f1_score :' + str(f1_score(y_valid, y_valid_pred)))
+recall_score :0.22916666666666666
+confusion_matrix = metrics.confusion_matrix(y_valid, y_valid_pred)
+#confusion_matrix(y_valid, y_valid_pred)
+
+cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = [False, True])
+
+cm_display.plot()
+plt.show()
+ 
+The analyzes presented above show that even after performing a grid search, the predictive model shows low performance, as reflected in the recall index and the omission of the confusion matrix. In this context, it appears that after the implementation of the grid search, the quality indicators and the level of accuracy of the model in the training data set and the validation data set are low, even low compared to the quality and accuracy of the models before the implementation of the grid search.
+The low performance of the model is due, among other things, to the problem of imbalance in the departments of the result factor - disqualification of personality. This problem leads to the fact that the model underestimates the attempt to predict the rare category of personality disqualification, and as a result, the recall index is very low, and under these conditions, the model is not effective.
+Following the aforementioned problem, in the following sections we will implement interventions designed to reduce the aforementioned problem as much as possible by means of parameters to penalize the model following few attempts to predict the rare category of the outcome variable, as well as by changing the threshold point from which the model's predictions are classified as personality disqualification / transition personality test
+After performing a grid search, you can see a very slight improvement in the quality indicators of the logistic regression model. At the same time, it is important to note that the important project indices, AUC, and especially the recall index, are quite low. On the other hand, the procision index is relatively high.
+In light of the above, in the next part we will perform a number of manual operations for the purpose of improving the important quality indicators in the project, including this, we will mainly try to lead to an improvement in the recall index and the AUC index.
+Parameters Penalties
+In this step we add to the model parameter that create a "penalty" to the model due to underclassification of the rare category (Avoiding the model trying to predict the rare class of the target factor).
+The relevant parameters : class_weight=’balanced’
+train set
+Model_Logistic_Regression = LogisticRegression(random_state=1, C=0.01, max_iter=50, multi_class='ovr', penalty='none', solver='saga', class_weight='balanced')
+Model_Logistic_Regression.fit(X_train, y_train)
+LogisticRegression(C=0.01, class_weight='balanced', max_iter=50,
+                   multi_class='ovr', penalty='none', random_state=1,
+                   solver='saga')
+### predictions based on cross validation test
+num_folds = 3
+cross_v_predictions = cross_val_predict(Model_Logistic_Regression, X_train, y_train, cv=num_folds)
+Metrics = classificationMetrics(y_train, cross_v_predictions) 
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.77, 'AUC': 0.8}
+confusion_matrix = metrics.confusion_matrix(y_train, cross_v_predictions)
+
+cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = [False, True])
+
+cm_display.plot()
+plt.show()
+ 
+validation set
+predictions = Model_Logistic_Regression.predict(X_valid)
+Metrics = classificationMetrics(y_valid, predictions)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.73, 'AUC': 0.76}
+confusion_matrix = metrics.confusion_matrix(y_valid, predictions)
+
+cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = [False, True])
+
+cm_display.plot()
+plt.show()
+ 
+In the presented tables and charts, it is evident that employing the class_weight parameter with a value of "balanced" yielded the desired outcomes. This is manifested in a significant enhancement of the pertinent quality indicators crucial to the ongoing project. Notably, these discernments were consistent across both the training and validation datasets. Specifically, following the parameter adjustment, the AUC index and the recall index approached a score of 0.73-0.8.
+It can be seen that the increase in the quality indicators (Recall/RUC) is reflected in both the training data set and the validation data set. In general, the quality indicators are moderately higher in the training data set compared to the moderately set, but in any case, this is a moderate difference.
+In the next part we will try to bring about further improvement in the relevant quality indicators through changing the cut-off point according to which the target factor predictions are classified as failing a personality / passing a personality test.
+Cut point Changing for classifying the Outcome factor classes
+train set
+Model_Logistic_Regression = LogisticRegression(random_state=1, C=0.01, max_iter=50, multi_class='ovr', penalty='none', solver='saga', class_weight='balanced')
+Model_Logistic_Regression.fit(X_train, y_train)
+LogisticRegression(C=0.01, class_weight='balanced', max_iter=50,
+                   multi_class='ovr', penalty='none', random_state=1,
+                   solver='saga')
+num_folds = 3
+cross_v_predictions  = cross_val_predict(Model_Logistic_Regression, X_train,y_train, cv=num_folds, method='predict_proba')
+predictions_cat = np.where(cross_v_predictions[:,1] > 0.42,1,0)
+Metrics = classificationMetrics(y_train, predictions_cat)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.81, 'AUC': 0.79}
+confusion_matrix = metrics.confusion_matrix(y_train, predictions_cat)
+
+cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = [False, True])
+
+cm_display.plot()
+plt.show()
+ 
+validaion set
+predictions =  Model_Logistic_Regression.predict_proba(X_valid)
+predictions_cat = np.where(predictions[:,1] > 0.34,1,0)
+confusion_matrix = metrics.confusion_matrix(y_valid, predictions_cat)
+
+cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = [False, True])
+
+cm_display.plot()
+plt.show()
+ 
+Metrics = classificationMetrics(y_valid, predictions_cat)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.81, 'AUC': 0.75}
+Following the change of the cut-off point, we can see another slight improvement in the Recall and RUC quality indicators, both in the training set and in the attack set.
+In general, at this stage the quality metric RUC in the training set and the validtion set are quite high (stand at about 0.8) and without significant differences between the training set compare to the validation set. In the training set, the recall threshold is also quite high and stands at about 0.8. At the same time, in the validation data set, this metric is moderately low compared to the training set, and stands at 0.75.
+fine-tuning - search for optimal sets size division
+In this section we will examine the RUC quality metric according to the size of the training set, validation and test datasets. The results of the tests that will be done are adapted point by point to the selected algorithm (logistic regression) and require time and resources. Therefore, this test is suitable for performing on the selected prediction model, and not for all the developed models.From the results of the analyzes in this section, it will be possible to learn whether it is possible to maximize the level of accuracy of the selected model by creating changes in the size of the participant groups in the training\validation\test sets.
+change categoric variables to float type
+X_train['Assessment_Center_Grade_missing_new'] = X_train['Assessment_Center_Grade_missing_new'].astype(float); X_train['Assessment_Center_Grade_medium_new'] = X_train['Assessment_Center_Grade_medium_new'].astype(float); X_train['Gender_Dico_new'] = X_train['Gender_Dico_new'].astype(float)
+X_valid['Assessment_Center_Grade_missing_new'] = X_valid['Assessment_Center_Grade_missing_new'].astype(float); X_valid['Assessment_Center_Grade_medium_new'] = X_valid['Assessment_Center_Grade_medium_new'].astype(float); X_valid['Gender_Dico_new'] = X_valid['Gender_Dico_new'].astype(float)
+X_test['Assessment_Center_Grade_missing_new'] = X_test['Assessment_Center_Grade_missing_new'].astype(float); X_test['Assessment_Center_Grade_medium_new'] = X_test['Assessment_Center_Grade_medium_new'].astype(float); X_test['Gender_Dico_new'] = X_test['Gender_Dico_new'].astype(float)
+df_train['Assessment_Center_Grade_missing_new'] = df_train['Assessment_Center_Grade_missing_new'].astype(float); df_train['Assessment_Center_Grade_medium_new'] = df_train['Assessment_Center_Grade_medium_new'].astype(float); df_train['Gender_Dico_new'] = df_train['Gender_Dico_new'].astype(float); df_train['Personality_Disqualification_Dico_final'] = df_train['Personality_Disqualification_Dico_final'].astype(float)
+def percentile(n):
+    def percentile_(x):
+        return np.percentile(x, n)
+    percentile_.__name__ = 'percentile_%s' % n
+    return percentile_
+def train_model(X_train, y_train, X_valid, y_valid, m=LogisticRegression(random_state=1, C=0.01, max_iter=50, multi_class='ovr', penalty='none', solver='saga', class_weight='balanced')):
+    m.fit(X_train, y_train)
+    probs_valid = m.predict_proba(X_valid)[:,1]
+    return roc_auc_score(y_valid, probs_valid)
+train_model(X_train, y_train, X_valid, y_valid, m=LogisticRegression(random_state=1, C=0.01, max_iter=50, multi_class='ovr', penalty='none', solver='saga', class_weight='balanced'))
+0.8200849514563107
+def estimate_valid_size_df(X, y, grid=np.arange(0.1, 1.1, 0.1), reps=range(30), verbose=False):
+    valid_aucs = []
+
+    X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.3, random_state=123)
+    if verbose: print(f"Training on fixed {len(X_train)} points (70% total). Max validation size (30% total): {len(X_valid)}")
+
+    m=xgb.XGBClassifier(learning_rate=0.03, n_estimators=300, n_jobs=-1, verbosity = 0)
+    m.fit(X_train, y_train)
+    probs_valid = m.predict_proba(X_valid)[:,1]
+    valid = pd.DataFrame({'actual': y_valid, 'pred': probs_valid})
+
+    for perc in grid:
+        n = int(len(X_valid)*perc)
+        if perc==1.0:
+            auc = roc_auc_score(y_valid, probs_valid)
+            valid_aucs.append((perc, n, auc, len(X_valid), len(X_train), 1))
+
+        if perc<1.0:
+            for _ in reps:
+                val = valid.sample(n, replace=True)
+                auc = roc_auc_score(val.actual, val.pred)
+                valid_aucs.append((perc, n, auc, len(val), len(X_train), len(reps)))
+    
+    df = pd.DataFrame(valid_aucs, columns=['Percentage', 'Sample', 'AUC', 'Valid_size', 'Train_size', 'Bootstraps'])
+    return df
+def estimate_train_size_df(X, y, grid=np.arange(0.1, 1.1, 0.1), reps=range(30), verbose=False):
+    since = time.time()
+    train_aucs = []
+
+    X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.2, random_state=123)
+    if verbose: print(f"Validating on fixed {len(X_valid)} points (20% total). Max training size (80% total): {len(X_train)}")
+
+    for perc in grid:
+        n = int(len(X_train)*perc)
+        if perc==1.0:
+            auc = train_model(X_train, y_train, X_valid, y_valid)
+            train_aucs.append((perc, n, auc, len(X_valid), len(X_train), 1))
+            if verbose: print(f"Training once on {n} data points: {perc*100}% of {len(X_train)}...")
+        
+        if perc<1.0:
+            if verbose: print(f"Training {len(reps)} times on {n} data points: {np.round(perc*100,1)}% of {len(X_train)}...")
+            for _ in reps:
+                X_t = X_train.sample(n)
+                y_t = y_train.loc[X_t.index]
+                auc = train_model(X_t, y_t, X_valid, y_valid)
+                train_aucs.append((perc, n, auc, len(X_valid), len(X_t), len(reps)))
+    time_elapsed = (time.time() - since)
+    df = pd.DataFrame(train_aucs, columns=['Percentage', 'Sample', 'AUC', 'Valid_size', 'Train_size', 'Bootstraps'])
+    print("Done in {:.0f}m {:.0f}s".format(time_elapsed // 60, time_elapsed % 60))
+    return df
+###if not run, so far always works on the second click
+#destimate_valid_size_df(X_train, y_train, grid=np.arange(0.1, 1.1, 0.1), reps=range(30), verbose=False)
+The following table shows the relationship between the size of the validation set and the RUC index before aggregating the data. In the following table and diagram it will be possible to get a clearer indication as to the relationship between the size of the validation set and the RUC index.
+###if not run, so far always works on the second click
+#df = estimate_valid_size_df(X_train, y_train, grid=np.arange(0.1, 1.1, 0.1), reps=range(30), verbose=False)
+#df.head()
+def aggregate_size_df(df):
+    df["Perc-Sample"] = (df.Percentage*100).astype(int).astype(str) + "%-" + df.Sample.astype(str)
+    df = df.groupby('Perc-Sample').agg(Sample=('Sample', 'min'),
+                                    Valid_size=('Valid_size','min'),
+                                    Train_size=('Train_size','min'),
+                                    Bootstraps=('Bootstraps', 'min'),
+                                    AUC_mean=('AUC', 'mean'),
+                                    AUC_std=('AUC', 'std'),
+                                    AUC_975=('AUC', percentile(97.5)),
+                                    AUC_025=('AUC', percentile(2.5))
+                                    )
+    df["975VSmean_%"] = (df.AUC_975/df.AUC_mean-1) * 100
+    df["025VSmean_%"] = (df.AUC_025/df.AUC_mean-1) * 100
+    df.sort_values(by='Sample', inplace=True)
+    return df
+From the data in the table it is evident that there is no relationship between the size of the validation set and the RUC index score. Increases and decreases in the above index are manifested in a moderate size regardless of the number of participants in the validation set.
+#df_1 = aggregate_size_df(df_0)
+#df_1
+def plot_size_df(df, title=None, plot_std=False):
+    _, _ = plt.subplots(figsize=(9, 7))
+    plt.plot(df.index, df.AUC_mean, 'k', label="Mean AUC")
+    if plot_std: plt.fill_between(df.index, df.AUC_mean - 2 * df.AUC_std, df.AUC_mean + 2 * df.AUC_std, color='b', alpha=0.2, label="2std (95%) AUC interval")
+    plt.fill_between(df.index, df.AUC_025, df.AUC_975, color='g', alpha=0.2, label="2.5-97.5 (95%) AUC quantiles")
+    plt.ylabel('AUC')
+    plt.xlabel('%dataset - #samples')
+    if title is not None: plt.title(title)
+
+    for x,y in zip(df.index,df.AUC_mean):
+        label = "{:.3f}".format(y)
+        plt.annotate(label, # this is the text
+                    (x,y), # this is the point to label
+                    textcoords="offset points", # how to position the text
+                    xytext=(0,10), # distance from text to points (x,y)
+                    ha='center') # horizontal alignment can be left, right or center
+
+    plt.legend(loc="lower right")
+    plt.xticks(rotation=30)
+    plt.show()
+    display(df.round(3))
+Similar to the panel, the chart shows an unstable trend in the relationship between the size of the training set and the ROC index score
+#plot_size_df(df_1, title=None, plot_std=False)
+In the next section we will examine the relationship between the size of the training set and the RUC index score
+def estimate_impact_size(what: str,
+                         X: pd.DataFrame,
+                         y: pd.Series, 
+                         grid: np.array = np.arange(0.1, 1.1, 0.1), 
+                         reps: range = range(30), 
+                         verbose: bool = False) -> (pd.DataFrame, pd.DataFrame):
+    """
+    Estimates the impact of the training set size on a fix-sized validation set.
+
+    Parameters
+    ----------
+    what: str
+        `train` or `test`. Whether to estimate the impact of the size of the 
+        training or test set.
+    
+    X : pd.DataFrame
+        The dataframe containing all our dataset. Ready to be fed to an estimator.
+
+    y: pd.Series
+        The ground truth labels
+
+    grid: np.array (default=np.arange(0.1, 1.1, 0.1))
+        Array of percentages of the validation set to explore.
+
+    reps: range (default=range(30))
+        Number of times the validation process is repeated at each percentage level.
+        Bootstrapping with repetition.
+    
+    verbose: bool (default=False)
+        Whether to print relevant info while running
+    """
+    if what == 'test': original = estimate_valid_size_df(X, y, grid=grid, reps=reps, verbose=verbose)
+    elif what == 'train': original = estimate_train_size_df(X, y, grid=grid, reps=reps, verbose=verbose)
+    else: raise ValueError(f"`what` accepts `test` or `train` only: {what} was provided instead.")
+
+    df = aggregate_size_df(original)
+    if what == 'test': title = f"AUC on validation set of increasing size (up to 30% total - {df.Valid_size.max()} points) \n at fixed training set size (@70% total - {df.Train_size.max()} points)"
+    else: title = f"AUC on validation set (fixed @20% total - {df.Valid_size.min()} points) \n at increasing training set size (up to 80% total - {df.Train_size.max()} points)"
+    
+    plot_size_df(df, title)
+    return df, original
+Creating a data frame that includes only features and a data frame that includes only the result factor.
+column_to_exclude = "Personality_Disqualification_Dico_final"
+df_train_only_pred = df_train.drop(columns=[column_to_exclude])
+df_train_only_outcome = df_train[['Personality_Disqualification_Dico_final']]
+train_estimate_impact_size = estimate_impact_size(what='train', X=df_train_only_pred, y=df_train_only_outcome, grid=np.arange(0.1, 1.1, 0.1), reps=range(30), verbose=False)
+Done in 0m 9s
+ 
+             Sample  Valid_size  Train_size  Bootstraps  AUC_mean  AUC_std  \
+Perc-Sample                                                                  
+10%-184         184         460         184          30     0.755    0.060   
+20%-368         368         460         368          30     0.789    0.038   
+30%-552         552         460         552          30     0.816    0.017   
+40%-736         736         460         736          30     0.826    0.015   
+50%-920         920         460         920          30     0.833    0.015   
+60%-1104       1104         460        1104          30     0.841    0.008   
+70%-1288       1288         460        1288          30     0.844    0.005   
+80%-1472       1472         460        1472          30     0.846    0.005   
+90%-1656       1656         460        1656          30     0.847    0.003   
+100%-1840      1840         460        1840           1     0.848      NaN   
+
+             AUC_975  AUC_025  975VSmean_%  025VSmean_%  
+Perc-Sample                                              
+10%-184        0.816    0.608        8.090      -19.392  
+20%-368        0.835    0.714        5.786       -9.469  
+30%-552        0.840    0.782        2.913       -4.242  
+40%-736        0.847    0.793        2.585       -3.990  
+50%-920        0.848    0.804        1.889       -3.443  
+60%-1104       0.852    0.825        1.323       -1.912  
+70%-1288       0.852    0.835        1.006       -1.037  
+80%-1472       0.857    0.837        1.237       -1.059  
+90%-1656       0.851    0.840        0.442       -0.787  
+100%-1840      0.848    0.848        0.000        0.000  
+The graphical representation and the table presented below depict a positive correlation between the size of the training set and the ROC AUC index score. Notably, this trend in increased ROC AUC is discernible as the training set expands, encompassing participant counts ranging from 184 to 1,104. However, subsequent increases in participant numbers beyond this range do not yield any commensurate enhancement in the ROC AUC index.
+These findings underscore that alterations in the sizes of the training, validation, and test sets are unlikely to result in heightened ROC AUC quality. In a broader sense, the analysis reveals that the dimensions of the validation set exhibit no substantial relationship with the metric score. Additionally, the data demonstrates that once the participant count reaches 1,104 or surpasses it, further augmentations to the participant pool do not engender any notable improvements or deteriorations in the ROC AUC index score.
+Stepwise Logistic Regression
+As a general rule, stepwise logistic regression is used as an important tool in the phase of selecting the features that will be included / not included in the development of the models.
+At the same time, in the phase of selecting the features, we chose to avoid omitting predictors without a significant unique contribution in predicting the target factor, and at the same time, to leave in the data frame only those features that were found to have a significant unique contribution in predicting personality disqualification. In this context, according to the logistic regression findings using the stepwise method, it is possible to get an indication regarding the factors that do not contribute to the prediction of the target factor beyond the other factors taken into account in the model. At the same time, it is quite possible that there will be factors without a unique contribution in the stepwise method in logistic regression, but on the other hand, an important and distinct contribution in predicting the target factor in other algorithms, such as decision trees , neural networks, etc.
+Different from the feature selection stage, according to the results of the metric scores chosen to evaluate the quality of the models (recall/roc), the preferred prediction model has already been selected. Therefore, at the current stage, using multiple logistic regression using the stepwise method, it is possible to identify the features that have a clear unique contribution in predicting the target factor, as well as the factors that do not have a clear unique contribution in predicting personality disqualification. In this way, it will be possible to adjust in a refined and targeted manner the list of variables that will be included in the logistic regression model as a direct derivative of the logistic regression results. Adjusting the list of findings for the above analysis is expected to help reduce problems related to overfitting, multicollinearity and generalization problems (among other things, due to the omission of many predictors from the model that do not contribute to predicting the outcome factor). Also , focusing only on the significant predictors may lead to greater stability in the level of accuracy and predictive validity of the model in the different prediction environments (training set, validation and test), and may even lead to an increase in the model's quality indicators ( roc/recall).
+Below will be presented a logistic regression analysis using the steowise method to examine the relationship between the project predictors and personality disqualification:
+In order to avoid an overfitting problem, we will apply the stepwise regression analysis among participants from the training set only (so that the results of the analysis will not be based at all on observations from the test environment, nor from the validation environment).
+For this purpose, we will redo the division into a training, validation and test group, but we will leave in the training set the target factor - personality disqualification.
+X_data_1 = df_train
+y_data_1 = df_train['Personality_Disqualification_Dico_final'];
+
+# Split the data into train, validation and test sets
+
+X_train_1, X_temp_1, y_train_1, y_temp_1 = train_test_split(X_data_1, y_data_1, test_size=0.4, random_state=42)
+X_valid_1, X_test_1, y_valid_1, y_test_1 = train_test_split(X_temp_1, y_temp_1, test_size=0.5, random_state=42);
+print("Train data shape:", X_train_1.shape)
+Train data shape: (1380, 19)
+Logistic regression - stepwise method :
+# Define your features (X) and target variable (y)
+X = X_train_1.drop(columns=['Personality_Disqualification_Dico_final'])
+y = X_train_1['Personality_Disqualification_Dico_final']
+
+# Add a constant term to the features matrix
+X = sm.add_constant(X)
+
+# Perform logistic regression using stepwise method
+def stepwise_selection(X, y,
+                       initial_list=[],
+                       threshold_in=0.01,
+                       threshold_out=0.05,
+                       verbose=True):
+    included = list(initial_list)
+    while True:
+        changed = False
+        excluded = list(set(X.columns) - set(included))
+        new_pval = pd.Series(index=excluded)
+        for new_column in excluded:
+            model = sm.Logit(y, X[included + [new_column]]).fit(disp=False)
+            new_pval[new_column] = model.pvalues[new_column]
+        best_pval = new_pval.min()
+        if best_pval < threshold_in:
+            best_feature = new_pval.idxmin()
+            included.append(best_feature)
+            changed = True
+            if verbose:
+                print(f'Add {best_feature} with p-value {best_pval:.6f}')
+        model = sm.Logit(y, X[included]).fit(disp=False)
+        pvalues = model.pvalues.iloc[1:]
+        worst_pval = pvalues.max()
+        if worst_pval > threshold_out:
+            changed = True
+            worst_feature = pvalues.idxmax()
+            included.remove(worst_feature)
+            if verbose:
+                print(f'Drop {worst_feature} with p-value {worst_pval:.6f}')
+        if not changed:
+            break
+    return included
+
+selected_features = stepwise_selection(X, y)
+print("Selected features:", selected_features)
+
+# Fit the logistic regression model using the selected features
+final_model = sm.Logit(y, X[selected_features]).fit()
+
+# Print summary of the final model
+print(final_model.summary())
+
+# Make predictions on the same dataset
+y_pred = final_model.predict(X[selected_features])
+
+# Evaluate the model (e.g., calculate accuracy, ROC curve, etc.)
+Add const with p-value 0.000000
+Add num_composite_measure with p-value 0.000000
+Add Designated_Role_continuous with p-value 0.000000
+Add Job_Interview_Grade with p-value 0.000000
+Add Assessment_Center_Grade_missing_new with p-value 0.000000
+Add dummy_composite_measure with p-value 0.000015
+Add INT_No_Asses_Center_Morals_and_Values with p-value 0.000151
+Add Assessment_Center_Grade_medium_new with p-value 0.001579
+Selected features: ['const', 'num_composite_measure', 'Designated_Role_continuous', 'Job_Interview_Grade', 'Assessment_Center_Grade_missing_new', 'dummy_composite_measure', 'INT_No_Asses_Center_Morals_and_Values', 'Assessment_Center_Grade_medium_new']
+Optimization terminated successfully.
+         Current function value: 0.195532
+         Iterations 10
+                                      Logit Regression Results                                     
+===================================================================================================
+Dep. Variable:     Personality_Disqualification_Dico_final   No. Observations:                 1380
+Model:                                               Logit   Df Residuals:                     1372
+Method:                                                MLE   Df Model:                            7
+Date:                                     Wed, 30 Aug 2023   Pseudo R-squ.:                  0.3530
+Time:                                             04:43:16   Log-Likelihood:                -269.83
+converged:                                            True   LL-Null:                       -417.04
+Covariance Type:                                 nonrobust   LLR p-value:                 9.446e-60
+=========================================================================================================
+                                            coef    std err          z      P>|z|      [0.025      0.975]
+---------------------------------------------------------------------------------------------------------
+const                                    -6.6174      1.040     -6.363      0.000      -8.656      -4.579
+num_composite_measure                     0.3803      0.139      2.737      0.006       0.108       0.653
+Designated_Role_continuous                0.4227      0.109      3.863      0.000       0.208       0.637
+Job_Interview_Grade                      -0.8373      0.130     -6.448      0.000      -1.092      -0.583
+Assessment_Center_Grade_missing_new       4.1239      1.046      3.942      0.000       2.073       6.175
+dummy_composite_measure                   0.5184      0.124      4.169      0.000       0.275       0.762
+INT_No_Asses_Center_Morals_and_Values     0.3067      0.094      3.246      0.001       0.121       0.492
+Assessment_Center_Grade_medium_new        3.3249      1.052      3.160      0.002       1.262       5.387
+=========================================================================================================
+X_train.head()
+      Morals_and_Values_Test  Job_Interview_Grade  Designated_Role_continuous  \
+1723               -0.668628            -0.115481                   -0.461410   
+1071               -0.668628            -0.115481                   -0.461410   
+1103               -0.196607            -0.115481                   -0.461410   
+816                 1.691478            -0.115481                   -0.341241   
+43                 -0.668628             1.587119                   -1.038226   
+
+      MMPI_factor_group_A  MMPI_factor_group_B  num_composite_measure  \
+1723            -0.359636            -0.569082              -0.160082   
+1071            -0.219850             1.581808              -0.252376   
+1103             0.174091            -0.569082              -1.396660   
+816              2.448786            -0.473487               0.663372   
+43              -1.579584            -0.903665              -0.901230   
+
+      dummy_composite_measure  Personal_elevations_index       FAM        PD  \
+1723                -0.175114                  -0.489385  0.746730 -1.757300   
+1071                -0.175114                  -0.489385 -0.528121 -1.067904   
+1103                -0.175114                  -0.489385 -0.273151 -1.205783   
+816                  2.694729                   0.235396  1.766610 -1.757300   
+43                  -0.877271                  -0.489385 -0.655606  0.173008   
+
+      INT_No_Asses_Center_Morals_and_Values  \
+1723                               0.580225   
+1071                               0.580225   
+1103                               0.170612   
+816                                1.949193   
+43                                 0.580225   
+
+      INT_No_Asses_Center_Job_Interview_Grade  \
+1723                                 0.100212   
+1071                                 0.100212   
+1103                                 0.100212   
+816                                 -0.133075   
+43                                  -1.377276   
+
+      INT_No_Asses_Center_Personal_elevations_index  \
+1723                                       0.424680   
+1071                                       0.424680   
+1103                                       0.424680   
+816                                        0.271261   
+43                                         0.424680   
+
+      INT_No_Asses_Center_composite_measure  \
+1723                               0.151961   
+1071                               0.151961   
+1103                               0.151961   
+816                                3.105300   
+43                                 0.761282   
+
+      INT_No_Asses_Center_MMPI_Numeric_0_15_above  \
+1723                                     0.349188   
+1071                                     0.081873   
+1103                                     0.532968   
+816                                      1.910214   
+43                                       0.733454   
+
+      Assessment_Center_Grade_missing_new  Assessment_Center_Grade_medium_new  \
+1723                                  0.0                                 0.0   
+1071                                  0.0                                 1.0   
+1103                                  0.0                                 1.0   
+816                                   1.0                                 0.0   
+43                                    0.0                                 1.0   
+
+      Gender_Dico_new  
+1723              1.0  
+1071              1.0  
+1103              0.0  
+816               0.0  
+43                0.0  
+The provided table reveals that the analysis encompassed a total of 9 iterations. Furthermore, among the 18 features considered, the logistic regression analysis employing the stepwise method identified a subset of 7 predictors that showcased a statistically significant and exclusive impact on predicting the target factor (with p-values ranging from <0.001 to 0.05). These predictive variables collectively account for 35.3% of the explained variance pertaining to the target factor, which is the rejection of personality.
+Based on the outcomes of the above analysis, the ensuing section will delve into an evaluation of the quality indicators associated with the logistic regression model. This assessment will be conducted within both the training and test sets, utilizing the roster of variables that were established to possess a distinct and unique influence in prognosticating personality disqualification.
+Omitting variables without a significant unique contribution from the data sets
+columns_to_drop = ['Morals_and_Values_Test', 'MMPI_factor_group_A', 'MMPI_factor_group_B', 'Personal_elevations_index', 'FAM', 'PD', 'INT_No_Asses_Center_Job_Interview_Grade', 'INT_No_Asses_Center_Personal_elevations_index', 'INT_No_Asses_Center_composite_measure', 'INT_No_Asses_Center_MMPI_Numeric_0_15_above', 'Gender_Dico_new'];
+
+X_train = X_train.drop(columns=columns_to_drop, axis=1);
+X_valid = X_valid.drop(columns=columns_to_drop, axis=1);
+X_test = X_test.drop(columns=columns_to_drop, axis=1);
+print("Train data shape:", X_train.shape)
+print("Validation data shape:", X_valid.shape)
+print("Test data shape:", X_test.shape)
+Train data shape: (1380, 7)
+Validation data shape: (460, 7)
+Test data shape: (460, 7)
+Model evaluation after omitting predictors without significant unique contribution
+train set
+from sklearn.metrics import precision_recall_fscore_support, roc_curve, auc
+from sklearn.metrics import confusion_matrix
+Model_Logistic_Regression = LogisticRegression(random_state=1, C=0.01, max_iter=50, multi_class='ovr', penalty='none', solver='saga', class_weight='balanced')
+Model_Logistic_Regression.fit(X_train, y_train)
+LogisticRegression(C=0.01, class_weight='balanced', max_iter=50,
+                   multi_class='ovr', penalty='none', random_state=1,
+                   solver='saga')
+num_folds = 3
+cross_v_predictions  = cross_val_predict(Model_Logistic_Regression, X_train,y_train, cv=num_folds, method='predict_proba')
+predictions_cat = np.where(cross_v_predictions[:,1] > 0.43,1,0)
+# Assuming predictions_cat contains your predicted labels and y_train contains true labels
+precision, recall, f1_score, support = precision_recall_fscore_support(y_train, predictions_cat, average='binary')
+
+# Calculate ROC curve and AUC
+fpr, tpr, _ = roc_curve(y_train, predictions_cat)
+roc_auc = auc(fpr, tpr)
+
+print("Recall:", recall)
+print("ROC AUC:", roc_auc)
+Recall: 0.8548387096774194
+ROC AUC: 0.7996327306348879
+# Calculate confusion matrix
+cm = confusion_matrix(y_train, predictions_cat)
+
+# Print confusion matrix
+print("Confusion Matrix:")
+print(cm)
+
+# Plot confusion matrix as a heatmap
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=["Predicted 0", "Predicted 1"], yticklabels=["Actual 0", "Actual 1"])
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix")
+plt.show()
+Confusion Matrix:
+[[935 321]
+ [ 18 106]]
+ 
+Validation set
+predictions =  Model_Logistic_Regression.predict_proba(X_valid)
+predictions_cat = np.where(predictions[:,1] > 0.5,1,0)
+# Assuming predictions_cat contains your predicted labels and y_train contains true labels
+precision, recall, f1_score, support = precision_recall_fscore_support(y_valid, predictions_cat, average='binary')
+
+# Calculate ROC curve and AUC
+fpr, tpr, _ = roc_curve(y_valid, predictions_cat)
+roc_auc = auc(fpr, tpr)
+
+print("Recall:", recall)
+print("ROC AUC:", roc_auc)
+Recall: 0.8125
+ROC AUC: 0.8030946601941747
+# Calculate confusion matrix
+cm = confusion_matrix(y_valid, predictions_cat)
+
+# Plot confusion matrix as a heatmap
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=["Predicted 0", "Predicted 1"], yticklabels=["Actual 0", "Actual 1"])
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix")
+plt.show()
+ 
+Following the removal of features that did not significantly contribute to predicting the target factor (based on the results of strpwise logistic regression), another moderate improvement appeared in the quality metrics (RUC\Recall) of the training dataset, as well as, the validation dataset.
+At this point, the recall score for the training set is 0.85, and the ROC AUC score is 0.8. Similarly, for the validation set, the recall score is 0.81, and the ROC AUC score is 0.8.
+Hence, the pertinent and meaningful quality indicators that assess the selected model exhibit high values and demonstrate a relatively consistent level of stability across various tests and datasets.
+8. Model Evaluation - Test Set
+In this section we will first examine the level of accuracy and quality measures (RUC; Recall) of the selected model on the test data set. In this test, we would like to further test the level of accuracy and quality indicators of the selected model, while comparing them to the level of accuracy and quality indicators found in the previous stages in the training data set and the validation data set.
+predictions =  Model_Logistic_Regression.predict_proba(X_test)
+predictions_cat = np.where(predictions[:,1] > 0.59,1,0)
+# Assuming predictions_cat contains your predicted labels and y_train contains true labels
+precision, recall, f1_score, support = precision_recall_fscore_support(y_test, predictions_cat, average='binary')
+
+# Calculate ROC curve and AUC
+fpr, tpr, _ = roc_curve(y_test, predictions_cat)
+roc_auc = auc(fpr, tpr)
+
+print("Recall:", recall)
+print("ROC AUC:", roc_auc)
+Recall: 0.7948717948717948
+ROC AUC: 0.819051099336135
+# Calculate confusion matrix
+cm = confusion_matrix(y_test, predictions_cat)
+
+# Plot confusion matrix as a heatmap
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=["Predicted 0", "Predicted 1"], yticklabels=["Actual 0", "Actual 1"])
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix")
+plt.show()
+ 
+The results of the model evaluation on the test data set showed high quality indices (RUC; Recall = 0.8), and at the same time, also similar to the quality indices found for the model in the training data set and the validation data set. These findings suggest that beyond the aspects related to accuracy and predictive validity, the chosen model is characterized by a relatively high level of stability.
+For illustrative purposes, within the testing environment, the model successfully identified 31 non-qualified candidates out of a total of 39 candidates who were truly disqualified (80% accuracy). Conversely, the model incorrectly categorized 66 candidates who passed the personality test as non-qualified candidates. Despite the relatively elevated number of "false alarms" by the model, it is important to note that the law enforcement organization prefers a relatively larger number of "false alarms." The implications of this decision are manifested in subjecting candidates to a personality test, rather than approving individuals with unsuitable personality traits for permanent service within the Israel Police.
+In light of the aforementioned observations, it is evident that the current model aligns well with the needs and standards of the Department of Behavioral Sciences. Consequently, it holds potential for future utilization in endeavors related to expediting and refining the candidate recruitment process.
+9. Features Relative Importance
+Just before finishing, let's look at the relative importance of the features in predicting personality disqualification
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+X_train_scaler = scaler.fit_transform(X_train)
+X_test_scaler = scaler.transform(X_test)
+
+model = LogisticRegression(random_state=1, C=0.01, max_iter=50, multi_class='ovr', penalty='none', solver='saga', class_weight='balanced')
+model.fit(X_train, y_train)
+
+coefficients = model.coef_[0]
+feature_names = X_train.columns
+feature_importance = pd.DataFrame({'Feature': feature_names, 'Importance': np.abs(coefficients)})
+feature_importance = feature_importance.sort_values('Importance', ascending=True)
+feature_importance.plot(x='Feature', y='Importance', kind='barh', figsize=(10, 6))
+<AxesSubplot:ylabel='Feature'>
+ 
+It can be seen that the features of an assessment center have the most significant contribution in predicting personality disqualification.
+It should be emphasized that the great relative importance of the missing value in the evaluation center is not accidental. In this context, any participant who did not perform an assessment center is a participant who is designated for a position in the administrative sector / border guard.
+Therefore, the high relative importance of the missing variable in the assessment center indicates a significantly lower odds ratio of candidates for core positions for personality disqualification compared to candidates for the other positions.
+10. Save of Selected Model
+save as pickel
+import pickle
+# create an iterator object with write permission - model.pickle
+with open('Model_Logistic_Regression_pkl', 'wb') as files:
+    pickle.dump(Model_Logistic_Regression, files)
+open new file with open('model_pkl', 'wb'), wb stands for write binary file and aliased as files. then save the model objects in file\s using pickle.dump method (object = None , filename).
+Load model from pickle
+# load saved model
+with open('Model_Logistic_Regression_pkl' , 'rb') as f:
+    lr = pickle.load(f)
+check the loaded model (same results)
+predictions_cat = np.where(cross_v_predictions[:,1] > 0.42,1,0)
+Metrics = classificationMetrics(y_train, predictions_cat)
+
+formatted_Metrics = {key: value.round(2) if isinstance(value, float) else value for key, value in Metrics.items()}
+formatted_Metrics
+{'Recall': 0.85, 'AUC': 0.79}
+Save as Sklearn Joblib
+requires dependencies good for large model whith many parameters; can have large numpy arrays Can only save file to disk, not to a string (opposed to pickle) Works similar to a pickle - dump and load Most fitted to estimators
+### loading dependecy
+#from sklearn.externals import joblib
+# saving our model
+#joblib.dump(model , 'model_jlib')
+### opening the file
+#m_jlib = joblib.load('model_jlib')
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------THE END-------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+from IPython.display import Image
+Image("C:/Users/Knowl/Desktop/final/final.png")
+ 
+I sincerely appreciate the incredibly enriching, well-structured, and intellectually stimulating AI training program. Undoubtedly, the data scientist training program at Bar Ilan University, under the guidance of Dr. Tomas Karpati, showcases an exceptional level of quality and equips students with an outstanding toolbox of skills. Your efforts in creating such a focused and challenging educational experience do not go unnoticed. Thank you for your dedication to fostering excellence in this field!
+All the best,
+DR. Roei Zamir
